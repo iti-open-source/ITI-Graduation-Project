@@ -5,7 +5,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 
 import Footer from '@/components/home_components/Footer';
-import CustomLayout from '@/layouts/CustomLayout';
+import CustomLayout from '@/layouts/custom-layout';
 
 export default function Home({ features = [] }) {
     // Animation variants

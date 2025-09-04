@@ -1,13 +1,13 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Users, Clock, ArrowLeft, Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { useRoomUpdates } from '@/hooks/use-room-updates';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { useRoomUpdates } from '@/hooks/use-room-updates';
+import { Head, Link, router } from '@inertiajs/react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Clock, Loader2, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -56,7 +56,7 @@ export default function Queue({ room: initialRoom, queuePosition: initialQueuePo
     const { room, isConnected } = useRoomUpdates(initialRoom.room_code, initialRoom);
 
     // Find current queue position from updated room data
-    const currentQueueEntry = room.queue.find(q => q.user?.id === initialQueueEntry?.user?.id);
+    const currentQueueEntry = room.queue.find((q) => q.user?.id === initialQueueEntry?.user?.id);
     const queuePosition = currentQueueEntry?.position || initialQueuePosition;
 
     useEffect(() => {
@@ -94,9 +94,9 @@ export default function Queue({ room: initialRoom, queuePosition: initialQueuePo
             transition: {
                 duration: 2,
                 repeat: Infinity,
-                ease: "easeInOut"
-            }
-        }
+                ease: 'easeInOut',
+            },
+        },
     };
 
     return (
@@ -104,71 +104,48 @@ export default function Queue({ room: initialRoom, queuePosition: initialQueuePo
             <Head title={`Waiting in Queue - ${room.name}`} />
 
             <div className="container mx-auto px-4 py-8">
-                <motion.div
-                    variants={fadeIn}
-                    initial="hidden"
-                    animate="visible"
-                    className="max-w-2xl mx-auto"
-                >
+                <motion.div variants={fadeIn} initial="hidden" animate="visible" className="mx-auto max-w-2xl">
                     {/* Header */}
-                    <div className="flex items-center justify-between mb-8">
-                        <Button
-                            asChild
-                            variant="outline"
-                            size="sm"
-                            className="border-[var(--color-card-shadow)] text-[var(--color-text)]"
-                        >
+                    <div className="mb-8 flex items-center justify-between">
+                        <Button asChild variant="outline" size="sm" className="border-[var(--color-card-shadow)] text-[var(--color-text)]">
                             <Link href="/lobby">
-                                <ArrowLeft className="w-4 h-4 mr-2" />
+                                <ArrowLeft className="mr-2 h-4 w-4" />
                                 Back to Lobby
                             </Link>
                         </Button>
                     </div>
 
                     {/* Main Content */}
-                    <div className="text-center mb-8">
+                    <div className="mb-8 text-center">
                         <motion.div
                             variants={pulse}
                             animate="animate"
-                            className="w-24 h-24 mx-auto mb-6 bg-[var(--color-accent)] rounded-full flex items-center justify-center"
+                            className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-[var(--color-accent)]"
                         >
-                            <Users className="w-12 h-12 text-white" />
+                            <Users className="h-12 w-12 text-white" />
                         </motion.div>
 
-                        <h1 className="text-3xl font-bold text-[var(--color-text)] mb-4">
-                            Waiting in Queue
-                        </h1>
+                        <h1 className="mb-4 text-3xl font-bold text-[var(--color-text)]">Waiting in Queue</h1>
 
-                        <p className="text-lg text-[var(--color-text-secondary)] mb-2">
+                        <p className="mb-2 text-lg text-[var(--color-text-secondary)]">
                             You're waiting to join <strong>{room.name}</strong>
                         </p>
 
-                        <p className="text-[var(--color-text-secondary)]">
-                            The room owner will accept you when they're ready
-                        </p>
+                        <p className="text-[var(--color-text-secondary)]">The room owner will accept you when they're ready</p>
                     </div>
 
                     {/* Queue Status Card */}
-                    <motion.div
-                        variants={fadeIn}
-                        initial="hidden"
-                        animate="visible"
-                        className="mb-6"
-                    >
-                        <Card className="bg-[var(--color-card-bg)] border-[var(--color-card-shadow)]">
+                    <motion.div variants={fadeIn} initial="hidden" animate="visible" className="mb-6">
+                        <Card className="border-[var(--color-card-shadow)] bg-[var(--color-card-bg)]">
                             <CardHeader>
-                                <CardTitle className="text-[var(--color-text)] text-center">
-                                    Your Position in Queue
-                                </CardTitle>
+                                <CardTitle className="text-center text-[var(--color-text)]">Your Position in Queue</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="text-center space-y-4">
-                                    <div className="text-6xl font-bold text-[var(--color-accent)]">
-                                        #{queuePosition}
-                                    </div>
+                                <div className="space-y-4 text-center">
+                                    <div className="text-6xl font-bold text-[var(--color-accent)]">#{queuePosition}</div>
 
                                     <div className="flex items-center justify-center gap-2 text-[var(--color-text-secondary)]">
-                                        <Clock className="w-4 h-4" />
+                                        <Clock className="h-4 w-4" />
                                         <span>Waiting for {formatTime(timeInQueue)}</span>
                                     </div>
 
@@ -183,13 +160,8 @@ export default function Queue({ room: initialRoom, queuePosition: initialQueuePo
                     </motion.div>
 
                     {/* Room Info Card */}
-                    <motion.div
-                        variants={fadeIn}
-                        initial="hidden"
-                        animate="visible"
-                        className="mb-6"
-                    >
-                        <Card className="bg-[var(--color-card-bg)] border-[var(--color-card-shadow)]">
+                    <motion.div variants={fadeIn} initial="hidden" animate="visible" className="mb-6">
+                        <Card className="border-[var(--color-card-shadow)] bg-[var(--color-card-bg)]">
                             <CardHeader>
                                 <CardTitle className="text-[var(--color-text)]">Room Information</CardTitle>
                             </CardHeader>
@@ -208,9 +180,7 @@ export default function Queue({ room: initialRoom, queuePosition: initialQueuePo
 
                                 <div className="flex items-center justify-between">
                                     <span className="text-[var(--color-text-secondary)]">Status:</span>
-                                    <Badge className="bg-yellow-100 text-yellow-800">
-                                        Waiting
-                                    </Badge>
+                                    <Badge className="bg-yellow-100 text-yellow-800">Waiting</Badge>
                                 </div>
                             </CardContent>
                         </Card>
@@ -218,13 +188,8 @@ export default function Queue({ room: initialRoom, queuePosition: initialQueuePo
 
                     {/* Current Call Status */}
                     {room.current_participant && (
-                        <motion.div
-                            variants={fadeIn}
-                            initial="hidden"
-                            animate="visible"
-                            className="mb-6"
-                        >
-                            <Card className="bg-[var(--color-card-bg)] border-[var(--color-card-shadow)]">
+                        <motion.div variants={fadeIn} initial="hidden" animate="visible" className="mb-6">
+                            <Card className="border-[var(--color-card-shadow)] bg-[var(--color-card-bg)]">
                                 <CardHeader>
                                     <CardTitle className="text-[var(--color-text)]">Current Call</CardTitle>
                                     <CardDescription className="text-[var(--color-text-secondary)]">
@@ -232,11 +197,9 @@ export default function Queue({ room: initialRoom, queuePosition: initialQueuePo
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                                        <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                                        <span className="text-sm text-blue-800 dark:text-blue-200">
-                                            In call with {room.current_participant.name}
-                                        </span>
+                                    <div className="flex items-center gap-3 rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
+                                        <div className="h-3 w-3 animate-pulse rounded-full bg-red-500"></div>
+                                        <span className="text-sm text-blue-800 dark:text-blue-200">In call with {room.current_participant.name}</span>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -244,46 +207,25 @@ export default function Queue({ room: initialRoom, queuePosition: initialQueuePo
                     )}
 
                     {/* Loading Animation */}
-                    <motion.div
-                        variants={fadeIn}
-                        initial="hidden"
-                        animate="visible"
-                        className="text-center mb-6"
-                    >
+                    <motion.div variants={fadeIn} initial="hidden" animate="visible" className="mb-6 text-center">
                         <div className="flex items-center justify-center gap-2 text-[var(--color-text-secondary)]">
-                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <Loader2 className="h-4 w-4 animate-spin" />
                             <span>Waiting for room owner to accept...</span>
                         </div>
 
-                        <div className="flex items-center justify-center gap-2 mt-2">
-                            <Badge
-                                className={
-                                    isConnected
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-red-100 text-red-800'
-                                }
-                            >
+                        <div className="mt-2 flex items-center justify-center gap-2">
+                            <Badge className={isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
                                 {isConnected ? 'Connected' : 'Disconnected'}
                             </Badge>
                         </div>
                     </motion.div>
 
                     {/* Leave Queue Button */}
-                    <motion.div
-                        variants={fadeIn}
-                        initial="hidden"
-                        animate="visible"
-                        className="text-center"
-                    >
-                        <Button
-                            onClick={leaveQueue}
-                            variant="outline"
-                            disabled={isLeaving}
-                            className="border-red-200 text-red-600 hover:bg-red-50"
-                        >
+                    <motion.div variants={fadeIn} initial="hidden" animate="visible" className="text-center">
+                        <Button onClick={leaveQueue} variant="outline" disabled={isLeaving} className="border-red-200 text-red-600 hover:bg-red-50">
                             {isLeaving ? (
                                 <>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     Leaving...
                                 </>
                             ) : (

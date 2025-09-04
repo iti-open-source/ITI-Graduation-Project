@@ -1,7 +1,7 @@
-import CustomLayout from '@/layouts/CustomLayout';
+import CustomLayout from '@/layouts/custom-layout';
 import { ClientSideSuspense, LiveblocksProvider, RoomProvider } from '@liveblocks/react/suspense';
 import { useState } from 'react';
-import { CollaborativeEditor } from '../components/Room/CollaborativeEditor';
+import { CollaborativeEditor } from '../components/Room/collaborative-editor';
 
 function Room() {
     const [editorText, setEditorText] = useState<string>('');

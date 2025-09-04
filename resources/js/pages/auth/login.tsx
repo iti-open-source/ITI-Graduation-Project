@@ -1,5 +1,5 @@
 import AuthenticatedSessionController from '@/actions/App/Http/Controllers/Auth/AuthenticatedSessionController';
-import Navbar from '@/components/home_components/Navbar';
+import Navbar from '@/components/home_components/navbar';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';

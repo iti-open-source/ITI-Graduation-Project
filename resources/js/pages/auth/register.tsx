@@ -3,7 +3,7 @@ import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
-import Navbar from '@/components/home_components/Navbar';
+import Navbar from '@/components/home_components/navbar';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';

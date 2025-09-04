@@ -5,12 +5,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Home');
+    return Inertia::render('home');
 })->name('home');
-
-Route::get('/room', function () {
-    return Inertia::render('Room');
-})->name('room');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {

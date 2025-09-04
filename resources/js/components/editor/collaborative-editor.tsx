@@ -1,26 +1,35 @@
 'use client';
 
-import { useRoom } from '@liveblocks/react';
+import { ClientSideSuspense, LiveblocksProvider, RoomProvider, useRoom } from '@liveblocks/react';
 import { getYjsProviderForRoom } from '@liveblocks/yjs';
 import { Editor } from '@monaco-editor/react';
 import { editor } from 'monaco-editor';
 import { useCallback, useEffect, useState } from 'react';
 import { MonacoBinding } from 'y-monaco';
 import { Awareness } from 'y-protocols/awareness';
+import EditorControls from './editor-controlls';
 
-// Collaborative text editor with simple rich text, live cursors, and live avatars
-export function CollaborativeEditor({
-    editorText,
-    handleEditorTextChange,
-    language,
-}: {
-    editorText: string;
-    handleEditorTextChange: (text: string | undefined) => void;
-    language: string;
-}) {
-    const [editorRef, setEditorRef] = useState<editor.IStandaloneCodeEditor>();
+// inner component, have to use it because RoomProvider needs to be a parent of useRoom
+function CollaborativeEditorInner() {
     const room = useRoom();
+    const [editorRef, setEditorRef] = useState<editor.IStandaloneCodeEditor>();
     const yProvider = getYjsProviderForRoom(room);
+    const [editorText, setEditorText] = useState<string>('');
+    const [language, setLanguage] = useState<string>('typescript');
+
+    const languages = ['cpp', 'python', 'javascript', 'java', 'csharp', 'ruby', 'go', 'php', 'typescript', 'css', 'html'];
+
+    const handleSubmit = () => {
+        console.log(editorText);
+    };
+
+    const handleEditorTextChange = (text: string | undefined) => {
+        setEditorText(text || '');
+    };
+
+    const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setLanguage(e.target.value);
+    };
 
     // Set up Liveblocks Yjs provider and attach Monaco editor
     useEffect(() => {
@@ -42,16 +51,20 @@ export function CollaborativeEditor({
         return () => {
             binding?.destroy();
         };
-    }, [editorRef, room]);
+    }, [editorRef, room, yProvider]);
 
     const handleOnMount = useCallback((e: editor.IStandaloneCodeEditor) => {
         setEditorRef(e);
     }, []);
 
     return (
-        <div className="flex flex-col justify-between md:flex-row">
-            {/*  Web cams here */}
-            {/* <LiveCall /> */}
+        <>
+            <EditorControls
+                selectedLanguage={language}
+                languages={languages}
+                handleSubmit={handleSubmit}
+                handleLanguageChange={handleLanguageChange}
+            />
 
             <Editor
                 onMount={handleOnMount}
@@ -72,6 +85,19 @@ export function CollaborativeEditor({
                     padding: { top: 20, bottom: 20 },
                 }}
             />
-        </div>
+        </>
+    );
+}
+
+// main component
+export function CollaborativeEditor({ id }: { id: string }) {
+    return (
+        <LiveblocksProvider publicApiKey={'pk_dev_MDlFOJddGa3Jz5Wkux9tzCArD9ytT22YlXTcFPvBTrepZdZ4vlSA1fiTG0myYpf8'}>
+            <RoomProvider id={id}>
+                <ClientSideSuspense fallback={<div>Loading…</div>}>
+                    <CollaborativeEditorInner />
+                </ClientSideSuspense>
+            </RoomProvider>
+        </LiveblocksProvider>
     );
 }

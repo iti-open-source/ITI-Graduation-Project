@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
-import Footer from '@/components/home_components/Footer';
+import Footer from '@/components/home_components/footer';
 import CustomLayout from '@/layouts/custom-layout';
 
 export default function Home({ features = [] }) {

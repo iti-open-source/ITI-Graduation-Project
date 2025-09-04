@@ -2,7 +2,11 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
     <head>
         <meta charset="utf-8">
+        <title>MockMate - Ace Your Tech Interviews</title>
+
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        
 
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
@@ -45,5 +49,9 @@
     </head>
     <body class="font-sans antialiased">
         @inertia
+
+        <div id="app" data-theme="{{ session('theme', 'light') }}">
+        @inertia
+    </div>
     </body>
 </html>

@@ -1,3 +1,4 @@
+import CustomLayout from '@/layouts/CustomLayout';
 import { ClientSideSuspense, LiveblocksProvider, RoomProvider } from '@liveblocks/react/suspense';
 import { useState } from 'react';
 import { CollaborativeEditor } from '../components/Room/CollaborativeEditor';
@@ -21,34 +22,36 @@ function Room() {
 
     return (
         <>
-            <div className="mb-3 flex items-center justify-center gap-3 py-3">
-                <button
-                    className="cursor-pointer rounded-sm border-1 border-gray-500 px-3 py-1 transition-all ease-in-out hover:border-black hover:bg-gray-50 hover:text-black"
-                    onClick={handleSubmit}
-                >
-                    Submit
-                </button>
-                <select
-                    name="language"
-                    id="language"
-                    className="rounded-sm border-1 border-gray-500 px-3 py-1"
-                    value={language}
-                    onChange={handleLanguageChange}
-                >
-                    {languages.map((lang) => (
-                        <option key={lang} value={lang} className="text-black">
-                            {lang.charAt(0).toUpperCase() + lang.slice(1)}
-                        </option>
-                    ))}
-                </select>
-            </div>
-            <LiveblocksProvider publicApiKey={'pk_dev_MDlFOJddGa3Jz5Wkux9tzCArD9ytT22YlXTcFPvBTrepZdZ4vlSA1fiTG0myYpf8'}>
-                <RoomProvider id="my-room">
-                    <ClientSideSuspense fallback={<div>Loading…</div>}>
-                        <CollaborativeEditor editorText={editorText} handleEditorTextChange={handleEditorTextChange} language={language} />
-                    </ClientSideSuspense>
-                </RoomProvider>
-            </LiveblocksProvider>
+            <CustomLayout>
+                <div className="mb-3 flex items-center justify-center gap-3 py-3">
+                    <button
+                        className="cursor-pointer rounded-sm border-1 border-gray-500 px-3 py-1 transition-all ease-in-out hover:border-black hover:bg-gray-50 hover:text-black"
+                        onClick={handleSubmit}
+                    >
+                        Submit
+                    </button>
+                    <select
+                        name="language"
+                        id="language"
+                        className="rounded-sm border-1 border-gray-500 px-3 py-1"
+                        value={language}
+                        onChange={handleLanguageChange}
+                    >
+                        {languages.map((lang) => (
+                            <option key={lang} value={lang} className="text-black">
+                                {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <LiveblocksProvider publicApiKey={'pk_dev_MDlFOJddGa3Jz5Wkux9tzCArD9ytT22YlXTcFPvBTrepZdZ4vlSA1fiTG0myYpf8'}>
+                    <RoomProvider id="my-room">
+                        <ClientSideSuspense fallback={<div>Loading…</div>}>
+                            <CollaborativeEditor editorText={editorText} handleEditorTextChange={handleEditorTextChange} language={language} />
+                        </ClientSideSuspense>
+                    </RoomProvider>
+                </LiveblocksProvider>
+            </CustomLayout>
         </>
     );
 }

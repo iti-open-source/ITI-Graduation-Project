@@ -49,24 +49,29 @@ export function CollaborativeEditor({
     }, []);
 
     return (
-        <Editor
-            onMount={handleOnMount}
-            height="500px"
-            width="full"
-            theme="vs-dark"
-            defaultLanguage={language}
-            language={language}
-            defaultValue=""
-            onChange={handleEditorTextChange}
-            value={editorText}
-            options={{
-                tabSize: 2,
-                cursorBlinking: 'smooth',
-                fontSize: 16,
-                minimap: { enabled: false },
-                overviewRulerLanes: 0,
-                padding: { top: 20, bottom: 20 },
-            }}
-        />
+        <div className="flex flex-col justify-between md:flex-row">
+            {/*  Web cams here */}
+            {/* <LiveCall /> */}
+
+            <Editor
+                onMount={handleOnMount}
+                height="100vh"
+                width="100%"
+                theme={localStorage.getItem('theme') === 'dark' ? 'vs-dark' : 'light'}
+                defaultLanguage={language}
+                language={language}
+                defaultValue=""
+                onChange={handleEditorTextChange}
+                value={editorText}
+                options={{
+                    tabSize: 2,
+                    cursorBlinking: 'smooth',
+                    fontSize: 16,
+                    minimap: { enabled: false },
+                    overviewRulerLanes: 0,
+                    padding: { top: 20, bottom: 20 },
+                }}
+            />
+        </div>
     );
 }

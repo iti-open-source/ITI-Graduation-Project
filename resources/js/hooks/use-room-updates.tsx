@@ -61,7 +61,7 @@ export function useRoomUpdates(roomCode: string, initialRoom: Room) {
                     method: 'get',
                     onSuccess: () => {
                         // The controller will redirect to the appropriate page
-                    }
+                    },
                 });
             }
         });

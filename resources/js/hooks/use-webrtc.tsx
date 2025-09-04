@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
 import Pusher from 'pusher-js';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface WebRTCConfig {
     roomCode: string;
@@ -30,34 +30,37 @@ export function useWebRTC({ roomCode, userId, isCreator }: WebRTCConfig) {
     const isInitializedRef = useRef(false);
     const initializationPromiseRef = useRef<Promise<void> | null>(null);
 
-    const sendSignalingData = useCallback(async (type: string, data: any, toUserId?: number) => {
-        try {
-            console.log(`[WebRTC] Sending ${type} to user ${toUserId || 'all'}:`, data);
-            const token = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content;
-            const response = await fetch(`/room/${roomCode}/signaling`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    ...(token ? { 'X-CSRF-TOKEN': token } : {}),
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({
-                    type,
-                    data,
-                    to_user_id: toUserId,
-                }),
-            });
+    const sendSignalingData = useCallback(
+        async (type: string, data: any, toUserId?: number) => {
+            try {
+                console.log(`[WebRTC] Sending ${type} to user ${toUserId || 'all'}:`, data);
+                const token = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content;
+                const response = await fetch(`/room/${roomCode}/signaling`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        ...(token ? { 'X-CSRF-TOKEN': token } : {}),
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        type,
+                        data,
+                        to_user_id: toUserId,
+                    }),
+                });
 
-            if (!response.ok) {
-                console.error(`[WebRTC] Signaling request failed: ${response.status} ${response.statusText}`);
-            } else {
-                console.log(`[WebRTC] Signaling ${type} sent successfully`);
+                if (!response.ok) {
+                    console.error(`[WebRTC] Signaling request failed: ${response.status} ${response.statusText}`);
+                } else {
+                    console.log(`[WebRTC] Signaling ${type} sent successfully`);
+                }
+            } catch (error) {
+                console.error('Error sending signaling data:', error);
             }
-        } catch (error) {
-            console.error('Error sending signaling data:', error);
-        }
-    }, [roomCode]);
+        },
+        [roomCode],
+    );
 
     const initializeWebRTC = useCallback(async () => {
         if (isInitializedRef.current) {
@@ -76,7 +79,6 @@ export function useWebRTC({ roomCode, userId, isCreator }: WebRTCConfig) {
 
             // Create a promise to track initialization
             initializationPromiseRef.current = (async () => {
-
                 // Get user media
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: true,
@@ -102,7 +104,7 @@ export function useWebRTC({ roomCode, userId, isCreator }: WebRTCConfig) {
                 peerConnectionRef.current = peerConnection;
 
                 // Add local stream to peer connection
-                stream.getTracks().forEach(track => {
+                stream.getTracks().forEach((track) => {
                     peerConnection.addTrack(track, stream);
                 });
 
@@ -181,11 +183,9 @@ export function useWebRTC({ roomCode, userId, isCreator }: WebRTCConfig) {
                 });
 
                 setConnectionStatus('connecting');
-
             })();
 
             await initializationPromiseRef.current;
-
         } catch (error) {
             console.error('Error initializing WebRTC:', error);
             setConnectionStatus('disconnected');
@@ -263,107 +263,113 @@ export function useWebRTC({ roomCode, userId, isCreator }: WebRTCConfig) {
         }
     }, []);
 
-    const handleSignalingData = useCallback(async (data: SignalingData) => {
-        if (!peerConnectionRef.current) {
-            console.log('[WebRTC] No peer connection available, ignoring signaling data');
-            return;
-        }
-
-        try {
-            console.log(`[WebRTC] Handling ${data.type}:`, data.data);
-            switch (data.type) {
-                case 'offer':
-                    console.log('[WebRTC] Setting remote description (offer)');
-                    try {
-                        // Clean the SDP before creating the session description
-                        const cleanedSDP = cleanSDP(data.data.sdp);
-                        const cleanedOffer = {
-                            type: data.data.type,
-                            sdp: cleanedSDP
-                        };
-                        const offer = new RTCSessionDescription(cleanedOffer);
-                        console.log('[WebRTC] Valid offer received:', offer.type);
-                        await peerConnectionRef.current.setRemoteDescription(offer);
-                        console.log('[WebRTC] Creating answer');
-                        const answer = await peerConnectionRef.current.createAnswer();
-                        console.log('[WebRTC] Setting local description (answer)');
-                        await peerConnectionRef.current.setLocalDescription(answer);
-                        console.log('[WebRTC] Sending answer back');
-                        sendSignalingData('answer', answer, data.fromUserId);
-                        // Process any queued ICE candidates
-                        await processQueuedIceCandidates();
-                    } catch (error) {
-                        console.error('[WebRTC] Error processing offer:', error);
-                        console.log('[WebRTC] Raw offer data:', data.data);
-                    }
-                    break;
-
-                case 'answer':
-                    console.log('[WebRTC] Setting remote description (answer)');
-                    try {
-                        // Clean the SDP before creating the session description
-                        const cleanedSDP = cleanSDP(data.data.sdp);
-                        const cleanedAnswer = {
-                            type: data.data.type,
-                            sdp: cleanedSDP
-                        };
-                        const answer = new RTCSessionDescription(cleanedAnswer);
-                        console.log('[WebRTC] Valid answer received:', answer.type);
-                        await peerConnectionRef.current.setRemoteDescription(answer);
-                        // Process any queued ICE candidates
-                        await processQueuedIceCandidates();
-                    } catch (error) {
-                        console.error('[WebRTC] Error processing answer:', error);
-                        console.log('[WebRTC] Raw answer data:', data.data);
-                    }
-                    break;
-
-                case 'ice-candidate':
-                    console.log('[WebRTC] Handling ICE candidate');
-                    try {
-                        // Validate ICE candidate
-                        const candidate = new RTCIceCandidate(data.data);
-                        console.log('[WebRTC] Valid ICE candidate received');
-                        if (peerConnectionRef.current.remoteDescription) {
-                            console.log('[WebRTC] Adding ICE candidate immediately');
-                            await peerConnectionRef.current.addIceCandidate(candidate);
-                        } else {
-                            console.log('[WebRTC] Queuing ICE candidate (no remote description yet)');
-                            iceCandidateQueueRef.current.push(candidate);
-                        }
-                    } catch (error) {
-                        console.error('[WebRTC] Error processing ICE candidate:', error);
-                        console.log('[WebRTC] Raw ICE candidate data:', data.data);
-                    }
-                    break;
+    const handleSignalingData = useCallback(
+        async (data: SignalingData) => {
+            if (!peerConnectionRef.current) {
+                console.log('[WebRTC] No peer connection available, ignoring signaling data');
+                return;
             }
-        } catch (error) {
-            console.error('Error handling signaling data:', error);
-        }
-    }, [sendSignalingData, processQueuedIceCandidates, cleanSDP]);
 
-    const createOffer = useCallback(async (toUserId?: number) => {
-        if (!peerConnectionRef.current) {
-            console.log('[WebRTC] No peer connection available for creating offer');
-            return;
-        }
+            try {
+                console.log(`[WebRTC] Handling ${data.type}:`, data.data);
+                switch (data.type) {
+                    case 'offer':
+                        console.log('[WebRTC] Setting remote description (offer)');
+                        try {
+                            // Clean the SDP before creating the session description
+                            const cleanedSDP = cleanSDP(data.data.sdp);
+                            const cleanedOffer = {
+                                type: data.data.type,
+                                sdp: cleanedSDP,
+                            };
+                            const offer = new RTCSessionDescription(cleanedOffer);
+                            console.log('[WebRTC] Valid offer received:', offer.type);
+                            await peerConnectionRef.current.setRemoteDescription(offer);
+                            console.log('[WebRTC] Creating answer');
+                            const answer = await peerConnectionRef.current.createAnswer();
+                            console.log('[WebRTC] Setting local description (answer)');
+                            await peerConnectionRef.current.setLocalDescription(answer);
+                            console.log('[WebRTC] Sending answer back');
+                            sendSignalingData('answer', answer, data.fromUserId);
+                            // Process any queued ICE candidates
+                            await processQueuedIceCandidates();
+                        } catch (error) {
+                            console.error('[WebRTC] Error processing offer:', error);
+                            console.log('[WebRTC] Raw offer data:', data.data);
+                        }
+                        break;
 
-        if (peerConnectionRef.current.signalingState === 'closed') {
-            console.log('[WebRTC] Peer connection is closed, cannot create offer');
-            return;
-        }
+                    case 'answer':
+                        console.log('[WebRTC] Setting remote description (answer)');
+                        try {
+                            // Clean the SDP before creating the session description
+                            const cleanedSDP = cleanSDP(data.data.sdp);
+                            const cleanedAnswer = {
+                                type: data.data.type,
+                                sdp: cleanedSDP,
+                            };
+                            const answer = new RTCSessionDescription(cleanedAnswer);
+                            console.log('[WebRTC] Valid answer received:', answer.type);
+                            await peerConnectionRef.current.setRemoteDescription(answer);
+                            // Process any queued ICE candidates
+                            await processQueuedIceCandidates();
+                        } catch (error) {
+                            console.error('[WebRTC] Error processing answer:', error);
+                            console.log('[WebRTC] Raw answer data:', data.data);
+                        }
+                        break;
 
-        try {
-            console.log(`[WebRTC] Creating offer for user ${toUserId || 'all'}, signaling state: ${peerConnectionRef.current.signalingState}`);
-            const offer = await peerConnectionRef.current.createOffer();
-            console.log('[WebRTC] Setting local description (offer)');
-            await peerConnectionRef.current.setLocalDescription(offer);
-            console.log('[WebRTC] Sending offer');
-            sendSignalingData('offer', offer, toUserId);
-        } catch (error) {
-            console.error('Error creating offer:', error);
-        }
-    }, [sendSignalingData]);
+                    case 'ice-candidate':
+                        console.log('[WebRTC] Handling ICE candidate');
+                        try {
+                            // Validate ICE candidate
+                            const candidate = new RTCIceCandidate(data.data);
+                            console.log('[WebRTC] Valid ICE candidate received');
+                            if (peerConnectionRef.current.remoteDescription) {
+                                console.log('[WebRTC] Adding ICE candidate immediately');
+                                await peerConnectionRef.current.addIceCandidate(candidate);
+                            } else {
+                                console.log('[WebRTC] Queuing ICE candidate (no remote description yet)');
+                                iceCandidateQueueRef.current.push(candidate);
+                            }
+                        } catch (error) {
+                            console.error('[WebRTC] Error processing ICE candidate:', error);
+                            console.log('[WebRTC] Raw ICE candidate data:', data.data);
+                        }
+                        break;
+                }
+            } catch (error) {
+                console.error('Error handling signaling data:', error);
+            }
+        },
+        [sendSignalingData, processQueuedIceCandidates, cleanSDP],
+    );
+
+    const createOffer = useCallback(
+        async (toUserId?: number) => {
+            if (!peerConnectionRef.current) {
+                console.log('[WebRTC] No peer connection available for creating offer');
+                return;
+            }
+
+            if (peerConnectionRef.current.signalingState === 'closed') {
+                console.log('[WebRTC] Peer connection is closed, cannot create offer');
+                return;
+            }
+
+            try {
+                console.log(`[WebRTC] Creating offer for user ${toUserId || 'all'}, signaling state: ${peerConnectionRef.current.signalingState}`);
+                const offer = await peerConnectionRef.current.createOffer();
+                console.log('[WebRTC] Setting local description (offer)');
+                await peerConnectionRef.current.setLocalDescription(offer);
+                console.log('[WebRTC] Sending offer');
+                sendSignalingData('offer', offer, toUserId);
+            } catch (error) {
+                console.error('Error creating offer:', error);
+            }
+        },
+        [sendSignalingData],
+    );
 
     const toggleVideo = useCallback(() => {
         if (localStreamRef.current) {
@@ -391,7 +397,7 @@ export function useWebRTC({ roomCode, userId, isCreator }: WebRTCConfig) {
         initializationPromiseRef.current = null;
 
         if (localStreamRef.current) {
-            localStreamRef.current.getTracks().forEach(track => track.stop());
+            localStreamRef.current.getTracks().forEach((track) => track.stop());
         }
 
         if (peerConnectionRef.current) {

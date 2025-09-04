@@ -33,6 +33,7 @@ interface Room {
     is_active: boolean;
     last_activity: string;
     current_participant: User | null;
+    creator?: User; // optional, used for display while connecting
     queue: any[];
     queue_count: number;
 }
@@ -171,8 +172,8 @@ export default function Participant({ room }: ParticipantProps) {
                             onClick={toggleAudio}
                             size="lg"
                             className={`w-12 h-12 rounded-full ${isAudioEnabled
-                                    ? 'bg-gray-600 hover:bg-gray-700 text-white'
-                                    : 'bg-red-600 hover:bg-red-700 text-white'
+                                ? 'bg-gray-600 hover:bg-gray-700 text-white'
+                                : 'bg-red-600 hover:bg-red-700 text-white'
                                 }`}
                         >
                             {isAudioEnabled ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
@@ -183,8 +184,8 @@ export default function Participant({ room }: ParticipantProps) {
                             onClick={toggleVideo}
                             size="lg"
                             className={`w-12 h-12 rounded-full ${isVideoEnabled
-                                    ? 'bg-gray-600 hover:bg-gray-700 text-white'
-                                    : 'bg-red-600 hover:bg-red-700 text-white'
+                                ? 'bg-gray-600 hover:bg-gray-700 text-white'
+                                : 'bg-red-600 hover:bg-red-700 text-white'
                                 }`}
                         >
                             {isVideoEnabled ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
@@ -203,6 +204,22 @@ export default function Participant({ room }: ParticipantProps) {
                                 <PhoneOff className="w-5 h-5" />
                             )}
                         </Button>
+                    </div>
+                </div>
+
+                {/* Code Editor Placeholder */}
+                <div className="bg-[var(--color-nav-bg)] p-6 border-t border-[var(--color-card-shadow)]">
+                    <div className="max-w-5xl mx-auto">
+                        <div className="mb-3 flex items-center gap-2">
+                            <Badge className="bg-[var(--color-section-alt-bg)] text-[var(--color-text-secondary)]">participant</Badge>
+                            <span className="text-[var(--color-text-secondary)] text-sm">Code Editor (Placeholder)</span>
+                        </div>
+                        <div
+                            aria-label="Code Editor Placeholder"
+                            className="min-h-[200px] rounded-md border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)] font-mono text-sm p-4 text-[var(--color-text-secondary)]"
+                        >
+                            // Code editor will appear here.
+                        </div>
                     </div>
                 </div>
             </div>

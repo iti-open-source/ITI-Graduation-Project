@@ -461,6 +461,36 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                             </CardContent>
                         </Card>
                     </motion.div>
+
+                    {/* Code Editor Placeholder */}
+                    <motion.div
+                        variants={fadeIn}
+                        initial="hidden"
+                        animate="visible"
+                        className="mt-6"
+                    >
+                        <Card className="bg-[var(--color-card-bg)] border-[var(--color-card-shadow)]">
+                            <CardHeader>
+                                <CardTitle className="text-[var(--color-text)]">Code Editor (Placeholder)</CardTitle>
+                                <CardDescription className="text-[var(--color-text-secondary)]">
+                                    This is a placeholder for the shared code editor. We will wire it up later.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="mb-3 flex items-center gap-2">
+                                    <Button size="sm" variant="outline" className="border-[var(--color-card-shadow)]">Run</Button>
+                                    <Button size="sm" variant="outline" className="border-[var(--color-card-shadow)]">Format</Button>
+                                    <Badge className="ml-auto bg-[var(--color-section-alt-bg)] text-[var(--color-text-secondary)]">creator</Badge>
+                                </div>
+                                <div
+                                    aria-label="Code Editor Placeholder"
+                                    className="min-h-[240px] rounded-md border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)] font-mono text-sm p-4 text-[var(--color-text-secondary)]"
+                                >
+                                    // Code editor will appear here.
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
                 </motion.div>
             </div>
         </AppLayout>

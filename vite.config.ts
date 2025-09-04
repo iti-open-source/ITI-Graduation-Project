@@ -20,4 +20,12 @@ export default defineConfig({
     esbuild: {
         jsx: 'automatic',
     },
+    // server: {
+    //     host: '0.0.0.0',
+    //     port: 5173,
+    //     hmr: {
+    //         protocol: 'wss',
+    //         host: 'https://5172c0a8dccb.ngrok-free.app',
+    //     },
+    // },
 });

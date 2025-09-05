@@ -20,7 +20,7 @@ export default function Register() {
     }
     return (
         <>
-            <Navbar />
+            <Navbar/>
 
             <AuthLayout title="Create an account" description="Enter your details below to create your account">
                 <Head title="Register" />

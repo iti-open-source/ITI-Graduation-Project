@@ -12,6 +12,7 @@ import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
+
 interface LoginProps {
     status?: string;
     canResetPassword: boolean;
@@ -20,7 +21,7 @@ interface LoginProps {
 export default function Login({ status, canResetPassword }: LoginProps) {
     return (
         <>
-            <Navbar />
+            <Navbar/>
             <AuthLayout title="Welcome Back 👋" description="Log in to access your account">
                 <Head title="Log in" />
 

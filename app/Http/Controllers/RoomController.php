@@ -65,7 +65,7 @@ class RoomController extends Controller
 
         // Check if user is already in queue
         $queueEntry = $room->queue()->where('user_id', $user->id)->with('user')->first();
-        
+
         if ($queueEntry) {
             return Inertia::render('room/queue', [
                 'room' => $room,
@@ -76,13 +76,13 @@ class RoomController extends Controller
 
         // Add user to queue
         $queueEntry = $room->addToQueue($user);
-        
+
         // Load the user relationship for the queue entry
         $queueEntry->load('user');
-        
+
         // Broadcast queue update
         event(new QueueUpdated($room->fresh(), 'joined', $user));
-        
+
         return Inertia::render('room/queue', [
             'room' => $room,
             'queuePosition' => $queueEntry->position,
@@ -104,7 +104,7 @@ class RoomController extends Controller
         ]);
 
         $targetUser = $room->queue()->where('user_id', $request->user_id)->first();
-        
+
         if (!$targetUser) {
             return response()->json(['error' => 'User not found in queue'], 404);
         }
@@ -160,7 +160,7 @@ class RoomController extends Controller
         // Remove user from queue if they're in it
         $wasInQueue = $room->queue()->where('user_id', $user->id)->exists();
         $room->removeFromQueue($user);
-        
+
         // Broadcast queue update if user was in queue
         if ($wasInQueue) {
             event(new QueueUpdated($room->fresh(), 'left', $user));

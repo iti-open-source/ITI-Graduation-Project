@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 
 import 'swiper/css';
@@ -8,6 +8,8 @@ import Footer from '@/components/home_components/footer';
 import CustomLayout from '@/layouts/custom-layout';
 
 export default function Home({ features = [] }) {
+    const props = usePage().props;
+
     // Animation variants
     const fadeIn = {
         hidden: { opacity: 0, y: 20 },
@@ -21,7 +23,7 @@ export default function Home({ features = [] }) {
     ];
 
     return (
-        <CustomLayout>
+        <CustomLayout isLoggedIn={props.isLoggedIn as boolean}>
             <div className="font-inter min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
                 {/* Hero */}
                 <header className="h-screen bg-gradient-to-r from-[var(--color-header-bg-start)] to-[var(--color-header-bg-end)] text-[var(--color-nav-text)]">
@@ -40,13 +42,13 @@ export default function Home({ features = [] }) {
                         </motion.p>
                         <div className="flex flex-col justify-center gap-4 sm:flex-row">
                             <Link
-                                href="/room"
+                                href="/lobby"
                                 className="transform rounded-lg bg-[var(--color-button-primary-bg)] px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-105 hover:bg-[var(--color-button-primary-hover)]"
                             >
                                 Create a Room
                             </Link>
                             <Link
-                                href="/room"
+                                href="/lobby"
                                 className="rounded-lg border border-[var(--color-button-secondary-border)] bg-[var(--color-button-secondary-bg)] px-6 py-3 text-[var(--color-button-secondary-text)] transition hover:bg-[var(--color-button-secondary-hover-bg)] hover:text-[var(--color-button-secondary-hover-text)]"
                             >
                                 Join Random Room

@@ -19,7 +19,7 @@ export default function AuthSimpleLayout({ children, title, description }: Props
             href={home()}
             className="flex flex-col items-center gap-2 font-medium"
           >
-            <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-bold text-lg">
+            <div className="flex h-10 w-12 items-center justify-center rounded-xl bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-bold text-lg">
              
               MM
             </div>

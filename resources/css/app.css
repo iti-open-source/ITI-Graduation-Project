@@ -94,6 +94,14 @@
   --color-button-secondary-border: #ffffff; /* White: Secondary button border */
   --color-button-secondary-hover-bg: #ffffff; /* White: Secondary button hover */
   --color-button-secondary-hover-text: #1e293b; /* Slate-800: Hover text */
+
+
+  /* Dropdown / Menu */
+  --color-menu-bg: #d3d1d1; /* White background */
+  --color-menu-text: #0f172a; /* Dark text */
+  --color-menu-text-secondary: #778190; /* Subtext */
+  --color-menu-hover-bg: #f1f5f9; /* Light hover */
+  --color-menu-border: #e5e7eb; /* Gray-200 border */
 }
 
 /* Dark theme */
@@ -120,6 +128,13 @@
   --color-button-secondary-border: #e2e8f0; /* Slate-200: Border */
   --color-button-secondary-hover-bg: #e2e8f0; /* Slate-200: Hover background */
   --color-button-secondary-hover-text: #0f172a; /* Slate-900: Hover text */
+
+    /* Dropdown / Menu */
+  --color-menu-bg: #374151; /* Gray-700 background */
+  --color-menu-text: #e2e8f0; /* Bright text */
+  --color-menu-text-secondary: #9ca3af; /* Dim text */
+  --color-menu-hover-bg: #4b5563; /* Gray-600 hover */
+  --color-menu-border: #4b5563; /* Gray-600 border */
 }
 
 

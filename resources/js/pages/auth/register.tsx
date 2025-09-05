@@ -1,6 +1,6 @@
 import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
+import { LoaderCircle ,Plus ,User } from 'lucide-react';
 
 import Navbar from '@/components/home_components/navbar';
 import InputError from '@/components/input-error';
@@ -9,8 +9,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
+import { useState } from 'react';
 
 export default function Register() {
+     const [preview, setPreview] = useState<string | null>(null);
+
+    function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+        if (e.target.files && e.target.files[0]) {
+            setPreview(URL.createObjectURL(e.target.files[0]));
+        }
+    }
+
+
     function route(name: string): string {
         // Simple implementation for demonstration purposes
         // In a real app, use Ziggy or your routing library
@@ -33,10 +43,46 @@ export default function Register() {
                     resetOnSuccess={['password', 'password_confirmation']}
                     disableWhileProcessing
                     className="flex flex-col gap-6"
+                    encType="multipart/form-data" 
                 >
                     {({ processing, errors }) => (
                         <>
+                        {/* Profile Photo Upload */}
+                            <div className="flex flex-col items-center gap-2">
+                                <Label
+                                    htmlFor="avatar"
+                                    className="relative cursor-pointer flex flex-col items-center"
+                                >
+                                    <div className="mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] overflow-hidden">
+                                        {preview ? (
+                                            <img
+                                                src={preview}
+                                                alt="Preview"
+                                                className="h-full w-full object-cover"
+                                            />
+                                        ) : (
+                                            <User className="h-10 w-10" />
+                                        )}
+                                        <input
+                                            id="avatar"
+                                            type="file"
+                                            name="avatar"
+                                            accept="image/*"
+                                            onChange={handleImageChange}
+                                            className="hidden"
+                                        />
+                                    </div>
+
+                                    {/* Plus icon overlay */}
+                                    <div className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-accent)] text-white shadow-md">
+                                        <Plus className="h-4 w-4" />
+                                    </div>
+                                </Label>
+
+                                <InputError message={errors.photo} className="mt-2" />
+                            </div>
                             <div className="grid gap-6">
+                            
                                 <div className="grid gap-2">
                                     <Label htmlFor="name" className="text-[var(--color-text)]">
                                         Name

@@ -1,4 +1,3 @@
-import RegisteredUserController from '@/actions/App/Http/Controllers/Auth/RegisteredUserController';
 import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
@@ -12,6 +11,13 @@ import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 
 export default function Register() {
+    function route(name: string): string {
+        // Simple implementation for demonstration purposes
+        // In a real app, use Ziggy or your routing library
+        if (name === 'register') return '/register';
+        if (name === 'login') return '/login';
+        return '/';
+    }
     return (
         <>
             <Navbar />
@@ -21,7 +27,9 @@ export default function Register() {
 
                 {/* Form */}
                 <Form
-                    {...RegisteredUserController.store.form()}
+                    // {...RegisteredUserController.store.form()}
+                    method="post"
+    action={route('register')}
                     resetOnSuccess={['password', 'password_confirmation']}
                     disableWhileProcessing
                     className="flex flex-col gap-6"
@@ -42,7 +50,7 @@ export default function Register() {
                                         autoComplete="name"
                                         name="name"
                                         placeholder="Full name"
-                                        className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
+                                        className="rounded-lg border border-[var(--color-card-shadow)] text-[var(--color-text)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
                                     />
                                     <InputError message={errors.name} className="mt-2" />
                                 </div>
@@ -59,7 +67,7 @@ export default function Register() {
                                         autoComplete="email"
                                         name="email"
                                         placeholder="email@example.com"
-                                        className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
+                                        className="rounded-lg border border-[var(--color-card-shadow)] text-[var(--color-text)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
                                     />
                                     <InputError message={errors.email} />
                                 </div>
@@ -76,7 +84,7 @@ export default function Register() {
                                         autoComplete="new-password"
                                         name="password"
                                         placeholder="••••••••"
-                                        className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
+                                        className="rounded-lg border border-[var(--color-card-shadow)] text-[var(--color-text)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
                                     />
                                     <InputError message={errors.password} />
                                 </div>
@@ -93,7 +101,7 @@ export default function Register() {
                                         autoComplete="new-password"
                                         name="password_confirmation"
                                         placeholder="••••••••"
-                                        className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
+                                        className="rounded-lg border border-[var(--color-card-shadow)] text-[var(--color-text)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
                                     />
                                     <InputError message={errors.password_confirmation} />
                                 </div>

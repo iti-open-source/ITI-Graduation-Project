@@ -40,7 +40,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     tabIndex={1}
                                     autoComplete="email"
                                     placeholder="email@example.com"
-                                    className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
+                                    className="rounded-lg border border-[var(--color-card-shadow)] text-[var(--color-text)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
                                 />
                                 <InputError message={errors.email} />
                             </div>
@@ -68,7 +68,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     placeholder="••••••••"
-                                    className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
+                                    className="rounded-lg border border-[var(--color-card-shadow)] text-[var(--color-text)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
                                 />
                                 <InputError message={errors.password} />
                             </div>

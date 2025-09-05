@@ -3,9 +3,10 @@
 use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
-    return Inertia::render('home');
+    return Inertia::render('home', ["isLoggedIn" => Auth::check()]);
 })->name('home');
 
 Route::middleware(['auth', 'verified', 'admin.only'])->group(function () {

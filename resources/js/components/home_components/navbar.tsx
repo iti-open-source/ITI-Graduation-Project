@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
-export default function Navbar() {
+export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
     useEffect(() => {
@@ -28,16 +28,24 @@ export default function Navbar() {
                             }`}
                         />
                     </button>
-
-                    <Link href="/login" className="transition hover:text-[var(--color-accent)]">
-                        Login
-                    </Link>
-                    <Link
-                        href="/register"
-                        className="transform rounded-lg bg-[var(--color-button-primary-bg)] px-4 py-2 transition hover:scale-105 hover:bg-[var(--color-button-primary-hover)]"
-                    >
-                        Register
-                    </Link>
+                    {!isLoggedIn && (
+                        <>
+                            <Link href="/login" className="transition hover:text-[var(--color-accent)]">
+                                Login
+                            </Link>
+                            <Link
+                                href="/register"
+                                className="transform rounded-lg bg-[var(--color-button-primary-bg)] px-4 py-2 transition hover:scale-105 hover:bg-[var(--color-button-primary-hover)]"
+                            >
+                                Register
+                            </Link>
+                        </>
+                    )}
+                    {isLoggedIn && (
+                        <Link href="/logout" method="post" className="transition hover:text-[var(--color-accent)]">
+                            Logout
+                        </Link>
+                    )}
                 </div>
             </div>
         </nav>

@@ -25,6 +25,7 @@ class User extends Authenticatable
         'role',
         'avatar',
         'google_id',
+        'linkedin_id',
     ];
 
     /**

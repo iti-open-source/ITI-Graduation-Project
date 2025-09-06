@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { User, Settings, LogOut, Users, Monitor } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+
 export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
 
 
@@ -31,8 +32,13 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
     return (
         <nav className="sticky top-0 z-50 w-full bg-[var(--color-nav-bg)] text-[var(--color-nav-text)] shadow-md">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-                <Link href="/" className="text-2xl font-bold">
-                    MockMate
+                <Link href="/" className="flex items-center gap-2 text-2xl font-bold">
+                    <img
+                        src="/storage/images/logo.png"
+                        alt="Logo"
+                        className="h-10 w-60 object-cover"
+                    />
+                    {/* MockMate */}
                 </Link>
                 <div className="flex items-center space-x-4">
                     <button

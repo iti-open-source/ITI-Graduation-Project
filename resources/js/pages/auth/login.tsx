@@ -11,6 +11,8 @@ import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FcGoogle } from 'react-icons/fc';
+import { FaLinkedin } from 'react-icons/fa';
+
 
 
 
@@ -29,12 +31,12 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 <Form {...AuthenticatedSessionController.store.form()} resetOnSuccess={['password']} className="flex flex-col gap-6">
                     {({ processing, errors }) => (
                         <>
-                            {/* Continue with Google */}
+                            {/* Continue with Google & LinkedIn */}
                             <Button
                                 type="button"
 
-                                className="mt-4 w-full flex items-center justify-center gap-2 rounded-lg border border-[var(--color-card-shadow)] 
-               bg-[var(--color-section-alt-bg)]/70 py-3 text-sm font-medium text-[var(--color-text)] 
+                                className="w-full flex items-center justify-center gap-2 rounded-lg border border-[var(--color-card-shadow)] 
+               bg-[var(--color-section-alt-bg)]/70 text-sm font-medium text-[var(--color-text)] 
                shadow-lg transition-colors duration-200
                hover:bg-[var(--color-section-alt-bg)]/90 cursor-pointer"
                                 onClick={() => {
@@ -44,6 +46,28 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             >
                                 <FcGoogle className="h-5 w-5" /> Continue with Google
                             </Button>
+                            <Button
+                                type="button"
+                                className="w-full flex items-center justify-center gap-2 rounded-lg border border-[var(--color-card-shadow)] 
+       bg-[#0077B5]/70 text-sm font-medium text-white 
+       shadow-lg transition-colors duration-200 hover:bg-[#0077B5]/90 cursor-pointer"
+                                onClick={() => {
+                                    window.location.href = '/auth/linkedin';
+                                }}
+                            >
+                                <FaLinkedin className="h-5 w-5" /> Continue with LinkedIn
+                            </Button>
+                            {/* <Button
+                                type="button"
+                                className=" w-full flex items-center justify-center gap-1 rounded-lg border border-[var(--color-card-shadow)] 
+       bg-[#000]/70 py-3 text-sm font-medium text-white 
+       shadow-lg transition-colors duration-200 hover:bg-[#0052]/90 cursor-pointer"
+                                onClick={() => {
+                                    window.location.href = '/auth/github';
+                                }}
+                            >
+                                <FaGithub className="h-5 w-5" /> Continue with Github
+                            </Button> */}
 
                             {/* Divider */}
                             <div className="flex items-center gap-2 text-[var(--color-text-secondary)] text-sm">
@@ -60,7 +84,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     type="email"
                                     name="email"
                                     required
-                                    autoFocus
+                                    
                                     tabIndex={1}
                                     autoComplete="email"
                                     placeholder="email@example.com"

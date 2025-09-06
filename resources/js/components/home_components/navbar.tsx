@@ -36,7 +36,7 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                     <img
                         src="/storage/images/logo.png"
                         alt="Logo"
-                        className="h-10 w-60 object-cover"
+                        className="h-10 w-60 object-cotain"
                     />
                     {/* MockMate */}
                 </Link>

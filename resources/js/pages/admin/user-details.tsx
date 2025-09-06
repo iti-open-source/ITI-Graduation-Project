@@ -90,31 +90,6 @@ export default function UserDetail({ user }: UserDetailProps) {
                             <p className="text-muted-foreground">User profile and account details</p>
                         </div>
                     </div>
-                    <div className="flex gap-2">
-                        <Button variant="outline" asChild>
-                            <Link href={`/admin/users/${user.id}/edit`}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit User
-                            </Link>
-                        </Button>
-                        <Button variant="outline" onClick={handleToggleStatus}>
-                            {user.email_verified_at ? (
-                                <>
-                                    <UserX className="mr-2 h-4 w-4" />
-                                    Deactivate
-                                </>
-                            ) : (
-                                <>
-                                    <UserCheck className="mr-2 h-4 w-4" />
-                                    Activate
-                                </>
-                            )}
-                        </Button>
-                        <Button variant="destructive" onClick={handleDeleteUser}>
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                        </Button>
-                    </div>
                 </div>
 
                 {/* User Info Grid */}
@@ -210,13 +185,6 @@ export default function UserDetail({ user }: UserDetailProps) {
                                 </div>
 
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium">Account Active</span>
-                                    <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                        Active
-                                    </Badge>
-                                </div>
-
-                                <div className="flex items-center justify-between">
                                     <span className="text-sm font-medium">Registration Date</span>
                                     <span className="text-sm text-muted-foreground">{new Date(user.created_at).toLocaleDateString()}</span>
                                 </div>
@@ -284,23 +252,16 @@ export default function UserDetail({ user }: UserDetailProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-3">
-                                <Button variant="outline" className="w-full justify-start" asChild>
-                                    <Link href={`/admin/users/${user.id}/edit`}>
-                                        <Edit className="mr-2 h-4 w-4" />
-                                        Edit User Details
-                                    </Link>
-                                </Button>
-
                                 <Button variant="outline" className="w-full justify-start" onClick={handleToggleStatus}>
                                     {user.email_verified_at ? (
                                         <>
                                             <UserX className="mr-2 h-4 w-4" />
-                                            Deactivate Account
+                                            Unverify Account
                                         </>
                                     ) : (
                                         <>
                                             <UserCheck className="mr-2 h-4 w-4" />
-                                            Activate Account
+                                            Verify Account
                                         </>
                                     )}
                                 </Button>

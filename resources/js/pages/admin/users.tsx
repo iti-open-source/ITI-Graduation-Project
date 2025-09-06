@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, Form, usePage } from '@inertiajs/react';
-import { Calendar, Download, Edit, Eye, Filter, Mail, Search, Shield, Trash2, UserCheck, UserPlus, Users, UserX } from 'lucide-react';
+import { Calendar, Download, Eye, Filter, Mail, Search, Shield, Trash2, UserCheck, UserPlus, Users, UserX } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -226,11 +226,6 @@ export default function UsersPage({ users }: UsersPageProps) {
                                         <Button variant="outline" size="sm" asChild>
                                             <Link href={`/admin/users/${user.id}`}>
                                                 <Eye className="h-4 w-4" />
-                                            </Link>
-                                        </Button>
-                                        <Button variant="outline" size="sm" asChild>
-                                            <Link href={`/admin/users/${user.id}/edit`}>
-                                                <Edit className="h-4 w-4" />
                                             </Link>
                                         </Button>
                                         <Form

@@ -42,34 +42,6 @@ class AdminController extends Controller
     }
 
 
-    public function editUser(User $user)
-    {
-        return Inertia::render('admin/edit-user', [
-            'user' => $user
-        ]);
-    }
-
-    public function updateUser(Request $request, User $user)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'password' => 'nullable|string|min:8|confirmed',
-        ]);
-
-        $updateData = [
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-        ];
-
-        if (!empty($validated['password'])) {
-            $updateData['password'] = Hash::make($validated['password']);
-        }
-
-        $user->update($updateData);
-
-        return redirect()->route('admin.users')->with('success', 'User updated successfully.');
-    }
 
     public function deleteUser(User $user)
     {

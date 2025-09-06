@@ -51,14 +51,14 @@ class RoomController extends Controller
 
         // If user is the creator, show the room management interface
         if ($room->isCreator($user)) {
-            return Inertia::render('room/creator', [
+            return Inertia::render('room/room-creator', [
                 'room' => $room,
             ]);
         }
 
         // If user is already the current participant, show the video chat
         if ($room->current_participant === $user->id) {
-            return Inertia::render('room/participant', [
+            return Inertia::render('room/room-participant', [
                 'room' => $room,
             ]);
         }
@@ -67,7 +67,7 @@ class RoomController extends Controller
         $queueEntry = $room->queue()->where('user_id', $user->id)->with('user')->first();
 
         if ($queueEntry) {
-            return Inertia::render('room/queue', [
+            return Inertia::render('room/room-queue', [
                 'room' => $room,
                 'queuePosition' => $queueEntry->position,
                 'queueEntry' => $queueEntry,
@@ -83,7 +83,7 @@ class RoomController extends Controller
         // Broadcast queue update
         event(new QueueUpdated($room->fresh(), 'joined', $user));
 
-        return Inertia::render('room/queue', [
+        return Inertia::render('room/room-queue', [
             'room' => $room,
             'queuePosition' => $queueEntry->position,
             'queueEntry' => $queueEntry,

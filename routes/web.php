@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\LinkedInController;
 use App\Http\Controllers\RoomController;
@@ -14,8 +15,21 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard')->middleware('admin.only');
+        return Inertia::render('interview-dashboard');
+    })->name('dashboard');
+
+    // Admin routes
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', [AdminController::class, 'index'])->name('dashboard');
+        Route::get('/users', [AdminController::class, 'users'])->name('users');
+        Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
+        Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
+        Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('users.show');
+        Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
+        Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
+        Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.delete');
+        Route::patch('/users/{user}/toggle-status', [AdminController::class, 'toggleUserStatus'])->name('users.toggle-status');
+    });
 
     // Room routes
     Route::get('lobby', [RoomController::class, 'lobby'])->name('lobby');

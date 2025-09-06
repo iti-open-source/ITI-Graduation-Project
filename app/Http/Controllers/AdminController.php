@@ -36,14 +36,14 @@ class AdminController extends Controller
 
     public function showUser(User $user)
     {
-        return Inertia::render('admin/user-detail', [
+        return Inertia::render('admin/user-details', [
             'user' => $user
         ]);
     }
 
     public function createUser()
     {
-        return Inertia::render('admin/user-create');
+        return Inertia::render('admin/create-user');
     }
 
     public function storeUser(Request $request)
@@ -65,7 +65,7 @@ class AdminController extends Controller
 
     public function editUser(User $user)
     {
-        return Inertia::render('admin/user-edit', [
+        return Inertia::render('admin/edit-user', [
             'user' => $user
         ]);
     }

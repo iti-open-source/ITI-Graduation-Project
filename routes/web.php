@@ -19,11 +19,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     // Admin routes
-    Route::prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware('admin.only')->group(function () {
         Route::get('/', [AdminController::class, 'index'])->name('dashboard');
         Route::get('/users', [AdminController::class, 'users'])->name('users');
-        Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
-        Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
         Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('users.show');
         Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
         Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');

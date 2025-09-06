@@ -95,12 +95,6 @@ export default function UsersPage({ users }: UsersPageProps) {
                         <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
                         <p className="text-muted-foreground">Manage and monitor all platform users</p>
                     </div>
-                    <Button asChild>
-                        <Link href="/admin/users/create">
-                            <UserPlus className="mr-2 h-4 w-4" />
-                            Add User
-                        </Link>
-                    </Button>
                 </div>
 
                 {/* Stats Cards */}

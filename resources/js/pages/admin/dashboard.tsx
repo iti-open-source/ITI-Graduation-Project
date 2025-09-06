@@ -89,12 +89,6 @@ export default function AdminDashboard({ users, stats }: AdminDashboardProps) {
                                 View All Users
                             </Link>
                         </Button>
-                        <Button asChild>
-                            <Link href="/admin/users/create">
-                                <UserPlus className="mr-2 h-4 w-4" />
-                                Add User
-                            </Link>
-                        </Button>
                     </div>
                 </div>
 
@@ -204,12 +198,6 @@ export default function AdminDashboard({ users, stats }: AdminDashboardProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-3">
-                                <Button variant="outline" className="w-full justify-start" asChild>
-                                    <Link href="/admin/users/create">
-                                        <UserPlus className="mr-2 h-4 w-4" />
-                                        Add New User
-                                    </Link>
-                                </Button>
                                 <Button variant="outline" className="w-full justify-start" asChild>
                                     <Link href="/admin/users">
                                         <Users className="mr-2 h-4 w-4" />

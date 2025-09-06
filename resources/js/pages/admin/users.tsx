@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, Form, usePage } from '@inertiajs/react';
 import { Calendar, Download, Edit, Eye, Filter, Mail, Search, Shield, Trash2, UserCheck, UserPlus, Users, UserX } from 'lucide-react';
 import { useState } from 'react';
 
@@ -45,6 +45,8 @@ interface UsersPageProps {
 
 export default function UsersPage({ users }: UsersPageProps) {
     const [searchTerm, setSearchTerm] = useState('');
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const { csrf_token } = usePage().props as any;
 
     const getStatusBadge = (user: User) => {
         if (user.email_verified_at) {
@@ -77,9 +79,6 @@ export default function UsersPage({ users }: UsersPageProps) {
         }
     };
 
-    const handleToggleStatus = (userId: number) => {
-        router.patch(`/admin/users/${userId}/toggle-status`);
-    };
 
     const filteredUsers = users.data.filter(
         (user) => user.name.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -89,6 +88,19 @@ export default function UsersPage({ users }: UsersPageProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="User Management" />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-6">
+                {/* Success Message */}
+                {successMessage && (
+                    <div className="rounded-md bg-green-50 p-4 border border-green-200">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <UserCheck className="h-5 w-5 text-green-400" />
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm font-medium text-green-800">{successMessage}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
@@ -221,9 +233,24 @@ export default function UsersPage({ users }: UsersPageProps) {
                                                 <Edit className="h-4 w-4" />
                                             </Link>
                                         </Button>
-                                        <Button variant="outline" size="sm" onClick={() => handleToggleStatus(user.id)}>
-                                            {user.email_verified_at ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-                                        </Button>
+                                        <Form
+                                            method="patch"
+                                            action={`/admin/users/${user.id}/toggle-status`}
+                                            className="inline"
+                                        >
+                                            <Button 
+                                                variant="outline" 
+                                                size="sm" 
+                                                type="submit"
+                                                title={user.email_verified_at ? "Unverify user" : "Verify user"}
+                                            >
+                                                {user.email_verified_at ? (
+                                                    <UserX className="h-4 w-4" />
+                                                ) : (
+                                                    <UserCheck className="h-4 w-4" />
+                                                )}
+                                            </Button>
+                                        </Form>
                                         <Button
                                             variant="outline"
                                             size="sm"

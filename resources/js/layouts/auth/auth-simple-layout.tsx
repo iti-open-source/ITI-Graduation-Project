@@ -1,4 +1,5 @@
 // import AppLogoIcon from '@/components/app-logo-icon';
+import Navbar from '@/components/home_components/navbar';
 import { home } from '@/routes';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
@@ -11,7 +12,9 @@ interface AuthLayoutProps {
 
 export default function AuthSimpleLayout({ children, title, description }: PropsWithChildren<AuthLayoutProps>) {
    return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-[var(--color-header-bg-start)] to-[var(--color-header-bg-end)] px-4 sm:px-6 lg:px-8">
+    <>
+    <Navbar/>
+    <div className="relative  min-h-screen flex items-center justify-center bg-gradient-to-br from-[var(--color-header-bg-start)] to-[var(--color-header-bg-end)] px-4 sm:px-6 lg:px-8">
       <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 pointer-events-none"></div>
       <div className="relative z-10 w-full max-w-md rounded-2xl shadow-2xl backdrop-blur-xl bg-[var(--color-section-bg)]/80 border border-[var(--color-card-shadow)] p-8">
         <div className="flex flex-col items-center gap-4 mb-6">
@@ -39,5 +42,8 @@ export default function AuthSimpleLayout({ children, title, description }: Props
         <div className="mt-6">{children}</div>
       </div>
     </div>
+    
+    </>
+    
   );
 }

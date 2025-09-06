@@ -1,5 +1,4 @@
 import AuthenticatedSessionController from '@/actions/App/Http/Controllers/Auth/AuthenticatedSessionController';
-import Navbar from '@/components/home_components/navbar';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,8 @@ import { register } from '@/routes';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
+
 
 
 interface LoginProps {
@@ -21,13 +22,35 @@ interface LoginProps {
 export default function Login({ status, canResetPassword }: LoginProps) {
     return (
         <>
-            <Navbar/>
+
             <AuthLayout title="Welcome Back 👋" description="Log in to access your account">
                 <Head title="Log in" />
 
                 <Form {...AuthenticatedSessionController.store.form()} resetOnSuccess={['password']} className="flex flex-col gap-6">
                     {({ processing, errors }) => (
                         <>
+                            {/* Continue with Google */}
+                            <Button
+                                type="button"
+
+                                className="mt-4 w-full flex items-center justify-center gap-2 rounded-lg border border-[var(--color-card-shadow)] 
+               bg-[var(--color-section-alt-bg)]/70 py-3 text-sm font-medium text-[var(--color-text)] 
+               shadow-lg transition-colors duration-200
+               hover:bg-[var(--color-section-alt-bg)]/90 cursor-pointer"
+                                onClick={() => {
+
+                                    window.location.href = '/auth/google';
+                                }}
+                            >
+                                <FcGoogle className="h-5 w-5" /> Continue with Google
+                            </Button>
+
+                            {/* Divider */}
+                            <div className="flex items-center gap-2 text-[var(--color-text-secondary)] text-sm">
+                                <span className="flex-1 border-t border-[var(--color-card-shadow)]"></span>
+                                OR
+                                <span className="flex-1 border-t border-[var(--color-card-shadow)]"></span>
+                            </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="email" className="text-[var(--color-text)]">
                                     Email address

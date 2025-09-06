@@ -65,12 +65,6 @@
 @tailwind utilities;
 
 /* Light theme (default) */
-/* Base Tailwind imports (ensure these are included if using Tailwind) */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Light theme (default) */
 :root[data-theme="light"] {
   --color-bg: #f8fafc; /* Slate-50: Clean, soft white for main background */
   --color-text: #0f172a; /* Slate-900: High-contrast text */
@@ -179,6 +173,7 @@
     --sidebar-border: oklch(0.269 0 0);
     --sidebar-ring: oklch(0.439 0 0);
 }
+
 
 @layer base {
     * {

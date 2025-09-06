@@ -1,8 +1,6 @@
 import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle ,Plus ,User } from 'lucide-react';
-
-import Navbar from '@/components/home_components/navbar';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -22,16 +20,12 @@ export default function Register() {
 
 
     function route(name: string): string {
-        // Simple implementation for demonstration purposes
-        // In a real app, use Ziggy or your routing library
         if (name === 'register') return '/register';
         if (name === 'login') return '/login';
         return '/';
     }
     return (
         <>
-            <Navbar/>
-
             <AuthLayout title="Create an account" description="Enter your details below to create your account">
                 <Head title="Register" />
 

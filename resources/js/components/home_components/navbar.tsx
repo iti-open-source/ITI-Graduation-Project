@@ -1,12 +1,9 @@
 import { Link, usePage } from '@inertiajs/react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { LogOut, Monitor, Settings, User, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { User, Settings, LogOut, Users, Monitor } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
-
-export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
-
-
+export default function Navbar({ isLoggedIn, logo }: { isLoggedIn: boolean; logo: string }) {
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement | null>(null);
@@ -25,30 +22,28 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                 setMenuOpen(false);
             }
         }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     return (
         <nav className="sticky top-0 z-50 w-full bg-[var(--color-nav-bg)] text-[var(--color-nav-text)] shadow-md">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
                 <Link href="/" className="flex items-center gap-2 text-2xl font-bold">
-                    <img
-                        src="/storage/images/logo.png"
-                        alt="Logo"
-                        className="h-10 w-60 object-cotain"
-                    />
+                    <img src={logo} alt="Logo" className="object-cotain h-10 w-60" />
                     {/* MockMate */}
                 </Link>
                 <div className="flex items-center space-x-4">
                     <button
                         onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                        className={`relative flex h-8 w-14 items-center rounded-full transition-colors duration-300 ${theme === 'light' ? 'bg-yellow-300' : 'bg-gray-600'
-                            }`}
+                        className={`relative flex h-8 w-14 items-center rounded-full transition-colors duration-300 ${
+                            theme === 'light' ? 'bg-yellow-300' : 'bg-gray-600'
+                        }`}
                     >
                         <span
-                            className={`absolute h-6 w-6 transform rounded-full bg-white shadow-md transition-transform duration-300 ${theme === 'light' ? 'translate-x-1' : 'translate-x-7'
-                                }`}
+                            className={`absolute h-6 w-6 transform rounded-full bg-white shadow-md transition-transform duration-300 ${
+                                theme === 'light' ? 'translate-x-1' : 'translate-x-7'
+                            }`}
                         />
                     </button>
                     {!isLoggedIn && (
@@ -77,7 +72,7 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                                 onClick={() => setMenuOpen(!menuOpen)}
                                 className="focus:outline-none"
                                 style={{
-                                    borderColor: "var(--color-card-shadow)",
+                                    borderColor: 'var(--color-card-shadow)',
                                 }}
                             >
                                 {user?.avatar ? (
@@ -91,10 +86,10 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                                     />
                                 ) : (
                                     <div
-                                        className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-medium"
+                                        className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium"
                                         style={{
-                                            backgroundColor: "var(--color-section-alt-bg)",
-                                            color: "var(--color-text)",
+                                            backgroundColor: 'var(--color-section-alt-bg)',
+                                            color: 'var(--color-text)',
                                         }}
                                     >
                                         {user?.name?.charAt(0).toUpperCase()}
@@ -109,18 +104,18 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 0.95 }}
                                         transition={{ duration: 0.2 }}
-                                        className="absolute right-0 mt-2 w-72 rounded-xl shadow-lg  z-50 overflow-hidden"
+                                        className="absolute right-0 z-50 mt-2 w-72 overflow-hidden rounded-xl shadow-lg"
                                         style={{
-                                            backgroundColor: "var(--color-menu-bg)",
-                                            borderColor: "var(--color-menu-border)",
-                                            borderStyle: "solid",
+                                            backgroundColor: 'var(--color-menu-bg)',
+                                            borderColor: 'var(--color-menu-border)',
+                                            borderStyle: 'solid',
                                         }}
                                     >
                                         {/* User Info */}
                                         <div
-                                            className="flex items-center space-x-3 p-4 border-b"
+                                            className="flex items-center space-x-3 border-b p-4"
                                             style={{
-                                                borderColor: "var(--color-menu-border)",
+                                                borderColor: 'var(--color-menu-border)',
                                             }}
                                         >
                                             {user?.avatar ? (
@@ -134,22 +129,18 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                                                 />
                                             ) : (
                                                 <div
-                                                    className="h-12 w-12 rounded-full flex items-center justify-center text-lg font-medium"
+                                                    className="flex h-12 w-12 items-center justify-center rounded-full text-lg font-medium"
                                                     style={{
-                                                        backgroundColor: "var(--color-section-alt-bg)",
-                                                        color: "var(--color-text)",
+                                                        backgroundColor: 'var(--color-section-alt-bg)',
+                                                        color: 'var(--color-text)',
                                                     }}
                                                 >
                                                     {user?.name?.charAt(0).toUpperCase()}
                                                 </div>
                                             )}
                                             <div>
-                                                <p style={{ color: "var(--color-menu-text)", fontWeight: 500 }}>
-                                                    {user?.name}
-                                                </p>
-                                                <p style={{ color: "var(--color-menu-text-secondary)", fontSize: "0.875rem" }}>
-                                                    {user?.email}
-                                                </p>
+                                                <p style={{ color: 'var(--color-menu-text)', fontWeight: 500 }}>{user?.name}</p>
+                                                <p style={{ color: 'var(--color-menu-text-secondary)', fontSize: '0.875rem' }}>{user?.email}</p>
                                             </div>
                                         </div>
 
@@ -157,36 +148,36 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                                         <div className="p-2">
                                             <Link
                                                 href="/profile"
-                                                className="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors"
+                                                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
                                                 style={{
-                                                    color: "var(--color-menu-text)",
+                                                    color: 'var(--color-menu-text)',
                                                 }}
-                                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--color-menu-hover-bg)")}
-                                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-menu-hover-bg)')}
+                                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                                             >
                                                 <User className="h-4 w-4" /> Profile
                                             </Link>
                                             <Link
                                                 href="/settings"
-                                                className="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors"
+                                                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
                                                 style={{
-                                                    color: "var(--color-menu-text)",
+                                                    color: 'var(--color-menu-text)',
                                                 }}
-                                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--color-menu-hover-bg)")}
-                                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-menu-hover-bg)')}
+                                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                                             >
                                                 <Settings className="h-4 w-4" /> Account settings
                                             </Link>
 
                                             {/* Theme toggle */}
                                             <button
-                                                onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-                                                className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-md transition-colors"
+                                                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                                                className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition-colors"
                                                 style={{
-                                                    color: "var(--color-menu-text)",
+                                                    color: 'var(--color-menu-text)',
                                                 }}
-                                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--color-menu-hover-bg)")}
-                                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-menu-hover-bg)')}
+                                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                                             >
                                                 <span className="flex items-center gap-2">
                                                     <Monitor className="h-4 w-4" /> Theme
@@ -194,13 +185,14 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                                                 <div
                                                     className={`relative flex h-5 w-10 items-center rounded-full transition-colors duration-300`}
                                                     style={{
-                                                        backgroundColor: theme === "light" ? "var(--color-section-menu-bg)" : "var(--color-section-menu-bg)",
+                                                        backgroundColor:
+                                                            theme === 'light' ? 'var(--color-section-menu-bg)' : 'var(--color-section-menu-bg)',
                                                     }}
                                                 >
                                                     <span
                                                         className={`absolute h-4 w-4 transform rounded-full bg-white shadow-md transition-transform duration-300`}
                                                         style={{
-                                                            transform: theme === "light" ? "translateX(0.25rem)" : "translateX(1.25rem)",
+                                                            transform: theme === 'light' ? 'translateX(0.25rem)' : 'translateX(1.25rem)',
                                                         }}
                                                     />
                                                 </div>
@@ -208,19 +200,16 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                                         </div>
 
                                         {/* Divider */}
-                                        <div
-                                            className="my-1 border-t"
-                                            style={{ borderColor: "var(--color-menu-border)" }}
-                                        ></div>
+                                        <div className="my-1 border-t" style={{ borderColor: 'var(--color-menu-border)' }}></div>
 
                                         {/* Bottom links */}
                                         <div className="p-2">
                                             <Link
                                                 href="/switch-account"
-                                                className="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors"
-                                                style={{ color: "var(--color-menu-text)" }}
-                                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--color-menu-hover-bg)")}
-                                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                                                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
+                                                style={{ color: 'var(--color-menu-text)' }}
+                                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-menu-hover-bg)')}
+                                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                                             >
                                                 <Users className="h-4 w-4" /> Switch account
                                             </Link>
@@ -228,10 +217,10 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                                                 href="/logout"
                                                 method="post"
                                                 as="button"
-                                                className="flex w-full items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors"
-                                                style={{ color: "red" }}
-                                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--color-menu-hover-bg)")}
-                                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                                                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
+                                                style={{ color: 'red' }}
+                                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-menu-hover-bg)')}
+                                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                                             >
                                                 <LogOut className="h-4 w-4" /> Log out
                                             </Link>
@@ -241,8 +230,6 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                             </AnimatePresence>
                         </div>
                     )}
-
-
 
                     {/* {isLoggedIn && (
                         <div className="flex items-center space-x-3">

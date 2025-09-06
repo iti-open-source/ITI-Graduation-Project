@@ -11,9 +11,11 @@ Route::get('/', function () {
     return Inertia::render('home', ["isLoggedIn" => Auth::check()]);
 })->name('home');
 
-Route::middleware(['auth', 'verified', 'admin.only'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::get('dashboard', function () {return Inertia::render('dashboard');})->name('dashboard');
+    Route::get('dashboard', function () {
+        return Inertia::render('dashboard');
+    })->name('dashboard')->middleware('admin.only');
 
     // Room routes
     Route::get('lobby', [RoomController::class, 'lobby'])->name('lobby');

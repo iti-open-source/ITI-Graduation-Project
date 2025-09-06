@@ -97,11 +97,12 @@
 
 
   /* Dropdown / Menu */
-  --color-menu-bg: #d3d1d1; /* White background */
+  --color-menu-bg: #f0f0f0; /* White background */
   --color-menu-text: #0f172a; /* Dark text */
   --color-menu-text-secondary: #778190; /* Subtext */
-  --color-menu-hover-bg: #f1f5f9; /* Light hover */
-  --color-menu-border: #e5e7eb; /* Gray-200 border */
+  --color-menu-hover-bg: #e3e7eb; /* Light hover */
+  --color-menu-border: #d2d4d8; /* Gray-200 border */
+  --color-section-menu-bg: #eed677;
 }
 
 /* Dark theme */
@@ -134,7 +135,8 @@
   --color-menu-text: #e2e8f0; /* Bright text */
   --color-menu-text-secondary: #9ca3af; /* Dim text */
   --color-menu-hover-bg: #4b5563; /* Gray-600 hover */
-  --color-menu-border: #4b5563; /* Gray-600 border */
+  --color-menu-border: #404853; /* Gray-600 border */
+  --color-section-menu-bg: #4c586e;
 }
 
 

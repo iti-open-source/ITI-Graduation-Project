@@ -67,111 +67,177 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                     )} */}
 
                    {isLoggedIn && (
-                        <div className="relative" ref={menuRef}>
-                            <button onClick={() => setMenuOpen(!menuOpen)} className="focus:outline-none">
-                                {user?.avatar ? (
-                                    <img
-                                        src={`/storage/${user.avatar}`}
-                                        alt={user.name}
-                                        className="h-10 w-10 rounded-full object-cover border border-gray-300 dark:border-gray-600"
-                                    />
-                                ) : (
-                                    <div className="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-sm text-gray-800 dark:text-gray-200">
-                                        {user?.name?.charAt(0).toUpperCase()}
-                                    </div>
-                                )}
-                            </button>
+  <div className="relative" ref={menuRef}>
+    {/* Avatar button */}
+    <button
+      onClick={() => setMenuOpen(!menuOpen)}
+      className="focus:outline-none"
+      style={{
+        borderColor: "var(--color-card-shadow)",
+      }}
+    >
+      {user?.avatar ? (
+        <img
+          src={`/storage/${user.avatar}`}
+          alt={user.name}
+          className="h-10 w-10 rounded-full object-cover"
+          style={{
+            border: `1px solid var(--color-card-shadow)`,
+          }}
+        />
+      ) : (
+        <div
+          className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-medium"
+          style={{
+            backgroundColor: "var(--color-section-alt-bg)",
+            color: "var(--color-text)",
+          }}
+        >
+          {user?.name?.charAt(0).toUpperCase()}
+        </div>
+      )}
+    </button>
 
-                            <AnimatePresence>
-                                {menuOpen && (
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.95 }}
-                                        transition={{ duration: 0.2 }}
-                                        className="absolute right-0 mt-2 w-72 rounded-xl bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black/5 dark:ring-white/10 z-50 overflow-hidden"
-                                    >
-                                        {/* User Info */}
-                                        <div className="flex items-center space-x-3 p-4 border-b border-gray-200 dark:border-gray-700">
-                                            {user?.avatar ? (
-                                                <img
-                                                    src={`/storage/${user.avatar}`}
-                                                    alt={user.name}
-                                                    className="h-12 w-12 rounded-full object-cover border border-gray-300 dark:border-gray-600"
-                                                />
-                                            ) : (
-                                                <div className="h-12 w-12 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-lg text-gray-800 dark:text-gray-200">
-                                                    {user?.name?.charAt(0).toUpperCase()}
-                                                </div>
-                                            )}
-                                            <div>
-                                                <p className="font-medium text-gray-900 dark:text-gray-100">{user?.name}</p>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</p>
-                                            </div>
-                                        </div>
+    <AnimatePresence>
+      {menuOpen && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.2 }}
+          className="absolute right-0 mt-2 w-72 rounded-xl shadow-lg  z-50 overflow-hidden"
+          style={{
+            backgroundColor: "var(--color-menu-bg)",
+            borderColor: "var(--color-menu-border)",
+            borderStyle: "solid",
+          }}
+        >
+          {/* User Info */}
+          <div
+            className="flex items-center space-x-3 p-4 border-b"
+            style={{
+              borderColor: "var(--color-menu-border)",
+            }}
+          >
+            {user?.avatar ? (
+              <img
+                src={`/storage/${user.avatar}`}
+                alt={user.name}
+                className="h-12 w-12 rounded-full object-cover"
+                style={{
+                  border: `1px solid var(--color-card-shadow)`,
+                }}
+              />
+            ) : (
+              <div
+                className="h-12 w-12 rounded-full flex items-center justify-center text-lg font-medium"
+                style={{
+                  backgroundColor: "var(--color-section-alt-bg)",
+                  color: "var(--color-text)",
+                }}
+              >
+                {user?.name?.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <p style={{ color: "var(--color-menu-text)", fontWeight: 500 }}>
+                {user?.name}
+              </p>
+              <p style={{ color: "var(--color-menu-text-secondary)", fontSize: "0.875rem" }}>
+                {user?.email}
+              </p>
+            </div>
+          </div>
 
-                                        {/* Menu items */}
-                                        <div className="p-2">
-                                            <Link
-                                                href="/profile"
-                                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-                                            >
-                                                <User className="h-4 w-4" /> Profile
-                                            </Link>
-                                            <Link
-                                                href="/settings"
-                                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-                                            >
-                                                <Settings className="h-4 w-4" /> Account settings
-                                            </Link>
+          {/* Menu items */}
+          <div className="p-2">
+            <Link
+              href="/profile"
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors"
+              style={{
+                color: "var(--color-menu-text)",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--color-menu-hover-bg)")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+            >
+              <User className="h-4 w-4" /> Profile
+            </Link>
+            <Link
+              href="/settings"
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors"
+              style={{
+                color: "var(--color-menu-text)",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--color-menu-hover-bg)")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+            >
+              <Settings className="h-4 w-4" /> Account settings
+            </Link>
 
-                                            {/* Theme toggle inside menu */}
-                                            <button
-                                                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                                                className="flex w-full items-center justify-between px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-                                            >
-                                                <span className="flex items-center gap-2">
-                                                    <Monitor className="h-4 w-4" /> Theme
-                                                </span>
-                                                <div
-                                                    className={`relative flex h-5 w-10 items-center rounded-full transition-colors duration-300 ${
-                                                        theme === 'light' ? 'bg-yellow-300' : 'bg-gray-600'
-                                                    }`}
-                                                >
-                                                    <span
-                                                        className={`absolute h-4 w-4 transform rounded-full bg-white shadow-md transition-transform duration-300 ${
-                                                            theme === 'light' ? 'translate-x-1' : 'translate-x-5'
-                                                        }`}
-                                                    />
-                                                </div>
-                                            </button>
-                                        </div>
+            {/* Theme toggle */}
+            <button
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              className="flex w-full items-center justify-between px-3 py-2 text-sm rounded-md transition-colors"
+              style={{
+                color: "var(--color-menu-text)",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--color-menu-hover-bg)")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+            >
+              <span className="flex items-center gap-2">
+                <Monitor className="h-4 w-4" /> Theme
+              </span>
+              <div
+                className={`relative flex h-5 w-10 items-center rounded-full transition-colors duration-300`}
+                style={{
+                  backgroundColor: theme === "light" ? "var(--color-section-menu-bg)" : "var(--color-section-menu-bg)",
+                }}
+              >
+                <span
+                  className={`absolute h-4 w-4 transform rounded-full bg-white shadow-md transition-transform duration-300`}
+                  style={{
+                    transform: theme === "light" ? "translateX(0.25rem)" : "translateX(1.25rem)",
+                  }}
+                />
+              </div>
+            </button>
+          </div>
 
-                                        {/* Divider */}
-                                        <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+          {/* Divider */}
+          <div
+            className="my-1 border-t"
+            style={{ borderColor: "var(--color-menu-border)" }}
+          ></div>
 
-                                        {/* Bottom links */}
-                                        <div className="p-2">
-                                            <Link
-                                                href="/switch-account"
-                                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-                                            >
-                                                <Users className="h-4 w-4" /> Switch account
-                                            </Link>
-                                            <Link
-                                                href="/logout"
-                                                method="post"
-                                                as="button"
-                                                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-                                            >
-                                                <LogOut className="h-4 w-4" /> Log out
-                                            </Link>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-                    )}
+          {/* Bottom links */}
+          <div className="p-2">
+            <Link
+              href="/switch-account"
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors"
+              style={{ color: "var(--color-menu-text)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--color-menu-hover-bg)")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+            >
+              <Users className="h-4 w-4" /> Switch account
+            </Link>
+            <Link
+              href="/logout"
+              method="post"
+              as="button"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors"
+              style={{ color: "red" }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--color-menu-hover-bg)")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+            >
+              <LogOut className="h-4 w-4" /> Log out
+            </Link>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+)}
+
 
 
                      {/* {isLoggedIn && (

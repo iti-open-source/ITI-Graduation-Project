@@ -56,7 +56,6 @@ export default function Home({ features = [] }) {
                         </div>
                     </div>
                 </header>
-
                 {/* Features */}
                 <section className="bg-[var(--color-section-bg)] py-20">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -87,7 +86,6 @@ export default function Home({ features = [] }) {
                         </div>
                     </div>
                 </section>
-
                 {/* How It Works */}
                 <section className="bg-[var(--color-section-alt-bg)] py-20">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

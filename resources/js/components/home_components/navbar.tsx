@@ -222,13 +222,13 @@ export default function Navbar() {
                                             {/* Bottom links */}
                                             <div className="p-2">
                                                 <Link
-                                                    href="/switch-account"
+                                                    href="/settings"
                                                     className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
                                                     style={{ color: 'var(--color-menu-text)' }}
                                                     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-menu-hover-bg)')}
                                                     onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                                                 >
-                                                    <Users className="h-4 w-4" /> Switch account
+                                                    <Users className="h-4 w-4" /> Account Settings
                                                 </Link>
                                                 <Link
                                                     href="/logout"

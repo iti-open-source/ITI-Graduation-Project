@@ -1,53 +1,53 @@
 interface EditorControlsProps {
-    selectedLanguage: string;
-    languages: string[];
-    handleSubmit: () => void;
-    handleLanguageChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-    handleRunWithInput?: () => void;
-    userInputs?: string[];
+  selectedLanguage: string;
+  languages: string[];
+  handleSubmit: () => void;
+  handleLanguageChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleRunWithInput?: () => void;
+  userInputs?: string[];
 }
 
 export default function EditorControls({
-    selectedLanguage,
-    languages,
-    handleSubmit,
-    handleLanguageChange,
-    handleRunWithInput,
-    userInputs,
+  selectedLanguage,
+  languages,
+  handleSubmit,
+  handleLanguageChange,
+  handleRunWithInput,
+  userInputs,
 }: EditorControlsProps) {
-    return (
-        <div className="mb-3 flex items-center justify-center gap-3 py-3">
-            <button
-                className="cursor-pointer rounded-sm border-1 border-gray-500 px-3 py-1 transition-all ease-in-out hover:border-black hover:bg-gray-50 hover:text-black"
-                onClick={handleSubmit}
-            >
-                Submit
-            </button>
+  return (
+    <div className="mb-3 flex items-center justify-center gap-3 py-3">
+      <button
+        className="cursor-pointer rounded-sm border-1 border-gray-500 px-3 py-1 transition-all ease-in-out hover:border-black hover:bg-gray-50 hover:text-black"
+        onClick={handleSubmit}
+      >
+        Submit
+      </button>
 
-            {handleRunWithInput && userInputs && userInputs.length > 0 && (
-                <button
-                    className="cursor-pointer rounded-sm border-1 border-green-500 px-3 py-1 transition-all ease-in-out hover:border-green-700 hover:bg-green-50 hover:text-green-700"
-                    onClick={handleRunWithInput}
-                >
-                    Reset Inputs
-                </button>
-            )}
-            <label htmlFor="language" className="sr-only">
-                Select Language
-            </label>
-            <select
-                name="language"
-                id="language"
-                className="rounded-sm border border-gray-500 px-3 py-1"
-                value={selectedLanguage}
-                onChange={handleLanguageChange}
-            >
-                {languages.map((lang: string) => (
-                    <option key={lang} value={lang} className="text-black">
-                        {lang.charAt(0).toUpperCase() + lang.slice(1)}
-                    </option>
-                ))}
-            </select>
-        </div>
-    );
+      {handleRunWithInput && userInputs && userInputs.length > 0 && (
+        <button
+          className="cursor-pointer rounded-sm border-1 border-green-500 px-3 py-1 transition-all ease-in-out hover:border-green-700 hover:bg-green-50 hover:text-green-700"
+          onClick={handleRunWithInput}
+        >
+          Reset Inputs
+        </button>
+      )}
+      <label htmlFor="language" className="sr-only">
+        Select Language
+      </label>
+      <select
+        name="language"
+        id="language"
+        className="rounded-sm border border-gray-500 px-3 py-1"
+        value={selectedLanguage}
+        onChange={handleLanguageChange}
+      >
+        {languages.map((lang: string) => (
+          <option key={lang} value={lang} className="text-black">
+            {lang.charAt(0).toUpperCase() + lang.slice(1)}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
 }

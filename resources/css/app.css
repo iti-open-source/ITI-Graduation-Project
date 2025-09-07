@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @plugin 'tailwindcss-animate';
 
@@ -8,55 +8,56 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-    --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-sans:
+    "Instrument Sans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
 
-    --radius-lg: var(--radius);
-    --radius-md: calc(var(--radius) - 2px);
-    --radius-sm: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
 
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
 
-    --color-card: var(--card);
-    --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
 
-    --color-popover: var(--popover);
-    --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
 
-    --color-primary: var(--primary);
-    --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
 
-    --color-secondary: var(--secondary);
-    --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
 
-    --color-muted: var(--muted);
-    --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
 
-    --color-accent: var(--accent);
-    --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
 
-    --color-destructive: var(--destructive);
-    --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
 
-    --color-border: var(--border);
-    --color-input: var(--input);
-    --color-ring: var(--ring);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
-    --color-chart-1: var(--chart-1);
-    --color-chart-2: var(--chart-2);
-    --color-chart-3: var(--chart-3);
-    --color-chart-4: var(--chart-4);
-    --color-chart-5: var(--chart-5);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
 
-    --color-sidebar: var(--sidebar);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
 /* Base Tailwind imports if not already present */
@@ -65,119 +66,119 @@
 @tailwind utilities;
 
 /* Light theme (default) */
-:root[data-theme='light'] {
-    --color-bg: #f8fafc; /* Slate-50: Clean, soft white for main background */
-    --color-text: #0f172a; /* Slate-900: High-contrast text */
-    --color-text-secondary: #778190; /* Gray-600:  secondary text */
-    --color-accent: #3b82f6; /* Blue-500: Vibrant, accessible accent */
-    --color-header-bg-start: #1e293b; /* Slate-800: Header gradient start */
-    --color-header-bg-end: #3b82f6; /* Blue-500: Header gradient end */
-    --color-section-bg: #ffffff; /* Pure white: Clean section backgrounds */
-    --color-section-alt-bg: #f1f5f9; /* Slate-100: Light alternate sections */
-    --color-card-bg: #ffffff; /* White: Card backgrounds */
-    --color-card-shadow: rgba(0, 0, 0, 0.06); /*   shadow */
-    --color-step-number: #3b82f6; /* Blue-500: Step numbers */
-    --color-footer-bg: #1e293b; /* Slate-800: Footer background */
-    --color-footer-text: #d1d5db; /* Gray-300: Footer text */
-    --color-nav-bg: #1e293b; /* Slate-800: Navbar background */
-    --color-nav-text: #ffffff; /* White: Navbar text */
-    --color-button-primary-bg: #3b82f6; /* Blue-500: Primary button */
-    --color-button-primary-hover: #2563eb; /* Blue-600: Primary button hover */
-    --color-button-secondary-bg: transparent; /* Transparent: Secondary button */
-    --color-button-secondary-text: #ffffff; /* White: Secondary button text */
-    --color-button-secondary-border: #ffffff; /* White: Secondary button border */
-    --color-button-secondary-hover-bg: #ffffff; /* White: Secondary button hover */
-    --color-button-secondary-hover-text: #1e293b; /* Slate-800: Hover text */
+:root[data-theme="light"] {
+  --color-bg: #f8fafc; /* Slate-50: Clean, soft white for main background */
+  --color-text: #0f172a; /* Slate-900: High-contrast text */
+  --color-text-secondary: #778190; /* Gray-600:  secondary text */
+  --color-accent: #3b82f6; /* Blue-500: Vibrant, accessible accent */
+  --color-header-bg-start: #1e293b; /* Slate-800: Header gradient start */
+  --color-header-bg-end: #3b82f6; /* Blue-500: Header gradient end */
+  --color-section-bg: #ffffff; /* Pure white: Clean section backgrounds */
+  --color-section-alt-bg: #f1f5f9; /* Slate-100: Light alternate sections */
+  --color-card-bg: #ffffff; /* White: Card backgrounds */
+  --color-card-shadow: rgba(0, 0, 0, 0.06); /*   shadow */
+  --color-step-number: #3b82f6; /* Blue-500: Step numbers */
+  --color-footer-bg: #1e293b; /* Slate-800: Footer background */
+  --color-footer-text: #d1d5db; /* Gray-300: Footer text */
+  --color-nav-bg: #1e293b; /* Slate-800: Navbar background */
+  --color-nav-text: #ffffff; /* White: Navbar text */
+  --color-button-primary-bg: #3b82f6; /* Blue-500: Primary button */
+  --color-button-primary-hover: #2563eb; /* Blue-600: Primary button hover */
+  --color-button-secondary-bg: transparent; /* Transparent: Secondary button */
+  --color-button-secondary-text: #ffffff; /* White: Secondary button text */
+  --color-button-secondary-border: #ffffff; /* White: Secondary button border */
+  --color-button-secondary-hover-bg: #ffffff; /* White: Secondary button hover */
+  --color-button-secondary-hover-text: #1e293b; /* Slate-800: Hover text */
 
-    /* Dropdown / Menu */
-    --color-menu-bg: #f0f0f0; /* White background */
-    --color-menu-text: #0f172a; /* Dark text */
-    --color-menu-text-secondary: #778190; /* Subtext */
-    --color-menu-hover-bg: #e3e7eb; /* Light hover */
-    --color-menu-border: #d2d4d8; /* Gray-200 border */
-    --color-section-menu-bg: #eed677;
+  /* Dropdown / Menu */
+  --color-menu-bg: #f0f0f0; /* White background */
+  --color-menu-text: #0f172a; /* Dark text */
+  --color-menu-text-secondary: #778190; /* Subtext */
+  --color-menu-hover-bg: #e3e7eb; /* Light hover */
+  --color-menu-border: #d2d4d8; /* Gray-200 border */
+  --color-section-menu-bg: #eed677;
 }
 
 /* Dark theme */
-:root[data-theme='dark'] {
-    --color-bg: #1f2937; /* Gray-800: Warm, soft dark background */
-    --color-text: #e2e8f0; /* Slate-200: Bright, readable text */
-    --color-text-secondary: #9ca3af; /* Gray-400:  secondary text */
-    --color-accent: #60a5fa; /* Blue-400: Lighter accent for dark mode */
-    --color-header-bg-start: #0f172a; /* Slate-900: Header gradient start */
-    --color-header-bg-end: #1e40af; /* Blue-800: Header gradient end */
-    --color-section-bg: #374151; /* Gray-700: Dark section backgrounds */
-    --color-section-alt-bg: #4b5563; /* Gray-600: Alternate sections */
-    --color-card-bg: #4b5563; /* Gray-600: Card backgrounds */
-    --color-card-shadow: rgba(0, 0, 0, 0.25); /*  dark shadow */
-    --color-step-number: #60a5fa; /* Blue-400: Step numbers */
-    --color-footer-bg: #0f172a; /* Slate-900: Footer background */
-    --color-footer-text: #9ca3af; /* Gray-400: Footer text */
-    --color-nav-bg: #0f172a; /* Slate-900: Navbar background */
-    --color-nav-text: #e2e8f0; /* Slate-200: Navbar text */
-    --color-button-primary-bg: #60a5fa; /* Blue-400: Primary button */
-    --color-button-primary-hover: #3b82f6; /* Blue-500: Primary button hover */
-    --color-button-secondary-bg: transparent; /* Transparent: Secondary button */
-    --color-button-secondary-text: #e2e8f0; /* Slate-200: Secondary button text */
-    --color-button-secondary-border: #e2e8f0; /* Slate-200: Border */
-    --color-button-secondary-hover-bg: #e2e8f0; /* Slate-200: Hover background */
-    --color-button-secondary-hover-text: #0f172a; /* Slate-900: Hover text */
+:root[data-theme="dark"] {
+  --color-bg: #1f2937; /* Gray-800: Warm, soft dark background */
+  --color-text: #e2e8f0; /* Slate-200: Bright, readable text */
+  --color-text-secondary: #9ca3af; /* Gray-400:  secondary text */
+  --color-accent: #60a5fa; /* Blue-400: Lighter accent for dark mode */
+  --color-header-bg-start: #0f172a; /* Slate-900: Header gradient start */
+  --color-header-bg-end: #1e40af; /* Blue-800: Header gradient end */
+  --color-section-bg: #374151; /* Gray-700: Dark section backgrounds */
+  --color-section-alt-bg: #4b5563; /* Gray-600: Alternate sections */
+  --color-card-bg: #4b5563; /* Gray-600: Card backgrounds */
+  --color-card-shadow: rgba(0, 0, 0, 0.25); /*  dark shadow */
+  --color-step-number: #60a5fa; /* Blue-400: Step numbers */
+  --color-footer-bg: #0f172a; /* Slate-900: Footer background */
+  --color-footer-text: #9ca3af; /* Gray-400: Footer text */
+  --color-nav-bg: #0f172a; /* Slate-900: Navbar background */
+  --color-nav-text: #e2e8f0; /* Slate-200: Navbar text */
+  --color-button-primary-bg: #60a5fa; /* Blue-400: Primary button */
+  --color-button-primary-hover: #3b82f6; /* Blue-500: Primary button hover */
+  --color-button-secondary-bg: transparent; /* Transparent: Secondary button */
+  --color-button-secondary-text: #e2e8f0; /* Slate-200: Secondary button text */
+  --color-button-secondary-border: #e2e8f0; /* Slate-200: Border */
+  --color-button-secondary-hover-bg: #e2e8f0; /* Slate-200: Hover background */
+  --color-button-secondary-hover-text: #0f172a; /* Slate-900: Hover text */
 
-    /* Dropdown / Menu */
-    --color-menu-bg: #374151; /* Gray-700 background */
-    --color-menu-text: #e2e8f0; /* Bright text */
-    --color-menu-text-secondary: #9ca3af; /* Dim text */
-    --color-menu-hover-bg: #4b5563; /* Gray-600 hover */
-    --color-menu-border: #404853; /* Gray-600 border */
-    --color-section-menu-bg: #4c586e;
+  /* Dropdown / Menu */
+  --color-menu-bg: #374151; /* Gray-700 background */
+  --color-menu-text: #e2e8f0; /* Bright text */
+  --color-menu-text-secondary: #9ca3af; /* Dim text */
+  --color-menu-hover-bg: #4b5563; /* Gray-600 hover */
+  --color-menu-border: #404853; /* Gray-600 border */
+  --color-section-menu-bg: #4c586e;
 }
 
 :root {
-    --color-bg: #f8fafc;
-    --color-text: #0f172a;
+  --color-bg: #f8fafc;
+  --color-text: #0f172a;
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.145 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.145 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.985 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.396 0.141 25.723);
-    --destructive-foreground: oklch(0.637 0.237 25.331);
-    --border: oklch(0.269 0 0);
-    --input: oklch(0.269 0 0);
-    --ring: oklch(0.439 0 0);
-    --chart-1: oklch(0.488 0.243 264.376);
-    --chart-2: oklch(0.696 0.17 162.48);
-    --chart-3: oklch(0.769 0.188 70.08);
-    --chart-4: oklch(0.627 0.265 303.9);
-    --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.985 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(0.269 0 0);
-    --sidebar-ring: oklch(0.439 0 0);
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.985 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
 }
 
 @layer base {
-    * {
-        @apply border-border;
-    }
+  * {
+    @apply border-border;
+  }
 
-    body {
-        @apply bg-background text-foreground;
-    }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

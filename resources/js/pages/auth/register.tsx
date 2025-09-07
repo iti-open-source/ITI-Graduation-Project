@@ -1,163 +1,173 @@
-import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
-import { login } from '@/routes';
-import { Form, Head } from '@inertiajs/react';
-import { LoaderCircle, Plus, User } from 'lucide-react';
-import { useState } from 'react';
+import InputError from "@/components/input-error";
+import TextLink from "@/components/text-link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import AuthLayout from "@/layouts/auth-layout";
+import { login } from "@/routes";
+import { Form, Head } from "@inertiajs/react";
+import { LoaderCircle, Plus, User } from "lucide-react";
+import { useState } from "react";
 
 export default function Register() {
-    const [preview, setPreview] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
-    function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-        if (e.target.files && e.target.files[0]) {
-            setPreview(URL.createObjectURL(e.target.files[0]));
-        }
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.files && e.target.files[0]) {
+      setPreview(URL.createObjectURL(e.target.files[0]));
     }
+  }
 
-    function route(name: string): string {
-        if (name === 'register') return '/register';
-        if (name === 'login') return '/login';
-        return '/';
-    }
-    return (
-        <>
-            <AuthLayout title="Create an account" description="Enter your details below to create your account">
-                <Head title="Register" />
+  function route(name: string): string {
+    if (name === "register") return "/register";
+    if (name === "login") return "/login";
+    return "/";
+  }
+  return (
+    <>
+      <AuthLayout
+        title="Create an account"
+        description="Enter your details below to create your account"
+      >
+        <Head title="Register" />
 
-                {/* Form */}
-                <Form
-                    // {...RegisteredUserController.store.form()}
-                    method="post"
-                    action={route('register')}
-                    resetOnSuccess={['password', 'password_confirmation']}
-                    disableWhileProcessing
-                    className="flex flex-col gap-6"
-                    encType="multipart/form-data"
+        {/* Form */}
+        <Form
+          // {...RegisteredUserController.store.form()}
+          method="post"
+          action={route("register")}
+          resetOnSuccess={["password", "password_confirmation"]}
+          disableWhileProcessing
+          className="flex flex-col gap-6"
+          encType="multipart/form-data"
+        >
+          {({ processing, errors }) => (
+            <>
+              {/* Profile Photo Upload */}
+              <div className="flex flex-col items-center gap-2">
+                <Label
+                  htmlFor="avatar"
+                  className="relative flex cursor-pointer flex-col items-center"
                 >
-                    {({ processing, errors }) => (
-                        <>
-                            {/* Profile Photo Upload */}
-                            <div className="flex flex-col items-center gap-2">
-                                <Label htmlFor="avatar" className="relative flex cursor-pointer flex-col items-center">
-                                    <div className="mb-2 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
-                                        {preview ? (
-                                            <img src={preview} alt="Preview" className="h-full w-full object-cover" />
-                                        ) : (
-                                            <User className="h-10 w-10" />
-                                        )}
-                                        <input
-                                            id="avatar"
-                                            type="file"
-                                            name="avatar"
-                                            accept="image/*"
-                                            onChange={handleImageChange}
-                                            className="hidden"
-                                        />
-                                    </div>
-
-                                    {/* Plus icon overlay */}
-                                    <div className="absolute right-2 bottom-2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-accent)] text-white shadow-md">
-                                        <Plus className="h-4 w-4" />
-                                    </div>
-                                </Label>
-
-                                <InputError message={errors.photo} className="mt-2" />
-                            </div>
-                            <div className="grid gap-6">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="name" className="text-[var(--color-text)]">
-                                        Name
-                                    </Label>
-                                    <Input
-                                        id="name"
-                                        type="text"
-                                        required
-                                        autoFocus
-                                        tabIndex={1}
-                                        autoComplete="name"
-                                        name="name"
-                                        placeholder="Full name"
-                                        className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
-                                    />
-                                    <InputError message={errors.name} className="mt-2" />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="email" className="text-[var(--color-text)]">
-                                        Email address
-                                    </Label>
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        required
-                                        tabIndex={2}
-                                        autoComplete="email"
-                                        name="email"
-                                        placeholder="email@example.com"
-                                        className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
-                                    />
-                                    <InputError message={errors.email} />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="password" className="text-[var(--color-text)]">
-                                        Password
-                                    </Label>
-                                    <Input
-                                        id="password"
-                                        type="password"
-                                        required
-                                        tabIndex={3}
-                                        autoComplete="new-password"
-                                        name="password"
-                                        placeholder="••••••••"
-                                        className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
-                                    />
-                                    <InputError message={errors.password} />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="password_confirmation" className="text-[var(--color-text)]">
-                                        Confirm password
-                                    </Label>
-                                    <Input
-                                        id="password_confirmation"
-                                        type="password"
-                                        required
-                                        tabIndex={4}
-                                        autoComplete="new-password"
-                                        name="password_confirmation"
-                                        placeholder="••••••••"
-                                        className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
-                                    />
-                                    <InputError message={errors.password_confirmation} />
-                                </div>
-
-                                <Button
-                                    type="submit"
-                                    className="mt-2 w-full transform rounded-lg bg-[var(--color-button-primary-bg)] py-3 font-semibold text-white shadow-lg transition hover:scale-[1.02] hover:bg-[var(--color-button-primary-hover)]"
-                                    tabIndex={5}
-                                    disabled={processing}
-                                >
-                                    {processing && <LoaderCircle className="mr-2 inline h-4 w-4 animate-spin" />}
-                                    Create account
-                                </Button>
-                            </div>
-
-                            <div className="mt-6 text-center text-sm text-[var(--color-text-secondary)]">
-                                Already have an account?{' '}
-                                <TextLink href={login()} tabIndex={6} className="font-medium text-[var(--color-accent)] hover:underline">
-                                    Log in
-                                </TextLink>
-                            </div>
-                        </>
+                  <div className="mb-2 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
+                    {preview ? (
+                      <img src={preview} alt="Preview" className="h-full w-full object-cover" />
+                    ) : (
+                      <User className="h-10 w-10" />
                     )}
-                </Form>
-            </AuthLayout>
-        </>
-    );
+                    <input
+                      id="avatar"
+                      type="file"
+                      name="avatar"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </div>
+
+                  {/* Plus icon overlay */}
+                  <div className="absolute right-2 bottom-2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-accent)] text-white shadow-md">
+                    <Plus className="h-4 w-4" />
+                  </div>
+                </Label>
+
+                <InputError message={errors.photo} className="mt-2" />
+              </div>
+              <div className="grid gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="name" className="text-[var(--color-text)]">
+                    Name
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    required
+                    autoFocus
+                    tabIndex={1}
+                    autoComplete="name"
+                    name="name"
+                    placeholder="Full name"
+                    className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
+                  />
+                  <InputError message={errors.name} className="mt-2" />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="email" className="text-[var(--color-text)]">
+                    Email address
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    required
+                    tabIndex={2}
+                    autoComplete="email"
+                    name="email"
+                    placeholder="email@example.com"
+                    className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
+                  />
+                  <InputError message={errors.email} />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="password" className="text-[var(--color-text)]">
+                    Password
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    required
+                    tabIndex={3}
+                    autoComplete="new-password"
+                    name="password"
+                    placeholder="••••••••"
+                    className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
+                  />
+                  <InputError message={errors.password} />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="password_confirmation" className="text-[var(--color-text)]">
+                    Confirm password
+                  </Label>
+                  <Input
+                    id="password_confirmation"
+                    type="password"
+                    required
+                    tabIndex={4}
+                    autoComplete="new-password"
+                    name="password_confirmation"
+                    placeholder="••••••••"
+                    className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
+                  />
+                  <InputError message={errors.password_confirmation} />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="mt-2 w-full transform rounded-lg bg-[var(--color-button-primary-bg)] py-3 font-semibold text-white shadow-lg transition hover:scale-[1.02] hover:bg-[var(--color-button-primary-hover)]"
+                  tabIndex={5}
+                  disabled={processing}
+                >
+                  {processing && <LoaderCircle className="mr-2 inline h-4 w-4 animate-spin" />}
+                  Create account
+                </Button>
+              </div>
+
+              <div className="mt-6 text-center text-sm text-[var(--color-text-secondary)]">
+                Already have an account?{" "}
+                <TextLink
+                  href={login()}
+                  tabIndex={6}
+                  className="font-medium text-[var(--color-accent)] hover:underline"
+                >
+                  Log in
+                </TextLink>
+              </div>
+            </>
+          )}
+        </Form>
+      </AuthLayout>
+    </>
+  );
 }

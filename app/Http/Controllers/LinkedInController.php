@@ -25,6 +25,7 @@ class LinkedInController extends Controller
             if ($user->linkedin_id === null) {
                 $user->linkedin_id = $linkedInUser->getId();
                 $user->avatar = $user->avatar ?? $linkedInUser->getAvatar();
+                $user->email_verified_at = $user->email_verified_at ?? now();
                 $user->save();
             }
         } else {

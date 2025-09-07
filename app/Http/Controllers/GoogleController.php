@@ -27,6 +27,7 @@ class GoogleController extends Controller
             if($user->google_id === null){
                 $user->google_id = $googleUser->getId();
                 $user->avatar = $user->avatar ? $user->avatar : $googleUser->getAvatar();
+                $user->email_verified_at = $user->email_verified_at ? $user->email_verified_at : now();
                 $user->save();
             }
         } else {

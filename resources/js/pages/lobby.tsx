@@ -99,7 +99,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
   };
 
   return (
-    <CustomLayout isLoggedIn={props.isLoggedIn as boolean}>
+    <CustomLayout>
       <Head title="Lobby" />
       <div className="container mx-auto px-4 py-8">
         <motion.div

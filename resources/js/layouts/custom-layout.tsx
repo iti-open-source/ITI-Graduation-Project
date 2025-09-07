@@ -1,17 +1,11 @@
 import Navbar from "@/components/home_components/navbar";
 import React from "react";
 
-export default function CustomLayout({
-  children,
-  isLoggedIn,
-}: {
-  children: React.ReactNode;
-  isLoggedIn: boolean;
-}) {
+export default function CustomLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div>
-      <Navbar isLoggedIn={isLoggedIn} />
-      <div>{children}</div>
+    <div className="min-h-screen bg-background text-foreground">
+      <Navbar />
+      <main>{children}</main>
     </div>
   );
 }

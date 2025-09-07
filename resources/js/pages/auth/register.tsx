@@ -1,23 +1,22 @@
-import { login } from '@/routes';
-import { Form, Head } from '@inertiajs/react';
-import { LoaderCircle ,Plus ,User } from 'lucide-react';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
+import { login } from '@/routes';
+import { Form, Head } from '@inertiajs/react';
+import { LoaderCircle, Plus, User } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Register() {
-     const [preview, setPreview] = useState<string | null>(null);
+    const [preview, setPreview] = useState<string | null>(null);
 
     function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
         if (e.target.files && e.target.files[0]) {
             setPreview(URL.createObjectURL(e.target.files[0]));
         }
     }
-
 
     function route(name: string): string {
         if (name === 'register') return '/register';
@@ -33,27 +32,20 @@ export default function Register() {
                 <Form
                     // {...RegisteredUserController.store.form()}
                     method="post"
-    action={route('register')}
+                    action={route('register')}
                     resetOnSuccess={['password', 'password_confirmation']}
                     disableWhileProcessing
                     className="flex flex-col gap-6"
-                    encType="multipart/form-data" 
+                    encType="multipart/form-data"
                 >
                     {({ processing, errors }) => (
                         <>
-                        {/* Profile Photo Upload */}
+                            {/* Profile Photo Upload */}
                             <div className="flex flex-col items-center gap-2">
-                                <Label
-                                    htmlFor="avatar"
-                                    className="relative cursor-pointer flex flex-col items-center"
-                                >
-                                    <div className="mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] overflow-hidden">
+                                <Label htmlFor="avatar" className="relative flex cursor-pointer flex-col items-center">
+                                    <div className="mb-2 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
                                         {preview ? (
-                                            <img
-                                                src={preview}
-                                                alt="Preview"
-                                                className="h-full w-full object-cover"
-                                            />
+                                            <img src={preview} alt="Preview" className="h-full w-full object-cover" />
                                         ) : (
                                             <User className="h-10 w-10" />
                                         )}
@@ -68,7 +60,7 @@ export default function Register() {
                                     </div>
 
                                     {/* Plus icon overlay */}
-                                    <div className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-accent)] text-white shadow-md">
+                                    <div className="absolute right-2 bottom-2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-accent)] text-white shadow-md">
                                         <Plus className="h-4 w-4" />
                                     </div>
                                 </Label>
@@ -76,7 +68,6 @@ export default function Register() {
                                 <InputError message={errors.photo} className="mt-2" />
                             </div>
                             <div className="grid gap-6">
-                            
                                 <div className="grid gap-2">
                                     <Label htmlFor="name" className="text-[var(--color-text)]">
                                         Name
@@ -90,7 +81,7 @@ export default function Register() {
                                         autoComplete="name"
                                         name="name"
                                         placeholder="Full name"
-                                        className="rounded-lg border border-[var(--color-card-shadow)] text-[var(--color-text)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
+                                        className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
                                     />
                                     <InputError message={errors.name} className="mt-2" />
                                 </div>
@@ -107,7 +98,7 @@ export default function Register() {
                                         autoComplete="email"
                                         name="email"
                                         placeholder="email@example.com"
-                                        className="rounded-lg border border-[var(--color-card-shadow)] text-[var(--color-text)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
+                                        className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
                                     />
                                     <InputError message={errors.email} />
                                 </div>
@@ -124,7 +115,7 @@ export default function Register() {
                                         autoComplete="new-password"
                                         name="password"
                                         placeholder="••••••••"
-                                        className="rounded-lg border border-[var(--color-card-shadow)] text-[var(--color-text)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
+                                        className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
                                     />
                                     <InputError message={errors.password} />
                                 </div>
@@ -141,7 +132,7 @@ export default function Register() {
                                         autoComplete="new-password"
                                         name="password_confirmation"
                                         placeholder="••••••••"
-                                        className="rounded-lg border border-[var(--color-card-shadow)] text-[var(--color-text)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
+                                        className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
                                     />
                                     <InputError message={errors.password_confirmation} />
                                 </div>

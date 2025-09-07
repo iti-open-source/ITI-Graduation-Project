@@ -10,11 +10,8 @@ import { register } from '@/routes';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
-import { FcGoogle } from 'react-icons/fc';
 import { FaLinkedin } from 'react-icons/fa';
-
-
-
+import { FcGoogle } from 'react-icons/fc';
 
 interface LoginProps {
     status?: string;
@@ -24,7 +21,6 @@ interface LoginProps {
 export default function Login({ status, canResetPassword }: LoginProps) {
     return (
         <>
-
             <AuthLayout title="Welcome Back 👋" description="Log in to access your account">
                 <Head title="Log in" />
 
@@ -34,13 +30,8 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             {/* Continue with Google & LinkedIn */}
                             <Button
                                 type="button"
-
-                                className="w-full flex items-center justify-center gap-2 rounded-lg border border-[var(--color-card-shadow)] 
-               bg-[var(--color-section-alt-bg)]/70 text-sm font-medium text-[var(--color-text)] 
-               shadow-lg transition-colors duration-200
-               hover:bg-[var(--color-section-alt-bg)]/90 cursor-pointer"
+                                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-sm font-medium text-[var(--color-text)] shadow-lg transition-colors duration-200 hover:bg-[var(--color-section-alt-bg)]/90"
                                 onClick={() => {
-
                                     window.location.href = '/auth/google';
                                 }}
                             >
@@ -48,9 +39,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             </Button>
                             <Button
                                 type="button"
-                                className="w-full flex items-center justify-center gap-2 rounded-lg border border-[var(--color-card-shadow)] 
-       bg-[#0077B5]/70 text-sm font-medium text-white 
-       shadow-lg transition-colors duration-200 hover:bg-[#0077B5]/90 cursor-pointer"
+                                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-[var(--color-card-shadow)] bg-[#0077B5]/70 text-sm font-medium text-white shadow-lg transition-colors duration-200 hover:bg-[#0077B5]/90"
                                 onClick={() => {
                                     window.location.href = '/auth/linkedin';
                                 }}
@@ -70,7 +59,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             </Button> */}
 
                             {/* Divider */}
-                            <div className="flex items-center gap-2 text-[var(--color-text-secondary)] text-sm">
+                            <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
                                 <span className="flex-1 border-t border-[var(--color-card-shadow)]"></span>
                                 OR
                                 <span className="flex-1 border-t border-[var(--color-card-shadow)]"></span>
@@ -84,11 +73,10 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     type="email"
                                     name="email"
                                     required
-                                    
                                     tabIndex={1}
                                     autoComplete="email"
                                     placeholder="email@example.com"
-                                    className="rounded-lg border border-[var(--color-card-shadow)] text-[var(--color-text)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
+                                    className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
                                 />
                                 <InputError message={errors.email} />
                             </div>
@@ -116,7 +104,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     placeholder="••••••••"
-                                    className="rounded-lg border border-[var(--color-card-shadow)] text-[var(--color-text)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
+                                    className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
                                 />
                                 <InputError message={errors.password} />
                             </div>

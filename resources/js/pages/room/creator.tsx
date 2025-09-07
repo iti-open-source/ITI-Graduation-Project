@@ -1,14 +1,14 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Users, Copy, Trash2, ArrowLeft, UserPlus } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useRoomUpdates } from '@/hooks/use-room-updates';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { useRoomUpdates } from '@/hooks/use-room-updates';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Copy, Trash2, UserPlus, Users } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -122,88 +122,51 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
             <Head title={`Room: ${room.name}`} />
 
             <div className="container mx-auto px-4 py-8">
-                <motion.div
-                    variants={fadeIn}
-                    initial="hidden"
-                    animate="visible"
-                    className="max-w-4xl mx-auto"
-                >
+                <motion.div variants={fadeIn} initial="hidden" animate="visible" className="mx-auto max-w-4xl">
                     {/* Header */}
-                    <div className="flex items-center justify-between mb-8">
+                    <div className="mb-8 flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                            <Button
-                                asChild
-                                variant="outline"
-                                size="sm"
-                                className="border-[var(--color-card-shadow)] text-[var(--color-text)]"
-                            >
+                            <Button asChild variant="outline" size="sm" className="border-[var(--color-card-shadow)] text-[var(--color-text)]">
                                 <Link href="/lobby">
-                                    <ArrowLeft className="w-4 h-4 mr-2" />
+                                    <ArrowLeft className="mr-2 h-4 w-4" />
                                     Back to Lobby
                                 </Link>
                             </Button>
 
                             <div>
                                 <h1 className="text-3xl font-bold text-[var(--color-text)]">{room.name}</h1>
-                                <p className="text-[var(--color-text-secondary)] mt-1">
-                                    Room Code: {room.room_code}
-                                </p>
+                                <p className="mt-1 text-[var(--color-text-secondary)]">Room Code: {room.room_code}</p>
                             </div>
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <Badge
-                                className={
-                                    isConnected
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-red-100 text-red-800'
-                                }
-                            >
+                            <Badge className={isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
                                 {isConnected ? 'Connected' : 'Disconnected'}
                             </Badge>
 
-                            <Button
-                                onClick={copyRoomLink}
-                                variant="outline"
-                                className="border-[var(--color-card-shadow)] text-[var(--color-text)]"
-                            >
-                                <Copy className="w-4 h-4 mr-2" />
+                            <Button onClick={copyRoomLink} variant="outline" className="border-[var(--color-card-shadow)] text-[var(--color-text)]">
+                                <Copy className="mr-2 h-4 w-4" />
                                 {copied ? 'Copied!' : 'Copy Link'}
                             </Button>
 
-                            <Button
-                                onClick={deleteRoom}
-                                variant="outline"
-                                className="border-red-200 text-red-600 hover:bg-red-50"
-                            >
-                                <Trash2 className="w-4 h-4 mr-2" />
+                            <Button onClick={deleteRoom} variant="outline" className="border-red-200 text-red-600 hover:bg-red-50">
+                                <Trash2 className="mr-2 h-4 w-4" />
                                 Delete Room
                             </Button>
                         </div>
                     </div>
 
                     <div className="grid gap-6 lg:grid-cols-2">
-
                         {/* Queue */}
-                        <motion.div
-                            variants={fadeIn}
-                            initial="hidden"
-                            animate="visible"
-                        >
-                            <Card className="bg-[var(--color-card-bg)] border-[var(--color-card-shadow)]">
+                        <motion.div variants={fadeIn} initial="hidden" animate="visible">
+                            <Card className="border-[var(--color-card-shadow)] bg-[var(--color-card-bg)]">
                                 <CardHeader>
-                                    <CardTitle className="text-[var(--color-text)] flex items-center gap-2">
-                                        <Users className="w-5 h-5" />
+                                    <CardTitle className="flex items-center gap-2 text-[var(--color-text)]">
+                                        <Users className="h-5 w-5" />
                                         Waiting Queue
-                                        {room.queue_count > 0 && (
-                                            <Badge className="bg-yellow-100 text-yellow-800">
-                                                {room.queue_count}
-                                            </Badge>
-                                        )}
+                                        {room.queue_count > 0 && <Badge className="bg-yellow-100 text-yellow-800">{room.queue_count}</Badge>}
                                     </CardTitle>
-                                    <CardDescription className="text-[var(--color-text-secondary)]">
-                                        Users waiting to join your room
-                                    </CardDescription>
+                                    <CardDescription className="text-[var(--color-text-secondary)]">Users waiting to join your room</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     {room.queue.length > 0 ? (
@@ -211,50 +174,42 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                                             {room.queue.map((queueItem) => (
                                                 <div
                                                     key={queueItem.id}
-                                                    className="flex items-center gap-4 p-3 bg-[var(--color-section-alt-bg)] rounded-lg"
+                                                    className="flex items-center gap-4 rounded-lg bg-[var(--color-section-alt-bg)] p-3"
                                                 >
-                                                    <div className="flex items-center gap-3 flex-1">
-                                                        <div className="w-8 h-8 bg-[var(--color-accent)] text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                                                    <div className="flex flex-1 items-center gap-3">
+                                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-accent)] text-sm font-semibold text-white">
                                                             {queueItem.position}
                                                         </div>
-                                                        <Avatar className="w-10 h-10">
+                                                        <Avatar className="h-10 w-10">
                                                             <AvatarFallback className="bg-gray-100 text-gray-800">
                                                                 {queueItem.user.name.charAt(0).toUpperCase()}
                                                             </AvatarFallback>
                                                         </Avatar>
                                                         <div className="flex-1">
-                                                            <h4 className="font-medium text-[var(--color-text)]">
-                                                                {queueItem.user.name}
-                                                            </h4>
-                                                            <p className="text-sm text-[var(--color-text-secondary)]">
-                                                                {queueItem.user.email}
-                                                            </p>
+                                                            <h4 className="font-medium text-[var(--color-text)]">{queueItem.user.name}</h4>
+                                                            <p className="text-sm text-[var(--color-text-secondary)]">{queueItem.user.email}</p>
                                                         </div>
                                                     </div>
 
                                                     <Button
                                                         onClick={() => joinUser(queueItem.user.id)}
                                                         size="sm"
-                                                        className="bg-[var(--color-button-primary-bg)] hover:bg-[var(--color-button-primary-hover)] text-white"
+                                                        className="bg-[var(--color-button-primary-bg)] text-white hover:bg-[var(--color-button-primary-hover)]"
                                                         disabled={false}
                                                     >
-                                                        <UserPlus className="w-4 h-4 mr-2" />
+                                                        <UserPlus className="mr-2 h-4 w-4" />
                                                         Accept
                                                     </Button>
                                                 </div>
                                             ))}
                                         </div>
                                     ) : (
-                                        <div className="text-center py-8">
-                                            <div className="w-16 h-16 mx-auto mb-4 bg-[var(--color-section-alt-bg)] rounded-full flex items-center justify-center">
-                                                <Users className="w-8 h-8 text-[var(--color-text-secondary)]" />
+                                        <div className="py-8 text-center">
+                                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-section-alt-bg)]">
+                                                <Users className="h-8 w-8 text-[var(--color-text-secondary)]" />
                                             </div>
-                                            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-2">
-                                                No one waiting
-                                            </h3>
-                                            <p className="text-[var(--color-text-secondary)]">
-                                                Share your room link to invite participants
-                                            </p>
+                                            <h3 className="mb-2 text-lg font-semibold text-[var(--color-text)]">No one waiting</h3>
+                                            <p className="text-[var(--color-text-secondary)]">Share your room link to invite participants</p>
                                         </div>
                                     )}
                                 </CardContent>
@@ -262,14 +217,10 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                         </motion.div>
 
                         {/* Active Sessions */}
-                        <motion.div
-                            variants={fadeIn}
-                            initial="hidden"
-                            animate="visible"
-                        >
-                            <Card className="bg-[var(--color-card-bg)] border-[var(--color-card-shadow)]">
+                        <motion.div variants={fadeIn} initial="hidden" animate="visible">
+                            <Card className="border-[var(--color-card-shadow)] bg-[var(--color-card-bg)]">
                                 <CardHeader>
-                                    <CardTitle className="text-[var(--color-text)] flex items-center gap-2">
+                                    <CardTitle className="flex items-center gap-2 text-[var(--color-text)]">
                                         Active Sessions
                                         {Array.isArray((room as any).sessions) && (room as any).sessions.length > 0 && (
                                             <Badge className="bg-green-100 text-green-800">{(room as any).sessions.length}</Badge>
@@ -283,9 +234,12 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                                     {Array.isArray((room as any).sessions) && (room as any).sessions.length > 0 ? (
                                         <div className="space-y-3">
                                             {(room as any).sessions.map((s: any) => (
-                                                <div key={s.id} className="flex items-center justify-between p-3 bg-[var(--color-section-alt-bg)] rounded-lg">
+                                                <div
+                                                    key={s.id}
+                                                    className="flex items-center justify-between rounded-lg bg-[var(--color-section-alt-bg)] p-3"
+                                                >
                                                     <div>
-                                                        <div className="text-[var(--color-text)] font-medium">Session: {s.session_code}</div>
+                                                        <div className="font-medium text-[var(--color-text)]">Session: {s.session_code}</div>
                                                         <div className="text-sm text-[var(--color-text-secondary)]">Status: {s.status}</div>
                                                     </div>
                                                     <div className="flex items-center gap-2">
@@ -298,7 +252,7 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                                             ))}
                                         </div>
                                     ) : (
-                                        <div className="text-center py-8 text-[var(--color-text-secondary)]">No active sessions</div>
+                                        <div className="py-8 text-center text-[var(--color-text-secondary)]">No active sessions</div>
                                     )}
                                 </CardContent>
                             </Card>
@@ -306,13 +260,8 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                     </div>
 
                     {/* Room Link Card */}
-                    <motion.div
-                        variants={fadeIn}
-                        initial="hidden"
-                        animate="visible"
-                        className="mt-6"
-                    >
-                        <Card className="bg-[var(--color-card-bg)] border-[var(--color-card-shadow)]">
+                    <motion.div variants={fadeIn} initial="hidden" animate="visible" className="mt-6">
+                        <Card className="border-[var(--color-card-shadow)] bg-[var(--color-card-bg)]">
                             <CardHeader>
                                 <CardTitle className="text-[var(--color-text)]">Share Room Link</CardTitle>
                                 <CardDescription className="text-[var(--color-text-secondary)]">
@@ -320,7 +269,7 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <div className="flex items-center gap-2 p-3 bg-[var(--color-section-alt-bg)] rounded-lg">
+                                <div className="flex items-center gap-2 rounded-lg bg-[var(--color-section-alt-bg)] p-3">
                                     <code className="flex-1 text-sm text-[var(--color-text)]">
                                         {window.location.origin}/room/{room.room_code}
                                     </code>
@@ -330,7 +279,7 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                                         variant="outline"
                                         className="border-[var(--color-card-shadow)] text-[var(--color-text)]"
                                     >
-                                        <Copy className="w-4 h-4 mr-2" />
+                                        <Copy className="mr-2 h-4 w-4" />
                                         Copy
                                     </Button>
                                 </div>

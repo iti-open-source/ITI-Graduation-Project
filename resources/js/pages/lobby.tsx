@@ -1,14 +1,14 @@
-import { Form, Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Plus, Users, Copy, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
+import { Head, Link, router } from '@inertiajs/react';
+import { motion } from 'framer-motion';
+import { Copy, Eye, EyeOff, Plus, Trash2, Users } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -59,21 +59,25 @@ export default function Lobby({ userRooms }: LobbyProps) {
 
         setIsCreating(true);
 
-        router.post('/rooms', {
-            name: roomName,
-        }, {
-            onSuccess: () => {
-                setShowCreateForm(false);
-                setIsCreating(false);
+        router.post(
+            '/rooms',
+            {
+                name: roomName,
             },
-            onError: (errors) => {
-                console.error('Room creation errors:', errors);
-                setIsCreating(false);
+            {
+                onSuccess: () => {
+                    setShowCreateForm(false);
+                    setIsCreating(false);
+                },
+                onError: (errors) => {
+                    console.error('Room creation errors:', errors);
+                    setIsCreating(false);
+                },
+                onFinish: () => {
+                    setIsCreating(false);
+                },
             },
-            onFinish: () => {
-                setIsCreating(false);
-            },
-        });
+        );
     };
 
     const copyRoomLink = (roomCode: string) => {
@@ -98,26 +102,19 @@ export default function Lobby({ userRooms }: LobbyProps) {
             <Head title="Lobby" />
 
             <div className="container mx-auto px-4 py-8">
-                <motion.div
-                    variants={fadeIn}
-                    initial="hidden"
-                    animate="visible"
-                    className="max-w-6xl mx-auto"
-                >
+                <motion.div variants={fadeIn} initial="hidden" animate="visible" className="mx-auto max-w-6xl">
                     {/* Header */}
-                    <div className="flex items-center justify-between mb-8">
+                    <div className="mb-8 flex items-center justify-between">
                         <div>
                             <h1 className="text-3xl font-bold text-[var(--color-text)]">Interview Rooms</h1>
-                            <p className="text-[var(--color-text-secondary)] mt-2">
-                                Create and manage your interview rooms
-                            </p>
+                            <p className="mt-2 text-[var(--color-text-secondary)]">Create and manage your interview rooms</p>
                         </div>
 
                         <Button
                             onClick={() => setShowCreateForm(!showCreateForm)}
-                            className="bg-[var(--color-button-primary-bg)] hover:bg-[var(--color-button-primary-hover)] text-white"
+                            className="bg-[var(--color-button-primary-bg)] text-white hover:bg-[var(--color-button-primary-hover)]"
                         >
-                            <Plus className="w-4 h-4 mr-2" />
+                            <Plus className="mr-2 h-4 w-4" />
                             Create Room
                         </Button>
                     </div>
@@ -130,7 +127,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
                             exit={{ opacity: 0, height: 0 }}
                             className="mb-8"
                         >
-                            <Card className="bg-[var(--color-card-bg)] border-[var(--color-card-shadow)]">
+                            <Card className="border-[var(--color-card-shadow)] bg-[var(--color-card-bg)]">
                                 <CardHeader>
                                     <CardTitle className="text-[var(--color-text)]">Create New Room</CardTitle>
                                     <CardDescription className="text-[var(--color-text-secondary)]">
@@ -148,7 +145,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
                                                 name="name"
                                                 type="text"
                                                 placeholder="Enter room name..."
-                                                className="bg-[var(--color-section-alt-bg)]/70 border-[var(--color-card-shadow)] focus:ring-2 focus:ring-[var(--color-accent)]"
+                                                className="border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 focus:ring-2 focus:ring-[var(--color-accent)]"
                                                 required
                                             />
                                         </div>
@@ -157,7 +154,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
                                             <Button
                                                 type="submit"
                                                 disabled={isCreating}
-                                                className="bg-[var(--color-button-primary-bg)] hover:bg-[var(--color-button-primary-hover)] text-white"
+                                                className="bg-[var(--color-button-primary-bg)] text-white hover:bg-[var(--color-button-primary-hover)]"
                                             >
                                                 {isCreating ? 'Creating...' : 'Create Room'}
                                             </Button>
@@ -188,26 +185,20 @@ export default function Lobby({ userRooms }: LobbyProps) {
                                     whileHover={{ scale: 1.02 }}
                                     transition={{ duration: 0.2 }}
                                 >
-                                    <Card className="bg-[var(--color-card-bg)] border-[var(--color-card-shadow)] hover:shadow-lg transition-shadow">
+                                    <Card className="border-[var(--color-card-shadow)] bg-[var(--color-card-bg)] transition-shadow hover:shadow-lg">
                                         <CardHeader>
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
-                                                    <CardTitle className="text-[var(--color-text)] text-lg">
-                                                        {room.name}
-                                                    </CardTitle>
+                                                    <CardTitle className="text-lg text-[var(--color-text)]">{room.name}</CardTitle>
                                                     <CardDescription className="text-[var(--color-text-secondary)]">
                                                         Code: {room.room_code}
                                                     </CardDescription>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     {room.is_active ? (
-                                                        <Badge className="bg-green-100 text-green-800">
-                                                            Active
-                                                        </Badge>
+                                                        <Badge className="bg-green-100 text-green-800">Active</Badge>
                                                     ) : (
-                                                        <Badge variant="secondary">
-                                                            Inactive
-                                                        </Badge>
+                                                        <Badge variant="secondary">Inactive</Badge>
                                                     )}
                                                 </div>
                                             </div>
@@ -216,25 +207,23 @@ export default function Lobby({ userRooms }: LobbyProps) {
                                         <CardContent className="space-y-4">
                                             {/* Current Participant */}
                                             {room.current_participant ? (
-                                                <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                                                    <Users className="w-4 h-4 text-blue-600" />
+                                                <div className="flex items-center gap-2 rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
+                                                    <Users className="h-4 w-4 text-blue-600" />
                                                     <span className="text-sm text-blue-800 dark:text-blue-200">
                                                         In call with: {room.current_participant.name}
                                                     </span>
                                                 </div>
                                             ) : (
-                                                <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                                    <EyeOff className="w-4 h-4 text-gray-500" />
-                                                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                                                        No active participant
-                                                    </span>
+                                                <div className="flex items-center gap-2 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+                                                    <EyeOff className="h-4 w-4 text-gray-500" />
+                                                    <span className="text-sm text-gray-600 dark:text-gray-400">No active participant</span>
                                                 </div>
                                             )}
 
                                             {/* Queue */}
                                             {room.queue_count > 0 && (
-                                                <div className="flex items-center gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                                                    <Users className="w-4 h-4 text-yellow-600" />
+                                                <div className="flex items-center gap-2 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20">
+                                                    <Users className="h-4 w-4 text-yellow-600" />
                                                     <span className="text-sm text-yellow-800 dark:text-yellow-200">
                                                         {room.queue_count} user{room.queue_count !== 1 ? 's' : ''} in queue
                                                     </span>
@@ -246,10 +235,10 @@ export default function Lobby({ userRooms }: LobbyProps) {
                                                 <Button
                                                     asChild
                                                     size="sm"
-                                                    className="flex-1 bg-[var(--color-button-primary-bg)] hover:bg-[var(--color-button-primary-hover)] text-white"
+                                                    className="flex-1 bg-[var(--color-button-primary-bg)] text-white hover:bg-[var(--color-button-primary-hover)]"
                                                 >
                                                     <Link href={`/room/${room.room_code}`}>
-                                                        <Eye className="w-4 h-4 mr-2" />
+                                                        <Eye className="mr-2 h-4 w-4" />
                                                         Enter Room
                                                     </Link>
                                                 </Button>
@@ -260,7 +249,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
                                                     onClick={() => copyRoomLink(room.room_code)}
                                                     className="border-[var(--color-card-shadow)] text-[var(--color-text)]"
                                                 >
-                                                    <Copy className="w-4 h-4" />
+                                                    <Copy className="h-4 w-4" />
                                                 </Button>
 
                                                 <Button
@@ -269,7 +258,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
                                                     onClick={() => deleteRoom(room.room_code)}
                                                     className="border-red-200 text-red-600 hover:bg-red-50"
                                                 >
-                                                    <Trash2 className="w-4 h-4" />
+                                                    <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         </CardContent>
@@ -278,27 +267,18 @@ export default function Lobby({ userRooms }: LobbyProps) {
                             ))}
                         </div>
                     ) : (
-                        <motion.div
-                            variants={fadeIn}
-                            initial="hidden"
-                            animate="visible"
-                            className="text-center py-12"
-                        >
-                            <div className="max-w-md mx-auto">
-                                <div className="w-16 h-16 mx-auto mb-4 bg-[var(--color-section-alt-bg)] rounded-full flex items-center justify-center">
-                                    <Users className="w-8 h-8 text-[var(--color-text-secondary)]" />
+                        <motion.div variants={fadeIn} initial="hidden" animate="visible" className="py-12 text-center">
+                            <div className="mx-auto max-w-md">
+                                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-section-alt-bg)]">
+                                    <Users className="h-8 w-8 text-[var(--color-text-secondary)]" />
                                 </div>
-                                <h3 className="text-lg font-semibold text-[var(--color-text)] mb-2">
-                                    No rooms yet
-                                </h3>
-                                <p className="text-[var(--color-text-secondary)] mb-6">
-                                    Create your first interview room to get started
-                                </p>
+                                <h3 className="mb-2 text-lg font-semibold text-[var(--color-text)]">No rooms yet</h3>
+                                <p className="mb-6 text-[var(--color-text-secondary)]">Create your first interview room to get started</p>
                                 <Button
                                     onClick={() => setShowCreateForm(true)}
-                                    className="bg-[var(--color-button-primary-bg)] hover:bg-[var(--color-button-primary-hover)] text-white"
+                                    className="bg-[var(--color-button-primary-bg)] text-white hover:bg-[var(--color-button-primary-hover)]"
                                 >
-                                    <Plus className="w-4 h-4 mr-2" />
+                                    <Plus className="mr-2 h-4 w-4" />
                                     Create Your First Room
                                 </Button>
                             </div>

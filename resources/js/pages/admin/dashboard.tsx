@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { Activity, Calendar, Edit, Eye, Settings, Shield, TrendingUp, UserCheck, UserPlus, Users, UserX } from 'lucide-react';
+import { Activity, Calendar, Edit, Eye, Settings, Shield, TrendingUp, UserCheck, Users, UserX } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

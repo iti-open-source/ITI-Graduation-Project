@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { LogOut, Monitor, Settings, User, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
-import logo from '../../../../storage/app/public/logo.png';
 import VerifyEmailButton from '../verify-email-button';
 
 export default function Navbar() {
@@ -36,7 +35,7 @@ export default function Navbar() {
             <nav className="sticky top-0 z-50 w-full bg-[var(--color-nav-bg)] text-[var(--color-nav-text)] shadow-md">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
                     <Link href="/" className="flex items-center gap-2 text-2xl font-bold">
-                        <img src={logo} alt="Logo" className="object-cotain h-10 w-60" />
+                        <img src="/logo.png" alt="Logo" className="h-10 w-60 object-contain" />
                         {/* MockMate */}
                     </Link>
                     <div className="flex items-center space-x-4">

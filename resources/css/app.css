@@ -65,78 +65,76 @@
 @tailwind utilities;
 
 /* Light theme (default) */
-:root[data-theme="light"] {
-  --color-bg: #f8fafc; /* Slate-50: Clean, soft white for main background */
-  --color-text: #0f172a; /* Slate-900: High-contrast text */
-  --color-text-secondary: #778190; /* Gray-600:  secondary text */
-  --color-accent: #3b82f6; /* Blue-500: Vibrant, accessible accent */
-  --color-header-bg-start: #1e293b; /* Slate-800: Header gradient start */
-  --color-header-bg-end: #3b82f6; /* Blue-500: Header gradient end */
-  --color-section-bg: #ffffff; /* Pure white: Clean section backgrounds */
-  --color-section-alt-bg: #f1f5f9; /* Slate-100: Light alternate sections */
-  --color-card-bg: #ffffff; /* White: Card backgrounds */
-  --color-card-shadow: rgba(0, 0, 0, 0.06); /*   shadow */
-  --color-step-number: #3b82f6; /* Blue-500: Step numbers */
-  --color-footer-bg: #1e293b; /* Slate-800: Footer background */
-  --color-footer-text: #d1d5db; /* Gray-300: Footer text */
-  --color-nav-bg: #1e293b; /* Slate-800: Navbar background */
-  --color-nav-text: #ffffff; /* White: Navbar text */
-  --color-button-primary-bg: #3b82f6; /* Blue-500: Primary button */
-  --color-button-primary-hover: #2563eb; /* Blue-600: Primary button hover */
-  --color-button-secondary-bg: transparent; /* Transparent: Secondary button */
-  --color-button-secondary-text: #ffffff; /* White: Secondary button text */
-  --color-button-secondary-border: #ffffff; /* White: Secondary button border */
-  --color-button-secondary-hover-bg: #ffffff; /* White: Secondary button hover */
-  --color-button-secondary-hover-text: #1e293b; /* Slate-800: Hover text */
+:root[data-theme='light'] {
+    --color-bg: #f8fafc; /* Slate-50: Clean, soft white for main background */
+    --color-text: #0f172a; /* Slate-900: High-contrast text */
+    --color-text-secondary: #778190; /* Gray-600:  secondary text */
+    --color-accent: #3b82f6; /* Blue-500: Vibrant, accessible accent */
+    --color-header-bg-start: #1e293b; /* Slate-800: Header gradient start */
+    --color-header-bg-end: #3b82f6; /* Blue-500: Header gradient end */
+    --color-section-bg: #ffffff; /* Pure white: Clean section backgrounds */
+    --color-section-alt-bg: #f1f5f9; /* Slate-100: Light alternate sections */
+    --color-card-bg: #ffffff; /* White: Card backgrounds */
+    --color-card-shadow: rgba(0, 0, 0, 0.06); /*   shadow */
+    --color-step-number: #3b82f6; /* Blue-500: Step numbers */
+    --color-footer-bg: #1e293b; /* Slate-800: Footer background */
+    --color-footer-text: #d1d5db; /* Gray-300: Footer text */
+    --color-nav-bg: #1e293b; /* Slate-800: Navbar background */
+    --color-nav-text: #ffffff; /* White: Navbar text */
+    --color-button-primary-bg: #3b82f6; /* Blue-500: Primary button */
+    --color-button-primary-hover: #2563eb; /* Blue-600: Primary button hover */
+    --color-button-secondary-bg: transparent; /* Transparent: Secondary button */
+    --color-button-secondary-text: #ffffff; /* White: Secondary button text */
+    --color-button-secondary-border: #ffffff; /* White: Secondary button border */
+    --color-button-secondary-hover-bg: #ffffff; /* White: Secondary button hover */
+    --color-button-secondary-hover-text: #1e293b; /* Slate-800: Hover text */
 
-
-  /* Dropdown / Menu */
-  --color-menu-bg: #f0f0f0; /* White background */
-  --color-menu-text: #0f172a; /* Dark text */
-  --color-menu-text-secondary: #778190; /* Subtext */
-  --color-menu-hover-bg: #e3e7eb; /* Light hover */
-  --color-menu-border: #d2d4d8; /* Gray-200 border */
-  --color-section-menu-bg: #eed677;
+    /* Dropdown / Menu */
+    --color-menu-bg: #f0f0f0; /* White background */
+    --color-menu-text: #0f172a; /* Dark text */
+    --color-menu-text-secondary: #778190; /* Subtext */
+    --color-menu-hover-bg: #e3e7eb; /* Light hover */
+    --color-menu-border: #d2d4d8; /* Gray-200 border */
+    --color-section-menu-bg: #eed677;
 }
 
 /* Dark theme */
-:root[data-theme="dark"] {
-  --color-bg: #1f2937; /* Gray-800: Warm, soft dark background */
-  --color-text: #e2e8f0; /* Slate-200: Bright, readable text */
-  --color-text-secondary: #9ca3af; /* Gray-400:  secondary text */
-  --color-accent: #60a5fa; /* Blue-400: Lighter accent for dark mode */
-  --color-header-bg-start: #0f172a; /* Slate-900: Header gradient start */
-  --color-header-bg-end: #1e40af; /* Blue-800: Header gradient end */
-  --color-section-bg: #374151; /* Gray-700: Dark section backgrounds */
-  --color-section-alt-bg: #4b5563; /* Gray-600: Alternate sections */
-  --color-card-bg: #4b5563; /* Gray-600: Card backgrounds */
-  --color-card-shadow: rgba(0, 0, 0, 0.25); /*  dark shadow */
-  --color-step-number: #60a5fa; /* Blue-400: Step numbers */
-  --color-footer-bg: #0f172a; /* Slate-900: Footer background */
-  --color-footer-text: #9ca3af; /* Gray-400: Footer text */
-  --color-nav-bg: #0f172a; /* Slate-900: Navbar background */
-  --color-nav-text: #e2e8f0; /* Slate-200: Navbar text */
-  --color-button-primary-bg: #60a5fa; /* Blue-400: Primary button */
-  --color-button-primary-hover: #3b82f6; /* Blue-500: Primary button hover */
-  --color-button-secondary-bg: transparent; /* Transparent: Secondary button */
-  --color-button-secondary-text: #e2e8f0; /* Slate-200: Secondary button text */
-  --color-button-secondary-border: #e2e8f0; /* Slate-200: Border */
-  --color-button-secondary-hover-bg: #e2e8f0; /* Slate-200: Hover background */
-  --color-button-secondary-hover-text: #0f172a; /* Slate-900: Hover text */
+:root[data-theme='dark'] {
+    --color-bg: #1f2937; /* Gray-800: Warm, soft dark background */
+    --color-text: #e2e8f0; /* Slate-200: Bright, readable text */
+    --color-text-secondary: #9ca3af; /* Gray-400:  secondary text */
+    --color-accent: #60a5fa; /* Blue-400: Lighter accent for dark mode */
+    --color-header-bg-start: #0f172a; /* Slate-900: Header gradient start */
+    --color-header-bg-end: #1e40af; /* Blue-800: Header gradient end */
+    --color-section-bg: #374151; /* Gray-700: Dark section backgrounds */
+    --color-section-alt-bg: #4b5563; /* Gray-600: Alternate sections */
+    --color-card-bg: #4b5563; /* Gray-600: Card backgrounds */
+    --color-card-shadow: rgba(0, 0, 0, 0.25); /*  dark shadow */
+    --color-step-number: #60a5fa; /* Blue-400: Step numbers */
+    --color-footer-bg: #0f172a; /* Slate-900: Footer background */
+    --color-footer-text: #9ca3af; /* Gray-400: Footer text */
+    --color-nav-bg: #0f172a; /* Slate-900: Navbar background */
+    --color-nav-text: #e2e8f0; /* Slate-200: Navbar text */
+    --color-button-primary-bg: #60a5fa; /* Blue-400: Primary button */
+    --color-button-primary-hover: #3b82f6; /* Blue-500: Primary button hover */
+    --color-button-secondary-bg: transparent; /* Transparent: Secondary button */
+    --color-button-secondary-text: #e2e8f0; /* Slate-200: Secondary button text */
+    --color-button-secondary-border: #e2e8f0; /* Slate-200: Border */
+    --color-button-secondary-hover-bg: #e2e8f0; /* Slate-200: Hover background */
+    --color-button-secondary-hover-text: #0f172a; /* Slate-900: Hover text */
 
     /* Dropdown / Menu */
-  --color-menu-bg: #374151; /* Gray-700 background */
-  --color-menu-text: #e2e8f0; /* Bright text */
-  --color-menu-text-secondary: #9ca3af; /* Dim text */
-  --color-menu-hover-bg: #4b5563; /* Gray-600 hover */
-  --color-menu-border: #404853; /* Gray-600 border */
-  --color-section-menu-bg: #4c586e;
+    --color-menu-bg: #374151; /* Gray-700 background */
+    --color-menu-text: #e2e8f0; /* Bright text */
+    --color-menu-text-secondary: #9ca3af; /* Dim text */
+    --color-menu-hover-bg: #4b5563; /* Gray-600 hover */
+    --color-menu-border: #404853; /* Gray-600 border */
+    --color-section-menu-bg: #4c586e;
 }
 
-
 :root {
-  --color-bg: #f8fafc;
-  --color-text: #0f172a;
+    --color-bg: #f8fafc;
+    --color-text: #0f172a;
 }
 
 .dark {
@@ -173,7 +171,6 @@
     --sidebar-border: oklch(0.269 0 0);
     --sidebar-ring: oklch(0.439 0 0);
 }
-
 
 @layer base {
     * {

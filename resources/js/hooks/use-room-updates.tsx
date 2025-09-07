@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import Pusher from 'pusher-js';
 import { router } from '@inertiajs/react';
+import Pusher from 'pusher-js';
+import { useEffect, useState } from 'react';
 
 interface User {
     id: number;

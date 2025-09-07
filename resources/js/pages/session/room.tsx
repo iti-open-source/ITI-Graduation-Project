@@ -1,8 +1,8 @@
-import { Head } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
-import Pusher from 'pusher-js';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
+import { Head } from '@inertiajs/react';
+import Pusher from 'pusher-js';
+import { useEffect, useRef, useState } from 'react';
 
 interface PageProps {
     roomCode: string;
@@ -45,7 +45,7 @@ export default function SessionRoom(props: PageProps) {
             });
             pcRef.current = pc;
 
-            stream.getTracks().forEach(t => pc.addTrack(t, stream));
+            stream.getTracks().forEach((t) => pc.addTrack(t, stream));
             pc.ontrack = (ev) => {
                 if (remoteRef.current) remoteRef.current.srcObject = ev.streams[0];
             };
@@ -83,7 +83,8 @@ export default function SessionRoom(props: PageProps) {
                         await drainIce();
                     } else if (payload.type === 'ice-candidate') {
                         const c = new RTCIceCandidate(payload.data);
-                        if (pc.remoteDescription) await pc.addIceCandidate(c); else iceQueueRef.current.push(c);
+                        if (pc.remoteDescription) await pc.addIceCandidate(c);
+                        else iceQueueRef.current.push(c);
                     }
                 } catch (e) {
                     console.error('signaling error', e);
@@ -91,7 +92,9 @@ export default function SessionRoom(props: PageProps) {
             });
         })();
 
-        return () => { isMounted = false; };
+        return () => {
+            isMounted = false;
+        };
     }, [roomCode, isCreator, pusherKey, pusherCluster]);
 
     const startCall = async () => {
@@ -104,9 +107,13 @@ export default function SessionRoom(props: PageProps) {
     const sendSignal = async (type: string, data: any) => {
         await fetch(`/session/${roomCode}/signal`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '' },
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
+            },
             credentials: 'same-origin',
-            body: JSON.stringify({ type, data })
+            body: JSON.stringify({ type, data }),
         });
     };
 
@@ -114,17 +121,23 @@ export default function SessionRoom(props: PageProps) {
         try {
             const sdp = String(desc.sdp || '');
             const lines = sdp.split(/\r?\n/).filter(Boolean);
-            const filtered = lines.filter(line => !/^a=max-message-size:/i.test(line));
+            const filtered = lines.filter((line) => !/^a=max-message-size:/i.test(line));
             let cleaned = filtered.join('\r\n');
             if (!cleaned.endsWith('\r\n')) cleaned += '\r\n';
             return { type: desc.type, sdp: cleaned } as RTCSessionDescriptionInit;
-        } catch { return desc; }
+        } catch {
+            return desc;
+        }
     };
 
     const drainIce = async () => {
         while (iceQueueRef.current.length) {
             const c = iceQueueRef.current.shift()!;
-            try { await pcRef.current?.addIceCandidate(c); } catch (e) { console.error(e); }
+            try {
+                await pcRef.current?.addIceCandidate(c);
+            } catch (e) {
+                console.error(e);
+            }
         }
     };
 
@@ -141,34 +154,70 @@ export default function SessionRoom(props: PageProps) {
             <Head title={`Session - ${roomCode}`} />
             <div className="container mx-auto px-4 py-6">
                 <div className="grid gap-4 md:grid-cols-[1fr_320px]">
-                    <div className="bg-[var(--color-card-bg)] border border-[var(--color-card-shadow)] rounded p-3">
+                    <div className="rounded border border-[var(--color-card-shadow)] bg-[var(--color-card-bg)] p-3">
                         <div className="relative">
-                            <video ref={remoteRef} autoPlay playsInline className="w-full h-[360px] bg-black rounded" />
-                            <video ref={localRef} autoPlay playsInline muted className="absolute bottom-2 right-2 w-44 h-28 bg-black rounded border border-white" />
+                            <video ref={remoteRef} autoPlay playsInline className="h-[360px] w-full rounded bg-black" />
+                            <video
+                                ref={localRef}
+                                autoPlay
+                                playsInline
+                                muted
+                                className="absolute right-2 bottom-2 h-28 w-44 rounded border border-white bg-black"
+                            />
                         </div>
                         <div className="mt-3 flex gap-2">
                             {isCreator && (
-                                <button onClick={startCall} className="inline-block bg-[var(--color-button-primary-bg)] hover:bg-[var(--color-button-primary-hover)] text-white px-3 py-1 rounded">Start Call</button>
+                                <button
+                                    onClick={startCall}
+                                    className="inline-block rounded bg-[var(--color-button-primary-bg)] px-3 py-1 text-white hover:bg-[var(--color-button-primary-hover)]"
+                                >
+                                    Start Call
+                                </button>
                             )}
                             <form method="POST" action={`/session/${roomCode}/terminate`}>
-                                <input type="hidden" name="_token" value={(document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || ''} />
-                                <button type="submit" className="inline-block bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">Terminate Session</button>
+                                <input
+                                    type="hidden"
+                                    name="_token"
+                                    value={(document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || ''}
+                                />
+                                <button type="submit" className="inline-block rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700">
+                                    Terminate Session
+                                </button>
                             </form>
                         </div>
                     </div>
-                    <div className="bg-[var(--color-card-bg)] border border-[var(--color-card-shadow)] rounded p-3">
-                        <div className="font-semibold mb-1 text-[var(--color-text)]">Chat {chatReady ? '' : '(connecting...)'}</div>
-                        <div className="h-72 overflow-y-auto bg-[var(--color-section-alt-bg)] rounded p-2">
+                    <div className="rounded border border-[var(--color-card-shadow)] bg-[var(--color-card-bg)] p-3">
+                        <div className="mb-1 font-semibold text-[var(--color-text)]">Chat {chatReady ? '' : '(connecting...)'}</div>
+                        <div className="h-72 overflow-y-auto rounded bg-[var(--color-section-alt-bg)] p-2">
                             {messages.map((m, i) => (
                                 <div key={i} className={`text-sm ${m.from === 'me' ? 'text-right' : 'text-left'}`}>
-                                    <span className={`inline-block px-2 py-1 rounded ${m.from === 'me' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-white'}`}>{m.text}</span>
+                                    <span
+                                        className={`inline-block rounded px-2 py-1 ${m.from === 'me' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-white'}`}
+                                    >
+                                        {m.text}
+                                    </span>
                                 </div>
                             ))}
                             {messages.length === 0 && <div className="text-sm text-[var(--color-text-secondary)]">No messages yet.</div>}
                         </div>
-                        <div className="flex gap-2 mt-2">
-                            <input value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') sendChat(); }} className="flex-1 bg-[var(--color-section-alt-bg)] border border-[var(--color-card-shadow)] rounded px-2 py-1 text-sm" placeholder={chatReady ? 'Type a message…' : 'Waiting for connection…'} disabled={!chatReady} />
-                            <button onClick={sendChat} disabled={!chatReady || !chatInput.trim()} className="bg-gray-700 text-white px-3 py-1 rounded">Send</button>
+                        <div className="mt-2 flex gap-2">
+                            <input
+                                value={chatInput}
+                                onChange={(e) => setChatInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') sendChat();
+                                }}
+                                className="flex-1 rounded border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)] px-2 py-1 text-sm"
+                                placeholder={chatReady ? 'Type a message…' : 'Waiting for connection…'}
+                                disabled={!chatReady}
+                            />
+                            <button
+                                onClick={sendChat}
+                                disabled={!chatReady || !chatInput.trim()}
+                                className="rounded bg-gray-700 px-3 py-1 text-white"
+                            >
+                                Send
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -176,5 +225,3 @@ export default function SessionRoom(props: PageProps) {
         </AppLayout>
     );
 }
-
-

@@ -4,8 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, Form, usePage } from '@inertiajs/react';
-import { Calendar, Download, Eye, Filter, Mail, Search, Shield, Trash2, UserCheck, UserPlus, Users, UserX } from 'lucide-react';
+import { Form, Head, Link, router, usePage } from '@inertiajs/react';
+import { Calendar, Download, Eye, Filter, Mail, Search, Shield, Trash2, UserCheck, Users, UserX } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -79,7 +79,6 @@ export default function UsersPage({ users }: UsersPageProps) {
         }
     };
 
-
     const filteredUsers = users.data.filter(
         (user) => user.name.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase()),
     );
@@ -90,7 +89,7 @@ export default function UsersPage({ users }: UsersPageProps) {
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-6">
                 {/* Success Message */}
                 {successMessage && (
-                    <div className="rounded-md bg-green-50 p-4 border border-green-200">
+                    <div className="rounded-md border border-green-200 bg-green-50 p-4">
                         <div className="flex">
                             <div className="flex-shrink-0">
                                 <UserCheck className="h-5 w-5 text-green-400" />
@@ -228,22 +227,14 @@ export default function UsersPage({ users }: UsersPageProps) {
                                                 <Eye className="h-4 w-4" />
                                             </Link>
                                         </Button>
-                                        <Form
-                                            method="patch"
-                                            action={`/admin/users/${user.id}/toggle-status`}
-                                            className="inline"
-                                        >
-                                            <Button 
-                                                variant="outline" 
-                                                size="sm" 
+                                        <Form method="patch" action={`/admin/users/${user.id}/toggle-status`} className="inline">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
                                                 type="submit"
-                                                title={user.email_verified_at ? "Unverify user" : "Verify user"}
+                                                title={user.email_verified_at ? 'Unverify user' : 'Verify user'}
                                             >
-                                                {user.email_verified_at ? (
-                                                    <UserX className="h-4 w-4" />
-                                                ) : (
-                                                    <UserCheck className="h-4 w-4" />
-                                                )}
+                                                {user.email_verified_at ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
                                             </Button>
                                         </Form>
                                         <Button

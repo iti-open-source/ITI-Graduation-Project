@@ -10,8 +10,12 @@ declare global {
 
         // The Storage tree for the room, for useMutation, useStorage, etc.
         Storage: {
-            // Example, a conflict-free list
-            // animals: LiveList<string>;
+            // Terminal and execution state
+            terminalOutput: string;
+            userInputs: string[];
+            isWaitingForInput: boolean;
+            selectedLanguage: string;
+            isExecuting: boolean;
         };
 
         // Custom user info set when authenticating with a secret key

@@ -1,4 +1,14 @@
 // Language boilerplate templates
+
+export const langs = {
+    cpp: 54,
+    python: 109,
+    javascript: 102,
+    java: 91,
+    csharp: 51,
+    typescript: 101,
+};
+
 export const languageTemplates = {
     cpp: `#include <iostream>
 #include <vector>

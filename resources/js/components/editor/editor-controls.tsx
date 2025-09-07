@@ -3,9 +3,18 @@ interface EditorControlsProps {
     languages: string[];
     handleSubmit: () => void;
     handleLanguageChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    handleRunWithInput?: () => void;
+    userInputs?: string[];
 }
 
-export default function EditorControls({ selectedLanguage, languages, handleSubmit, handleLanguageChange }: EditorControlsProps) {
+export default function EditorControls({
+    selectedLanguage,
+    languages,
+    handleSubmit,
+    handleLanguageChange,
+    handleRunWithInput,
+    userInputs,
+}: EditorControlsProps) {
     return (
         <div className="mb-3 flex items-center justify-center gap-3 py-3">
             <button
@@ -14,10 +23,22 @@ export default function EditorControls({ selectedLanguage, languages, handleSubm
             >
                 Submit
             </button>
+
+            {handleRunWithInput && userInputs && userInputs.length > 0 && (
+                <button
+                    className="cursor-pointer rounded-sm border-1 border-green-500 px-3 py-1 transition-all ease-in-out hover:border-green-700 hover:bg-green-50 hover:text-green-700"
+                    onClick={handleRunWithInput}
+                >
+                    Reset Inputs
+                </button>
+            )}
+            <label htmlFor="language" className="sr-only">
+                Select Language
+            </label>
             <select
                 name="language"
                 id="language"
-                className="rounded-sm border-1 border-gray-500 px-3 py-1"
+                className="rounded-sm border border-gray-500 px-3 py-1"
                 value={selectedLanguage}
                 onChange={handleLanguageChange}
             >

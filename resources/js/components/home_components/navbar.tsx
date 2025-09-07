@@ -2,14 +2,21 @@ import { Link, usePage } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LogOut, Monitor, Settings, User, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import logo from '/storage/app/public/images/logo.png';
+import { Toaster } from 'react-hot-toast';
+import VerifyEmailButton from '../verify-email-button';
 
-export default function Navbar({ isLoggedIn, logo }: { isLoggedIn: boolean; logo: string }) {
+export default function Navbar() {
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement | null>(null);
 
-    const { auth } = usePage().props as any;
+
+    const { auth} = usePage().props as any;
+
     const user = auth?.user;
+     const isLoggedIn = !!user;
+    
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
@@ -27,6 +34,7 @@ export default function Navbar({ isLoggedIn, logo }: { isLoggedIn: boolean; logo
     }, []);
 
     return (
+        <>
         <nav className="sticky top-0 z-50 w-full bg-[var(--color-nav-bg)] text-[var(--color-nav-text)] shadow-md">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
                 <Link href="/" className="flex items-center gap-2 text-2xl font-bold">
@@ -36,17 +44,15 @@ export default function Navbar({ isLoggedIn, logo }: { isLoggedIn: boolean; logo
                 <div className="flex items-center space-x-4">
                     <button
                         onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                        className={`relative flex h-8 w-14 items-center rounded-full transition-colors duration-300 ${
-                            theme === 'light' ? 'bg-yellow-300' : 'bg-gray-600'
-                        }`}
+                        className={`relative flex h-8 w-14 items-center rounded-full transition-colors duration-300 ${theme === 'light' ? 'bg-yellow-300' : 'bg-gray-600'
+                            }`}
                     >
                         <span
-                            className={`absolute h-6 w-6 transform rounded-full bg-white shadow-md transition-transform duration-300 ${
-                                theme === 'light' ? 'translate-x-1' : 'translate-x-7'
-                            }`}
+                            className={`absolute h-6 w-6 transform rounded-full bg-white shadow-md transition-transform duration-300 ${theme === 'light' ? 'translate-x-1' : 'translate-x-7'
+                                }`}
                         />
                     </button>
-                    {!isLoggedIn && (
+                    {!isLoggedIn &&  (
                         <>
                             <Link href="/login" className="transition hover:text-[var(--color-accent)]">
                                 Login
@@ -139,9 +145,25 @@ export default function Navbar({ isLoggedIn, logo }: { isLoggedIn: boolean; logo
                                                 </div>
                                             )}
                                             <div>
-                                                <p style={{ color: 'var(--color-menu-text)', fontWeight: 500 }}>{user?.name}</p>
-                                                <p style={{ color: 'var(--color-menu-text-secondary)', fontSize: '0.875rem' }}>{user?.email}</p>
+                                                <div className="flex items-center gap-2">
+                                                    <p style={{ color: 'var(--color-menu-text)', fontWeight: 500 }}>
+                                                        {user?.name}
+                                                    </p>
+
+                                                    {user?.email_verified_at ? (
+                                                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                                                            Verified
+                                                        </span>
+                                                    ) : (
+                                                        <VerifyEmailButton />
+                                                    )}
+                                                </div>
+
+                                                <p style={{ color: 'var(--color-menu-text-secondary)', fontSize: '0.875rem' }}>
+                                                    {user?.email}
+                                                </p>
                                             </div>
+
                                         </div>
 
                                         {/* Menu items */}
@@ -251,5 +273,7 @@ export default function Navbar({ isLoggedIn, logo }: { isLoggedIn: boolean; logo
                 </div>
             </div>
         </nav>
+        <Toaster position="top-center" reverseOrder={false} />
+        </>
     );
 }

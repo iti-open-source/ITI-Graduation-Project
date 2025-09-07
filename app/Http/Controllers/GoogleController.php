@@ -37,6 +37,7 @@ class GoogleController extends Controller
                 'password' => bcrypt(uniqid()), 
                 'role' => 'user',
                 'avatar' => $googleUser->getAvatar(),
+                'email_verified_at' => now(),
             ]);
         
     }

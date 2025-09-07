@@ -11,7 +11,7 @@ interface AuthLayoutProps {
 }
 
 export default function AuthSimpleLayout({ children, title, description }: PropsWithChildren<AuthLayoutProps>) {
-   return (
+  return (
     <>
     <Navbar/>
     <div className="relative  min-h-screen flex items-center justify-center bg-gradient-to-br from-[var(--color-header-bg-start)] to-[var(--color-header-bg-end)] px-4 sm:px-6 lg:px-8">

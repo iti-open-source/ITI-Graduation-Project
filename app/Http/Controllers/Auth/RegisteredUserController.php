@@ -60,8 +60,7 @@ class RegisteredUserController extends Controller
         if ($user->role === 'admin') {
         return redirect()->intended(route('dashboard', absolute: false));
     }
-    return redirect('/');
+    return redirect()->route('verification.notice');
 
-        // return redirect()->intended(route('dashboard', absolute: false));
     }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\LinkedInController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\SessionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -34,8 +35,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('room/{roomCode}/join', [RoomController::class, 'join'])->name('room.join');
     Route::post('room/{roomCode}/disconnect', [RoomController::class, 'disconnect'])->name('room.disconnect');
     Route::post('room/{roomCode}/leave', [RoomController::class, 'leave'])->name('room.leave');
-    Route::post('room/{roomCode}/signaling', [RoomController::class, 'signaling'])->name('room.signaling');
     Route::delete('room/{roomCode}', [RoomController::class, 'destroy'])->name('room.destroy');
+
+    // Session (simple WebRTC) routes
+    Route::get('session/create', [SessionController::class, 'create'])->name('session.create');
+    Route::get('session/{sessionCode}', [SessionController::class, 'room'])->name('session.room');
+    Route::post('session/{sessionCode}/signal', [SessionController::class, 'signal'])->name('session.signal');
+    Route::post('session/{sessionCode}/terminate', [SessionController::class, 'terminate'])->name('session.terminate');
 });
 
 

@@ -51,18 +51,14 @@ export function useRoomUpdates(roomCode: string, initialRoom: Room) {
         const channel = pusher.subscribe(`room.${roomCode}`);
 
         // Handle queue updates
-        channel.bind('queue-updated', (data: QueueUpdateData) => {
+        channel.bind('queue-updated', (data: QueueUpdateData & { sessionCode?: string }) => {
             console.log('Queue updated:', data);
             setRoom(data.room);
 
-            // If user was accepted, redirect to participant page
+            // If user was accepted, redirect to session page
             if (data.action === 'accepted' && data.user) {
-                router.visit(`/room/${roomCode}`, {
-                    method: 'get',
-                    onSuccess: () => {
-                        // The controller will redirect to the appropriate page
-                    },
-                });
+                const code = data.sessionCode || roomCode;
+                router.visit(`/session/${code}`);
             }
         });
 

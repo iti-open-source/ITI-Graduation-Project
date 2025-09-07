@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Events\QueueUpdated;
 use App\Events\RoomStatusUpdated;
-use App\Events\WebRTCSignaling;
 use App\Models\Room;
 use App\Models\RoomQueue;
+use App\Models\LobbySession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -44,30 +44,38 @@ class RoomController extends Controller
     public function show($roomCode)
     {
         $room = Room::where('room_code', $roomCode)
-            ->with(['creator', 'currentParticipant', 'queue.user'])
+            ->with(['creator', 'currentParticipant', 'queue.user', 'sessions' => function($q){ $q->where('status','active')->latest('id'); }])
             ->firstOrFail();
 
         $user = Auth::user();
 
+        // If the visiting user is a guest and already has an active session for this lobby, redirect to that session
+        if (!$room->isCreator($user)) {
+            $activeGuestSession = \App\Models\LobbySession::where('room_id', $room->id)
+                ->where('status', 'active')
+                ->where('guest_id', $user->id)
+                ->latest('id')
+                ->first();
+
+            if ($activeGuestSession) {
+                return redirect()->route('session.room', ['sessionCode' => $activeGuestSession->session_code]);
+            }
+        }
+
         // If user is the creator, show the room management interface
         if ($room->isCreator($user)) {
-            return Inertia::render('room/room-creator', [
+            return Inertia::render('room/creator', [
                 'room' => $room,
             ]);
         }
 
-        // If user is already the current participant, show the video chat
-        if ($room->current_participant === $user->id) {
-            return Inertia::render('room/room-participant', [
-                'room' => $room,
-            ]);
-        }
+        // Do not redirect solely based on current_participant; rely on active session check only
 
         // Check if user is already in queue
         $queueEntry = $room->queue()->where('user_id', $user->id)->with('user')->first();
 
         if ($queueEntry) {
-            return Inertia::render('room/room-queue', [
+            return Inertia::render('room/queue', [
                 'room' => $room,
                 'queuePosition' => $queueEntry->position,
                 'queueEntry' => $queueEntry,
@@ -83,7 +91,7 @@ class RoomController extends Controller
         // Broadcast queue update
         event(new QueueUpdated($room->fresh(), 'joined', $user));
 
-        return Inertia::render('room/room-queue', [
+        return Inertia::render('room/queue', [
             'room' => $room,
             'queuePosition' => $queueEntry->position,
             'queueEntry' => $queueEntry,
@@ -115,12 +123,24 @@ class RoomController extends Controller
         // Set as current participant
         $room->setCurrentParticipant($targetUser->user);
 
-        // Broadcast updates
-        event(new QueueUpdated($room->fresh(), 'accepted', $targetUser->user));
+        // Create a LobbySession record with per-session code
+        $sessionCode = strtoupper(bin2hex(random_bytes(3)));
+        LobbySession::create([
+            'session_code' => $sessionCode,
+            'room_id' => $room->id,
+            'creator_id' => $room->created_by,
+            'guest_id' => $targetUser->user_id,
+            'status' => 'active',
+            'started_at' => now(),
+        ]);
+
+        // Broadcast updates with sessionCode so both sides know where to go
+        event(new QueueUpdated($room->fresh(), 'accepted', $targetUser->user, $sessionCode));
         event(new RoomStatusUpdated($room->fresh(), 'participant_joined'));
 
         return response()->json([
             'success' => true,
+            'sessionCode' => $sessionCode,
             'message' => 'User joined the room',
         ]);
     }
@@ -136,6 +156,12 @@ class RoomController extends Controller
 
         $room->disconnectCurrentParticipant();
 
+        // Mark latest active session for this room as ended
+        LobbySession::where('room_id', $room->id)
+            ->where('status', 'active')
+            ->latest('id')
+            ->update(['status' => 'ended', 'ended_at' => now()]);
+
         // Broadcast room status update
         event(new RoomStatusUpdated($room->fresh(), 'participant_left'));
 
@@ -150,11 +176,16 @@ class RoomController extends Controller
         $room = Room::where('room_code', $roomCode)->firstOrFail();
         $user = Auth::user();
 
-        // If user is the current participant, disconnect them
+        // If user is the current participant, disconnect them and end session
         if ($room->current_participant === $user->id) {
             $room->disconnectCurrentParticipant();
             // Broadcast room status update
             event(new RoomStatusUpdated($room->fresh(), 'participant_left'));
+
+            LobbySession::where('room_id', $room->id)
+                ->where('status', 'active')
+                ->latest('id')
+                ->update(['status' => 'ended', 'ended_at' => now()]);
         }
 
         // Remove user from queue if they're in it
@@ -183,31 +214,5 @@ class RoomController extends Controller
         return redirect()->route('lobby');
     }
 
-    public function signaling(Request $request, $roomCode)
-    {
-        $request->validate([
-            'type' => 'required|in:offer,answer,ice-candidate',
-            'data' => 'required',
-            'to_user_id' => 'nullable|exists:users,id',
-        ]);
-
-        $room = Room::where('room_code', $roomCode)->firstOrFail();
-        $user = Auth::user();
-
-        // Verify user is either the creator or current participant
-        if (!$room->isCreator($user) && $room->current_participant !== $user->id) {
-            abort(403, 'You are not authorized to send signaling data');
-        }
-
-        // Broadcast the signaling data
-        event(new WebRTCSignaling(
-            $roomCode,
-            $request->type,
-            $request->data,
-            $user->id,
-            $request->to_user_id
-        ));
-
-        return response()->json(['success' => true]);
-    }
+    // Legacy WebRTC signaling removed in favor of simple RTC flow
 }

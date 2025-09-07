@@ -52,6 +52,11 @@ class Room extends Model
         return $this->hasMany(RoomQueue::class)->orderBy('position');
     }
 
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(LobbySession::class, 'room_id');
+    }
+
     public function getQueueCountAttribute(): int
     {
         return $this->queue()->count();

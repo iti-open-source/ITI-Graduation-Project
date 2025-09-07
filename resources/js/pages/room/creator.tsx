@@ -1,7 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Copy, Phone, PhoneOff, Trash2, ArrowLeft, UserPlus, UserMinus, Video, VideoOff, Mic, MicOff } from 'lucide-react';
+import { Users, Copy, Trash2, ArrowLeft, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +9,6 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { useRoomUpdates } from '@/hooks/use-room-updates';
-import { useWebRTC } from '@/hooks/use-webrtc';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -57,21 +56,7 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
 
     console.log(`[Creator] Initializing creator component for room ${room.room_code}, user ${auth.user.id}`);
 
-    const {
-        localVideoRef,
-        remoteVideoRef,
-        isVideoEnabled,
-        isAudioEnabled,
-        connectionStatus,
-        toggleVideo,
-        toggleAudio,
-        createOffer,
-        cleanup,
-    } = useWebRTC({
-        roomCode: room.room_code,
-        userId: auth.user.id,
-        isCreator: true,
-    });
+    // Lobby only: no in-lobby WebRTC
 
     const copyRoomLink = () => {
         const roomUrl = `${window.location.origin}/room/${room.room_code}`;
@@ -104,14 +89,10 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
             console.log(`[Creator] Response status: ${response.status}`);
 
             if (response.ok) {
-                console.log(`[Creator] User ${userId} accepted, creating WebRTC offer in 1 second`);
-                // Initiate WebRTC call after user is accepted
-                setTimeout(() => {
-                    console.log(`[Creator] Creating offer for user ${userId}`);
-                    console.log(`[Creator] createOffer function:`, typeof createOffer);
-                    createOffer(userId);
-                    console.log(`[Creator] createOffer called for user ${userId}`);
-                }, 1000); // Small delay to ensure the participant is ready
+                const result = await response.json();
+                const sessionCode = result.sessionCode || room.room_code;
+                console.log(`[Creator] User ${userId} accepted, redirecting to session ${sessionCode}`);
+                window.location.href = `/session/${sessionCode}`;
             } else {
                 const errorText = await response.text();
                 console.error(`[Creator] Failed to accept user ${userId}:`, response.status, errorText);
@@ -122,7 +103,6 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
     };
 
     const disconnectUser = () => {
-        cleanup(); // Cleanup WebRTC connection
         router.post(`/room/${room.room_code}/disconnect`);
     };
 
@@ -203,153 +183,6 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                     </div>
 
                     <div className="grid gap-6 lg:grid-cols-2">
-                        {/* Current Call */}
-                        <motion.div
-                            variants={fadeIn}
-                            initial="hidden"
-                            animate="visible"
-                        >
-                            <Card className="bg-[var(--color-card-bg)] border-[var(--color-card-shadow)]">
-                                <CardHeader>
-                                    <CardTitle className="text-[var(--color-text)] flex items-center gap-2">
-                                        <Phone className="w-5 h-5" />
-                                        Current Call
-                                        <Badge
-                                            className={
-                                                connectionStatus === 'connected'
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : connectionStatus === 'connecting'
-                                                        ? 'bg-yellow-100 text-yellow-800'
-                                                        : 'bg-red-100 text-red-800'
-                                            }
-                                        >
-                                            {connectionStatus === 'connected' ? 'Connected' :
-                                                connectionStatus === 'connecting' ? 'Connecting...' : 'Disconnected'}
-                                        </Badge>
-                                    </CardTitle>
-                                    <CardDescription className="text-[var(--color-text-secondary)]">
-                                        Manage your active video call
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    {room.current_participant ? (
-                                        <div className="space-y-4">
-                                            {/* Video Container */}
-                                            <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
-                                                {/* Remote Video */}
-                                                <div className="absolute inset-0 flex items-center justify-center">
-                                                    {connectionStatus === 'connected' ? (
-                                                        <video
-                                                            ref={remoteVideoRef}
-                                                            autoPlay
-                                                            playsInline
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="text-center text-white">
-                                                            <div className="w-16 h-16 mx-auto mb-4 bg-gray-700 rounded-full flex items-center justify-center">
-                                                                <Avatar className="w-12 h-12">
-                                                                    <AvatarFallback className="bg-gray-600 text-white text-lg">
-                                                                        {room.current_participant.name.charAt(0).toUpperCase()}
-                                                                    </AvatarFallback>
-                                                                </Avatar>
-                                                            </div>
-                                                            <h3 className="text-lg font-semibold mb-2">
-                                                                {room.current_participant.name}
-                                                            </h3>
-                                                            <p className="text-gray-400">
-                                                                {connectionStatus === 'connecting' ? 'Connecting...' : 'Waiting for connection'}
-                                                            </p>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Local Video (Picture-in-Picture) */}
-                                                <div className="absolute top-2 right-2 w-24 h-18 bg-gray-800 rounded-lg overflow-hidden border-2 border-white">
-                                                    <video
-                                                        ref={localVideoRef}
-                                                        autoPlay
-                                                        playsInline
-                                                        muted
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                    {!isVideoEnabled && (
-                                                        <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
-                                                            <VideoOff className="w-4 h-4 text-white" />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Call Controls */}
-                                            <div className="flex items-center justify-center gap-4">
-                                                <Button
-                                                    onClick={toggleAudio}
-                                                    size="sm"
-                                                    className={`w-10 h-10 rounded-full ${isAudioEnabled
-                                                        ? 'bg-gray-600 hover:bg-gray-700 text-white'
-                                                        : 'bg-red-600 hover:bg-red-700 text-white'
-                                                        }`}
-                                                >
-                                                    {isAudioEnabled ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
-                                                </Button>
-
-                                                <Button
-                                                    onClick={toggleVideo}
-                                                    size="sm"
-                                                    className={`w-10 h-10 rounded-full ${isVideoEnabled
-                                                        ? 'bg-gray-600 hover:bg-gray-700 text-white'
-                                                        : 'bg-red-600 hover:bg-red-700 text-white'
-                                                        }`}
-                                                >
-                                                    {isVideoEnabled ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
-                                                </Button>
-
-                                                <Button
-                                                    onClick={disconnectUser}
-                                                    size="sm"
-                                                    className="w-10 h-10 rounded-full bg-red-600 hover:bg-red-700 text-white"
-                                                >
-                                                    <PhoneOff className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-
-                                            {/* Participant Info */}
-                                            <div className="flex items-center gap-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                                                <Avatar className="w-10 h-10">
-                                                    <AvatarFallback className="bg-blue-100 text-blue-800">
-                                                        {room.current_participant.name.charAt(0).toUpperCase()}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div className="flex-1">
-                                                    <h3 className="font-semibold text-[var(--color-text)]">
-                                                        {room.current_participant.name}
-                                                    </h3>
-                                                    <p className="text-sm text-[var(--color-text-secondary)]">
-                                                        {room.current_participant.email}
-                                                    </p>
-                                                </div>
-                                                <Badge className="bg-green-100 text-green-800">
-                                                    In Call
-                                                </Badge>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-8">
-                                            <div className="w-16 h-16 mx-auto mb-4 bg-[var(--color-section-alt-bg)] rounded-full flex items-center justify-center">
-                                                <PhoneOff className="w-8 h-8 text-[var(--color-text-secondary)]" />
-                                            </div>
-                                            <h3 className="text-lg font-semibold text-[var(--color-text)] mb-2">
-                                                No Active Call
-                                            </h3>
-                                            <p className="text-[var(--color-text-secondary)]">
-                                                Accept users from the queue to start a call
-                                            </p>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </motion.div>
 
                         {/* Queue */}
                         <motion.div
@@ -403,7 +236,7 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                                                         onClick={() => joinUser(queueItem.user.id)}
                                                         size="sm"
                                                         className="bg-[var(--color-button-primary-bg)] hover:bg-[var(--color-button-primary-hover)] text-white"
-                                                        disabled={!!room.current_participant}
+                                                        disabled={false}
                                                     >
                                                         <UserPlus className="w-4 h-4 mr-2" />
                                                         Accept
@@ -423,6 +256,49 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                                                 Share your room link to invite participants
                                             </p>
                                         </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+
+                        {/* Active Sessions */}
+                        <motion.div
+                            variants={fadeIn}
+                            initial="hidden"
+                            animate="visible"
+                        >
+                            <Card className="bg-[var(--color-card-bg)] border-[var(--color-card-shadow)]">
+                                <CardHeader>
+                                    <CardTitle className="text-[var(--color-text)] flex items-center gap-2">
+                                        Active Sessions
+                                        {Array.isArray((room as any).sessions) && (room as any).sessions.length > 0 && (
+                                            <Badge className="bg-green-100 text-green-800">{(room as any).sessions.length}</Badge>
+                                        )}
+                                    </CardTitle>
+                                    <CardDescription className="text-[var(--color-text-secondary)]">
+                                        Ongoing sessions created from this lobby
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    {Array.isArray((room as any).sessions) && (room as any).sessions.length > 0 ? (
+                                        <div className="space-y-3">
+                                            {(room as any).sessions.map((s: any) => (
+                                                <div key={s.id} className="flex items-center justify-between p-3 bg-[var(--color-section-alt-bg)] rounded-lg">
+                                                    <div>
+                                                        <div className="text-[var(--color-text)] font-medium">Session: {s.session_code}</div>
+                                                        <div className="text-sm text-[var(--color-text-secondary)]">Status: {s.status}</div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Badge className="bg-blue-100 text-blue-800">active</Badge>
+                                                        <Button asChild size="sm" variant="outline" className="border-[var(--color-card-shadow)]">
+                                                            <a href={`/session/${s.session_code}`}>Open</a>
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8 text-[var(--color-text-secondary)]">No active sessions</div>
                                     )}
                                 </CardContent>
                             </Card>
@@ -462,35 +338,7 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                         </Card>
                     </motion.div>
 
-                    {/* Code Editor Placeholder */}
-                    <motion.div
-                        variants={fadeIn}
-                        initial="hidden"
-                        animate="visible"
-                        className="mt-6"
-                    >
-                        <Card className="bg-[var(--color-card-bg)] border-[var(--color-card-shadow)]">
-                            <CardHeader>
-                                <CardTitle className="text-[var(--color-text)]">Code Editor (Placeholder)</CardTitle>
-                                <CardDescription className="text-[var(--color-text-secondary)]">
-                                    This is a placeholder for the shared code editor. We will wire it up later.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="mb-3 flex items-center gap-2">
-                                    <Button size="sm" variant="outline" className="border-[var(--color-card-shadow)]">Run</Button>
-                                    <Button size="sm" variant="outline" className="border-[var(--color-card-shadow)]">Format</Button>
-                                    <Badge className="ml-auto bg-[var(--color-section-alt-bg)] text-[var(--color-text-secondary)]">creator</Badge>
-                                </div>
-                                <div
-                                    aria-label="Code Editor Placeholder"
-                                    className="min-h-[240px] rounded-md border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)] font-mono text-sm p-4 text-[var(--color-text-secondary)]"
-                                >
-                                    // Code editor will appear here.
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
+                    {/* Lobby only; editor removed */}
                 </motion.div>
             </div>
         </AppLayout>

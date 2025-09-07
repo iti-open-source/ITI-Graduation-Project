@@ -18,15 +18,17 @@ class QueueUpdated implements ShouldBroadcast
     public $room;
     public $action;
     public $user;
+    public $sessionCode;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(Room $room, string $action, $user = null)
+    public function __construct(Room $room, string $action, $user = null, ?string $sessionCode = null)
     {
         $this->room = $room->load(['queue.user', 'currentParticipant']);
         $this->action = $action; // 'joined', 'left', 'accepted'
         $this->user = $user;
+        $this->sessionCode = $sessionCode;
     }
 
     /**

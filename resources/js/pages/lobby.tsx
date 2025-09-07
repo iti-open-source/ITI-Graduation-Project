@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import AppLayout from "@/layouts/app-layout";
+import CustomLayout from "@/layouts/custom-layout";
 import { type BreadcrumbItem } from "@/types";
-import { Head, Link, router } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import { Copy, Eye, EyeOff, Plus, Trash2, Users } from "lucide-react";
 import { useState } from "react";
@@ -46,6 +46,7 @@ interface LobbyProps {
 }
 
 export default function Lobby({ userRooms }: LobbyProps) {
+  const props = usePage().props;
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -98,9 +99,8 @@ export default function Lobby({ userRooms }: LobbyProps) {
   };
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <CustomLayout isLoggedIn={props.isLoggedIn as boolean}>
       <Head title="Lobby" />
-
       <div className="container mx-auto px-4 py-8">
         <motion.div
           variants={fadeIn}
@@ -306,6 +306,6 @@ export default function Lobby({ userRooms }: LobbyProps) {
           )}
         </motion.div>
       </div>
-    </AppLayout>
+    </CustomLayout>
   );
 }

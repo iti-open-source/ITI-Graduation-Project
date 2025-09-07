@@ -13,7 +13,7 @@ import {
 import { dashboard } from "@/routes";
 import { type NavItem } from "@/types";
 import { Link } from "@inertiajs/react";
-import { LayoutGrid, Shield, Users } from "lucide-react";
+import { LayoutGrid, Shield } from "lucide-react";
 import AppLogo from "./app-logo";
 
 const mainNavItems: NavItem[] = [
@@ -21,11 +21,6 @@ const mainNavItems: NavItem[] = [
     title: "Dashboard",
     href: dashboard(),
     icon: LayoutGrid,
-  },
-  {
-    title: "Lobby",
-    href: "/lobby",
-    icon: Users,
   },
   {
     title: "Admin",

@@ -1,6 +1,6 @@
 import { Link, usePage } from "@inertiajs/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { LogOut, Monitor, Settings, User, Users } from "lucide-react";
+import { LogOut, Settings, User, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Toaster } from "react-hot-toast";
 import VerifyEmailButton from "../verify-email-button";
@@ -185,6 +185,21 @@ export default function Navbar() {
                         >
                           <User className="h-4 w-4" /> Profile
                         </Link>
+
+                        <Link
+                          href="/lobby"
+                          className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
+                          style={{ color: "var(--color-menu-text)" }}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.backgroundColor = "var(--color-menu-hover-bg)")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.backgroundColor = "transparent")
+                          }
+                        >
+                          <Users className="h-4 w-4" /> Lobby
+                        </Link>
+
                         <Link
                           href="/settings"
                           className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
@@ -201,19 +216,6 @@ export default function Navbar() {
                           <Settings className="h-4 w-4" /> Account settings
                         </Link>
 
-                        <Link
-                          href="/lobby"
-                          className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
-                          style={{ color: "var(--color-menu-text)" }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.backgroundColor = "var(--color-menu-hover-bg)")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.backgroundColor = "transparent")
-                          }
-                        >
-                          <Users className="h-4 w-4" /> Lobby
-                        </Link>
                         <Link
                           href="/logout"
                           method="post"

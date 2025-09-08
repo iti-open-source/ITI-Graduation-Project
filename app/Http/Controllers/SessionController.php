@@ -64,6 +64,9 @@ class SessionController extends Controller
             'ended_at' => now(),
         ]);
 
+        // Notify both session participants
+        event(new RoomSessionSignaling($sessionCode, 'terminated', ['by' => $userId], $userId));
+
         // Broadcast room status so creator lobby updates Active Sessions
         $room = \App\Models\Room::find($session->room_id);
         if ($room) {

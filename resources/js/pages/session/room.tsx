@@ -92,6 +92,16 @@ export default function SessionRoom(props: PageProps) {
       channelRef.current = channel;
       channel.bind("room-session-signaling", async (payload: any) => {
         try {
+          if (payload.type === "terminated") {
+            // Remote side ended session; cleanup and leave
+            try {
+              if (dcRef.current) { try { dcRef.current.close(); } catch {} dcRef.current = null; }
+              if (pcRef.current) { try { pcRef.current.close(); } catch {} pcRef.current = null; }
+              if (streamRef.current) { try { streamRef.current.getTracks().forEach((t)=>t.stop()); } catch {} streamRef.current = null; }
+            } catch {}
+            window.location.href = '/lobby';
+            return;
+          }
           if (payload.type === "ready") {
             peerReadyRef.current = true;
             if (isCreator && weReadyRef.current) {

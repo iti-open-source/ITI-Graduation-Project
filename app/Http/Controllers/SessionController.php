@@ -36,7 +36,7 @@ class SessionController extends Controller
     public function signal(Request $request, string $sessionCode)
     {
         $validated = $request->validate([
-            'type' => 'required|in:offer,answer,ice-candidate',
+            'type' => 'required|in:offer,answer,ice-candidate,ready',
             'data' => 'required',
         ]);
 

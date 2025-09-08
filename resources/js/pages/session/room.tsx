@@ -27,6 +27,8 @@ export default function SessionRoom(props: PageProps) {
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dcRef = useRef<RTCDataChannel | null>(null);
   const iceQueueRef = useRef<RTCIceCandidate[]>([]);
+  const peerReadyRef = useRef(false);
+  const weReadyRef = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -71,6 +73,13 @@ export default function SessionRoom(props: PageProps) {
       const channel = pusher.subscribe(`session.room.${roomCode}`);
       channel.bind("room-session-signaling", async (payload: any) => {
         try {
+          if (payload.type === "ready") {
+            peerReadyRef.current = true;
+            if (isCreator && weReadyRef.current) {
+              await startCall();
+            }
+            return;
+          }
           if (payload.type === "offer" && !isCreator) {
             const cleaned = cleanSdp(payload.data);
             await pc.setRemoteDescription(cleaned);
@@ -91,6 +100,13 @@ export default function SessionRoom(props: PageProps) {
           console.error("signaling error", e);
         }
       });
+
+      // Mark ourselves ready and auto-start when both are present
+      weReadyRef.current = true;
+      sendSignal("ready", { at: Date.now() });
+      if (isCreator && peerReadyRef.current) {
+        await startCall();
+      }
     })();
 
     return () => {

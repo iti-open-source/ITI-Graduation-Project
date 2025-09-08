@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRoomUpdates } from "@/hooks/use-room-updates";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem, type SharedData } from "@/types";
@@ -126,107 +126,126 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
 
       {!isConnected && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-          <div className="rounded border border-[var(--color-card-shadow)] bg-[var(--color-card-bg)] px-4 py-3 text-[var(--color-text)] shadow-lg">
-            Realtime connection lost. Reconnecting…
+          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] px-6 py-4 text-[var(--color-text)] shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+              Realtime connection lost. Reconnecting…
+            </div>
           </div>
         </div>
       )}
 
-      <div className="container mx-auto px-4 py-8">
-        <motion.div
-          variants={fadeIn}
-          initial="hidden"
-          animate="visible"
-          className="mx-auto max-w-4xl"
-        >
+      <div className="min-h-screen bg-[var(--background)] px-4 py-8">
+        <div className="mx-auto max-w-6xl">
           {/* Header */}
-          <div className="mb-8 flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <motion.div variants={fadeIn} initial="hidden" animate="visible" className="mb-8">
+            <div className="mb-6 flex items-center gap-6">
               <Button
                 asChild
                 variant="outline"
                 size="sm"
-                className="border-black text-black hover:bg-black hover:text-white"
+                className="border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-slate-100"
               >
                 <Link href="/lobby">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Lobby
                 </Link>
               </Button>
+            </div>
 
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-[var(--color-text)]">{room.name}</h1>
-                <p className="mt-1 text-[var(--color-text-secondary)]">
-                  Room Code: {room.room_code}
-                </p>
+                <h1 className="mb-2 text-4xl font-bold text-[var(--color-text)]">{room.name}</h1>
+                <div className="flex items-center gap-4">
+                  <p className="text-[var(--color-text-secondary)]">
+                    Room Code:{" "}
+                    <span className="font-mono font-semibold text-slate-600 dark:text-slate-300">
+                      {room.room_code}
+                    </span>
+                  </p>
+                  <Badge
+                    className={
+                      isConnected
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                    }
+                  >
+                    {isConnected ? "Connected" : "Disconnected"}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={copyRoomLink}
+                  variant="outline"
+                  className="border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  {copied ? "Copied!" : "Copy Link"}
+                </Button>
+
+                <Button
+                  onClick={deleteRoom}
+                  variant="outline"
+                  className="border-red-300 bg-[var(--color-card-bg)] text-red-600 hover:bg-red-600 hover:text-white dark:border-red-700 dark:text-red-400 dark:hover:bg-red-700 dark:hover:text-white"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Room
+                </Button>
               </div>
             </div>
+          </motion.div>
 
-            <div className="flex items-center gap-2">
-              <Badge
-                className={isConnected ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}
-              >
-                {isConnected ? "Connected" : "Disconnected"}
-              </Badge>
-
-              <Button
-                onClick={copyRoomLink}
-                variant="outline"
-                className="border-black text-black hover:bg-black hover:text-white"
-              >
-                <Copy className="mr-2 h-4 w-4" />
-                {copied ? "Copied!" : "Copy Link"}
-              </Button>
-
-              <Button
-                onClick={deleteRoom}
-                variant="outline"
-                className="border-black text-black hover:bg-black hover:text-white"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Room
-              </Button>
-            </div>
-          </div>
-
+          {/* Main Grid Layout */}
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Queue */}
-            <motion.div variants={fadeIn} initial="hidden" animate="visible">
-              <Card className="border-[var(--color-card-shadow)] bg-[var(--color-card-bg)]">
+            <motion.div variants={fadeIn} initial="hidden" animate="visible" className="space-y-6">
+              <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-[var(--color-text)]">
-                    <Users className="h-5 w-5" />
-                    Waiting Queue
-                    {room.queue_count > 0 && (
-                      <Badge className="bg-yellow-100 text-yellow-800">{room.queue_count}</Badge>
-                    )}
+                  <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500 text-white">
+                      <Users className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        Waiting Queue
+                        {room.queue_count > 0 && (
+                          <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                            {room.queue_count}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm font-normal text-[var(--color-text-secondary)]">
+                        Users waiting to join your room
+                      </p>
+                    </div>
                   </CardTitle>
-                  <CardDescription className="text-[var(--color-text-secondary)]">
-                    Users waiting to join your room
-                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {room.queue.length > 0 ? (
                     <div className="space-y-3">
                       {room.queue.map((queueItem) => (
-                        <div
+                        <motion.div
                           key={queueItem.id}
-                          className="flex items-center gap-4 rounded-lg bg-[var(--color-section-alt-bg)] p-3"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="flex items-center gap-4 rounded-lg bg-[var(--color-muted)] p-4 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20"
                         >
                           <div className="flex flex-1 items-center gap-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-accent)] text-sm font-semibold text-white">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-sm font-semibold text-white">
                               {queueItem.position}
                             </div>
                             <Avatar className="h-10 w-10">
-                              <AvatarFallback className="bg-gray-100 text-gray-800">
+                              <AvatarFallback className="bg-blue-50 font-semibold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
                                 {queueItem.user.name.charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
-                            <div className="flex-1">
-                              <h4 className="font-medium text-[var(--color-text)]">
+                            <div className="min-w-0 flex-1">
+                              <h4 className="truncate font-medium text-[var(--color-text)]">
                                 {queueItem.user.name}
                               </h4>
-                              <p className="text-sm text-[var(--color-text-secondary)]">
+                              <p className="truncate text-sm text-[var(--color-text-secondary)]">
                                 {queueItem.user.email}
                               </p>
                             </div>
@@ -235,18 +254,18 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                           <Button
                             onClick={() => joinUser(queueItem.user.id)}
                             size="sm"
-                            className="bg-black text-white hover:bg-black/90"
+                            className="border-0 bg-blue-500 text-white hover:bg-blue-600"
                             disabled={false}
                           >
                             <UserPlus className="mr-2 h-4 w-4" />
                             Accept
                           </Button>
-                        </div>
+                        </motion.div>
                       ))}
                     </div>
                   ) : (
-                    <div className="py-8 text-center">
-                      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-section-alt-bg)]">
+                    <div className="py-12 text-center">
+                      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-muted)]">
                         <Users className="h-8 w-8 text-[var(--color-text-secondary)]" />
                       </div>
                       <h3 className="mb-2 text-lg font-semibold text-[var(--color-text)]">
@@ -262,23 +281,32 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
             </motion.div>
 
             {/* Active Sessions */}
-            <motion.div variants={fadeIn} initial="hidden" animate="visible">
-              <Card className="border-[var(--color-card-shadow)] bg-[var(--color-card-bg)]">
+            <motion.div variants={fadeIn} initial="hidden" animate="visible" className="space-y-6">
+              <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-[var(--color-text)]">
-                    Active Sessions
-                    {(() => {
-                      const sessions = Array.isArray((room as any).sessions)
-                        ? (room as any).sessions.filter((s: any) => s.status === "active")
-                        : [];
-                      return sessions.length > 0 ? (
-                        <Badge className="bg-green-100 text-green-800">{sessions.length}</Badge>
-                      ) : null;
-                    })()}
+                  <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500 text-white">
+                      <Users className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        Active Sessions
+                        {(() => {
+                          const sessions = Array.isArray((room as any).sessions)
+                            ? (room as any).sessions.filter((s: any) => s.status === "active")
+                            : [];
+                          return sessions.length > 0 ? (
+                            <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                              {sessions.length}
+                            </Badge>
+                          ) : null;
+                        })()}
+                      </div>
+                      <p className="text-sm font-normal text-[var(--color-text-secondary)]">
+                        Ongoing sessions created from this lobby
+                      </p>
+                    </div>
                   </CardTitle>
-                  <CardDescription className="text-[var(--color-text-secondary)]">
-                    Ongoing sessions created from this lobby
-                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {(() => {
@@ -287,38 +315,53 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                       : [];
                     if (sessions.length === 0) {
                       return (
-                        <div className="py-8 text-center text-[var(--color-text-secondary)]">
-                          No active sessions
+                        <div className="py-12 text-center">
+                          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-muted)]">
+                            <Users className="h-8 w-8 text-[var(--color-text-secondary)]" />
+                          </div>
+                          <h3 className="mb-2 text-lg font-semibold text-[var(--color-text)]">
+                            No active sessions
+                          </h3>
+                          <p className="text-[var(--color-text-secondary)]">
+                            Sessions will appear here when participants join
+                          </p>
                         </div>
                       );
                     }
                     return (
                       <div className="space-y-3">
                         {sessions.map((s: any) => (
-                          <div
+                          <motion.div
                             key={s.id}
-                            className="flex items-center justify-between rounded-lg bg-[var(--color-section-alt-bg)] p-3"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="flex items-center justify-between rounded-lg bg-[var(--color-muted)] p-4 transition-colors hover:bg-green-50 dark:hover:bg-green-900/20"
                           >
-                            <div>
-                              <div className="font-medium text-[var(--color-text)]">
-                                Session: {s.session_code}
+                            <div className="min-w-0 flex-1">
+                              <div className="truncate font-medium text-[var(--color-text)]">
+                                Session:{" "}
+                                <span className="font-mono text-slate-600 dark:text-slate-300">
+                                  {s.session_code}
+                                </span>
                               </div>
                               <div className="text-sm text-[var(--color-text-secondary)]">
-                                Status: {s.status}
+                                Status: <span className="capitalize">{s.status}</span>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Badge className="bg-green-100 text-green-800">active</Badge>
+                            <div className="flex items-center gap-3">
+                              <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                active
+                              </Badge>
                               <Button
                                 asChild
                                 size="sm"
                                 variant="outline"
-                                className="border-black text-black hover:bg-black hover:text-white"
+                                className="border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-slate-100"
                               >
                                 <a href={`/session/${s.session_code}`}>Open</a>
                               </Button>
                             </div>
-                          </div>
+                          </motion.div>
                         ))}
                       </div>
                     );
@@ -329,35 +372,40 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
           </div>
 
           {/* Room Link Card */}
-          <motion.div variants={fadeIn} initial="hidden" animate="visible" className="mt-6">
-            <Card className="border-[var(--color-card-shadow)] bg-[var(--color-card-bg)]">
+          <motion.div variants={fadeIn} initial="hidden" animate="visible" className="mt-8">
+            <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
               <CardHeader>
-                <CardTitle className="text-[var(--color-text)]">Share Room Link</CardTitle>
-                <CardDescription className="text-[var(--color-text-secondary)]">
-                  Send this link to participants to join your room
-                </CardDescription>
+                <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500 text-white">
+                    <Copy className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div>Share Room Link</div>
+                    <p className="text-sm font-normal text-[var(--color-text-secondary)]">
+                      Send this link to participants to join your room
+                    </p>
+                  </div>
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-2 rounded-lg bg-[var(--color-section-alt-bg)] p-3">
-                  <code className="flex-1 text-sm text-[var(--color-text)]">
+                <div className="flex items-center gap-3 rounded-lg bg-[var(--color-muted)] p-4">
+                  <code className="flex-1 font-mono text-sm text-[var(--color-text)]">
                     {window.location.origin}/room/{room.room_code}
                   </code>
                   <Button
                     onClick={copyRoomLink}
                     size="sm"
                     variant="outline"
-                    className="border-black text-black hover:bg-black hover:text-white"
+                    className="border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-slate-100"
                   >
                     <Copy className="mr-2 h-4 w-4" />
-                    Copy
+                    {copied ? "Copied!" : "Copy"}
                   </Button>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
-
-          {/* Lobby only; editor removed */}
-        </motion.div>
+        </div>
       </div>
     </AppLayout>
   );

@@ -120,7 +120,7 @@ export default function Queue({
               asChild
               variant="outline"
               size="sm"
-              className="border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:bg-[var(--color-accent)] hover:text-white"
+              className="border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-slate-100"
             >
               <Link href="/lobby">
                 <ArrowLeft className="mr-2 h-4 w-4" />
@@ -143,7 +143,7 @@ export default function Queue({
                 <motion.div
                   variants={pulse}
                   animate="animate"
-                  className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-[var(--color-accent)] shadow-lg"
+                  className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-500 shadow-lg"
                 >
                   <Users className="h-10 w-10 text-white" />
                 </motion.div>
@@ -162,7 +162,7 @@ export default function Queue({
                 <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
                   <CardContent className="p-8">
                     <div className="space-y-4 text-center">
-                      <div className="mb-4 inline-flex h-24 w-24 items-center justify-center rounded-full bg-[var(--color-accent)]/10">
+                      <div className="mb-4 inline-flex h-24 w-24 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30">
                         <span className="text-4xl font-bold text-[var(--color-text)]">
                           #{queuePosition}
                         </span>

@@ -4,6 +4,7 @@ import { Head } from "@inertiajs/react";
 import Pusher from "pusher-js";
 import { useEffect, useRef, useState } from "react";
 import CollaborativeEditor from "@/components/editor/collaborative-editor";
+import { Mic, MicOff, Video as VideoIcon, VideoOff, PhoneOff } from "lucide-react";
 
 interface PageProps {
   roomCode: string;
@@ -26,6 +27,8 @@ export default function SessionRoom(props: PageProps) {
   const [chatReady, setChatReady] = useState(false);
   const [connStatus, setConnStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
   const [wsStatus, setWsStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
+  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dcRef = useRef<RTCDataChannel | null>(null);
@@ -189,6 +192,26 @@ export default function SessionRoom(props: PageProps) {
     };
   }, [roomCode, isCreator, pusherKey, pusherCluster]);
 
+  const toggleAudio = () => {
+    const stream = streamRef.current;
+    if (!stream) return;
+    const track = stream.getAudioTracks()[0];
+    if (track) {
+      track.enabled = !track.enabled;
+      setIsAudioEnabled(track.enabled);
+    }
+  };
+
+  const toggleVideo = () => {
+    const stream = streamRef.current;
+    if (!stream) return;
+    const track = stream.getVideoTracks()[0];
+    if (track) {
+      track.enabled = !track.enabled;
+      setIsVideoEnabled(track.enabled);
+    }
+  };
+
   const startCall = async () => {
     if (!pcRef.current) return;
     const offer = await pcRef.current.createOffer();
@@ -278,6 +301,20 @@ export default function SessionRoom(props: PageProps) {
               />
             </div>
             <div className="mt-3 flex gap-2">
+              <button
+                onClick={toggleAudio}
+                className={`inline-flex items-center justify-center rounded px-3 py-1 text-white ${isAudioEnabled ? "bg-gray-700 hover:bg-gray-600" : "bg-red-600 hover:bg-red-700"}`}
+                title={isAudioEnabled ? "Mute microphone" : "Unmute microphone"}
+              >
+                {isAudioEnabled ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+              </button>
+              <button
+                onClick={toggleVideo}
+                className={`inline-flex items-center justify-center rounded px-3 py-1 text-white ${isVideoEnabled ? "bg-gray-700 hover:bg-gray-600" : "bg-red-600 hover:bg-red-700"}`}
+                title={isVideoEnabled ? "Turn camera off" : "Turn camera on"}
+              >
+                {isVideoEnabled ? <VideoIcon className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
+              </button>
               <form method="POST" action={`/session/${roomCode}/terminate`}>
                 <input
                   type="hidden"
@@ -289,9 +326,10 @@ export default function SessionRoom(props: PageProps) {
                 />
                 <button
                   type="submit"
-                  className="inline-block rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700"
+                  className="inline-flex items-center justify-center rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700"
+                  title="End Call"
                 >
-                  Terminate Session
+                  <PhoneOff className="h-4 w-4" />
                 </button>
               </form>
             </div>

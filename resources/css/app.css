@@ -101,7 +101,7 @@
 
 /* Dark theme */
 :root[data-theme="dark"] {
-  --color-bg: #1f2937; /* Gray-800: Warm, soft dark background */
+  --color-bg: #000000; /* True black: Pure black background for dark mode */
   --color-text: #e2e8f0; /* Slate-200: Bright, readable text */
   --color-text-secondary: #9ca3af; /* Gray-400:  secondary text */
   --color-accent: #60a5fa; /* Blue-400: Lighter accent for dark mode */

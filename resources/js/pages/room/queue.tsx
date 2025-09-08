@@ -1,42 +1,24 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { router } from "@inertiajs/react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRoomUpdates } from "@/hooks/use-room-updates";
+import AppLayout from "@/layouts/app-layout";
+import { type BreadcrumbItem } from "@/types";
+import { Head, Link, router } from "@inertiajs/react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, Loader2, Signal, Users } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { ArrowLeft, Clock, Loader2, Users } from "lucide-react";
+import { useEffect, useState } from "react";
 
-// --- Mock Implementations to resolve build errors ---
-// In a real application, these would be imported from your project files and libraries.
-
-const AppLayout = ({ children }: { children: React.ReactNode; breadcrumbs: any[] }) => (
-  // A basic layout wrapper. In a real app, this would include navigation, footers, etc.
-  <div className="relative flex min-h-screen flex-col bg-background">
-    <main className="flex-1">{children}</main>
-  </div>
-);
-
-const Head = ({ title }: { title: string }) => {
-  React.useEffect(() => {
-    if (title) document.title = title;
-  }, [title]);
-  return null;
-};
-
-const Link = ({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-  <a href={href} {...props}>
-    {children}
-  </a>
-);
-
-// Mock the custom hook `useRoomUpdates`
-const useRoomUpdates = (roomCode: string, initialRoom: Room) => {
-  console.log(`Mock useRoomUpdates: Subscribed to updates for room ${roomCode}`);
-  // Simulate a stable connection for UI purposes
-  return { room: initialRoom, isConnected: true };
-};
-
-// --- End Mock Implementations ---
+const breadcrumbs: BreadcrumbItem[] = [
+  {
+    title: "Lobby",
+    href: "/lobby",
+  },
+  {
+    title: "Room",
+    href: "#",
+  },
+];
 
 interface User {
   id: number;
@@ -56,6 +38,7 @@ interface Room {
   name: string;
   room_code: string;
   is_active: boolean;
+  last_activity: string;
   current_participant: User | null;
   queue: QueueUser[];
   queue_count: number;
@@ -96,7 +79,7 @@ export default function Queue({
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   const leaveQueue = () => {
@@ -106,67 +89,205 @@ export default function Queue({
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeInOut" } },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  };
+
+  const pulse = {
+    animate: {
+      scale: [1, 1.05, 1],
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        ease: "easeInOut" as const,
+      },
+    },
   };
 
   return (
-    <AppLayout breadcrumbs={[]}>
+    <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={`Waiting in Queue - ${room.name}`} />
 
-      <div className="container mx-auto max-w-2xl px-4 py-8 md:py-12">
-        <motion.div variants={fadeIn} initial="hidden" animate="visible">
+      <div className="min-h-screen bg-[var(--background)] px-4 py-8">
+        <div className="mx-auto max-w-4xl">
           {/* Header */}
-          <div className="mb-8 flex">
-            <Button asChild variant="ghost" className="text-muted-foreground">
+          <motion.div
+            variants={fadeIn}
+            initial="hidden"
+            animate="visible"
+            className="mb-8 flex items-center justify-between"
+          >
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:bg-[var(--color-accent)] hover:text-white"
+            >
               <Link href="/lobby">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Lobby
               </Link>
             </Button>
-          </div>
+          </motion.div>
 
-          {/* Main Content Card */}
-          <Card className="w-full text-center shadow-sm">
-            <CardHeader className="pb-4">
+          {/* Main Grid Layout */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Left Column - Main Status */}
+            <div className="space-y-6 lg:col-span-2">
+              {/* Hero Section */}
               <motion.div
-                animate={{ scale: [1, 1.03, 1] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10"
+                variants={fadeIn}
+                initial="hidden"
+                animate="visible"
+                className="text-center"
               >
-                <Users className="h-10 w-10 text-primary" />
-              </motion.div>
-              <CardTitle className="text-3xl font-bold tracking-tight">
-                You're in the Queue
-              </CardTitle>
-              <CardDescription className="text-lg text-muted-foreground">
-                Waiting to join <strong>{room.name}</strong>. The host will let you in soon.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="rounded-lg border bg-muted/50 p-6">
-                <p className="mb-2 text-sm font-medium tracking-wider text-muted-foreground uppercase">
-                  Your Position
-                </p>
-                <div className="text-7xl font-bold tracking-tighter text-primary">
-                  {queuePosition}
-                </div>
-                <div className="mt-2 flex items-center justify-center gap-2 text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span>Time in queue: {formatTime(timeInQueue)}</span>
-                </div>
-              </div>
+                <motion.div
+                  variants={pulse}
+                  animate="animate"
+                  className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-[var(--color-accent)] shadow-lg"
+                >
+                  <Users className="h-10 w-10 text-white" />
+                </motion.div>
 
-              {/* Status and Leave Button */}
-              <div className="flex flex-col items-center justify-center gap-4 pt-4">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Waiting for host to accept...</span>
-                </div>
+                <h1 className="mb-3 text-2xl font-bold text-[var(--color-text)] sm:text-3xl">
+                  Waiting in Queue
+                </h1>
+                <p className="text-[var(--color-text-secondary)]">
+                  You're in line for{" "}
+                  <span className="font-semibold text-[var(--color-text)]">{room.name}</span>
+                </p>
+              </motion.div>
+
+              {/* Queue Position Card */}
+              <motion.div variants={fadeIn} initial="hidden" animate="visible">
+                <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+                  <CardContent className="p-8">
+                    <div className="space-y-4 text-center">
+                      <div className="mb-4 inline-flex h-24 w-24 items-center justify-center rounded-full bg-[var(--color-accent)]/10">
+                        <span className="text-4xl font-bold text-[var(--color-text)]">
+                          #{queuePosition}
+                        </span>
+                      </div>
+
+                      <div>
+                        <p className="mb-1 text-sm text-[var(--color-text-secondary)]">
+                          Your position
+                        </p>
+                        <p className="text-lg font-semibold text-[var(--color-text)]">
+                          {queuePosition === 1
+                            ? "You're next!"
+                            : `${queuePosition - 1} ahead of you`}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-center gap-2 text-[var(--color-text-secondary)]">
+                        <Clock className="h-4 w-4" />
+                        <span>Waiting for {formatTime(timeInQueue)}</span>
+                      </div>
+
+                      {room.queue_count > 1 && (
+                        <p className="text-sm text-[var(--color-text-secondary)]">
+                          {room.queue_count} people in queue
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Current Call Status */}
+              {room.current_participant && (
+                <motion.div variants={fadeIn} initial="hidden" animate="visible">
+                  <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900/20">
+                          <div className="h-3 w-3 animate-pulse rounded-full bg-red-500"></div>
+                        </div>
+                        <div>
+                          <p className="font-medium text-[var(--color-text)]">
+                            Currently in session
+                          </p>
+                          <p className="text-sm text-[var(--color-text-secondary)]">
+                            {room.current_participant.name} is interviewing
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Right Column - Room Info & Actions */}
+            <div className="space-y-6">
+              {/* Room Information */}
+              <motion.div variants={fadeIn} initial="hidden" animate="visible">
+                <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-lg text-[var(--color-text)]">Room Details</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-[var(--color-text-secondary)]">Name</span>
+                        <span className="text-sm font-medium text-[var(--color-text)]">
+                          {room.name}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-[var(--color-text-secondary)]">Code</span>
+                        <Badge
+                          variant="outline"
+                          className="border-[var(--color-border)] font-mono text-xs text-[var(--color-text)]"
+                        >
+                          {room.room_code}
+                        </Badge>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-[var(--color-text-secondary)]">Status</span>
+                        <Badge className="bg-yellow-100 text-xs text-yellow-800">In Queue</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Connection Status */}
+              <motion.div variants={fadeIn} initial="hidden" animate="visible">
+                <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[var(--color-text-secondary)]">Connection</span>
+                      <Badge
+                        className={
+                          isConnected
+                            ? "bg-green-100 text-xs text-green-800"
+                            : "bg-red-100 text-xs text-red-800"
+                        }
+                      >
+                        {isConnected ? "Connected" : "Disconnected"}
+                      </Badge>
+                    </div>
+
+                    {isConnected && (
+                      <div className="mt-3 flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        <span>Waiting for acceptance...</span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Action Button */}
+              <motion.div variants={fadeIn} initial="hidden" animate="visible">
                 <Button
                   onClick={leaveQueue}
                   variant="outline"
                   disabled={isLeaving}
-                  className="w-full hover:bg-destructive hover:text-destructive-foreground sm:w-auto"
+                  className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:border-red-200 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-800 dark:hover:bg-red-900/10 dark:hover:text-red-400"
                 >
                   {isLeaving ? (
                     <>
@@ -177,47 +298,10 @@ export default function Queue({
                     "Leave Queue"
                   )}
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* In-Call Status Card */}
-          {room.current_participant && (
-            <motion.div variants={fadeIn} className="mt-6">
-              <Card className="border-blue-500/20 bg-blue-500/5 text-blue-900 dark:text-blue-200">
-                <CardHeader className="flex-row items-center gap-4 space-y-0 p-4">
-                  <div className="relative flex h-3 w-3">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500"></span>
-                  </div>
-                  <div>
-                    <CardTitle className="text-base font-semibold">
-                      Host is Currently Busy
-                    </CardTitle>
-                    <CardDescription className="text-blue-800/80 dark:text-blue-200/80">
-                      In a call with {room.current_participant.name}
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-              </Card>
-            </motion.div>
-          )}
-
-          {/* Connection Status Footer */}
-          <motion.div variants={fadeIn} className="mt-8 text-center text-sm">
-            <Badge
-              variant={isConnected ? "outline" : "destructive"}
-              className={
-                isConnected
-                  ? "border-green-500/50 bg-green-500/10 font-normal text-green-700 dark:text-green-400"
-                  : "font-normal"
-              }
-            >
-              <Signal className="mr-2 h-3 w-3" />
-              {isConnected ? "Real-time Connection Active" : "Disconnected"}
-            </Badge>
-          </motion.div>
-        </motion.div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
       </div>
     </AppLayout>
   );

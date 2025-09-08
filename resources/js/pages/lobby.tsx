@@ -121,7 +121,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
 
             <Button
               onClick={() => setShowCreateForm(!showCreateForm)}
-              className="bg-[var(--color-button-primary-bg)] text-white hover:bg-[var(--color-button-primary-hover)]"
+              className="bg-black text-white hover:bg-black/90"
             >
               <Plus className="mr-2 h-4 w-4" />
               Create Room
@@ -163,7 +163,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
                       <Button
                         type="submit"
                         disabled={isCreating}
-                        className="bg-[var(--color-button-primary-bg)] text-white hover:bg-[var(--color-button-primary-hover)]"
+                        className="bg-black text-white hover:bg-black/90"
                       >
                         {isCreating ? "Creating..." : "Create Room"}
                       </Button>
@@ -171,7 +171,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
                         type="button"
                         variant="outline"
                         onClick={() => setShowCreateForm(false)}
-                        className="border-[var(--color-card-shadow)] text-[var(--color-text)]"
+                        className="border-black text-black hover:bg-black hover:text-white"
                       >
                         Cancel
                       </Button>
@@ -248,7 +248,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
                         <Button
                           asChild
                           size="sm"
-                          className="flex-1 bg-[var(--color-button-primary-bg)] text-white hover:bg-[var(--color-button-primary-hover)]"
+                          className="flex-1 bg-black text-white hover:bg-black/90"
                         >
                           <Link href={`/room/${room.room_code}`}>
                             <Eye className="mr-2 h-4 w-4" />
@@ -260,7 +260,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
                           size="sm"
                           variant="outline"
                           onClick={() => copyRoomLink(room.room_code)}
-                          className="border-[var(--color-card-shadow)] text-[var(--color-text)]"
+                          className="border-black text-black hover:bg-black hover:text-white"
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
@@ -269,7 +269,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
                           size="sm"
                           variant="outline"
                           onClick={() => deleteRoom(room.room_code)}
-                          className="border-red-200 text-red-600 hover:bg-red-50"
+                          className="border-black text-black hover:bg-black hover:text-white"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -298,7 +298,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
                 </p>
                 <Button
                   onClick={() => setShowCreateForm(true)}
-                  className="bg-[var(--color-button-primary-bg)] text-white hover:bg-[var(--color-button-primary-hover)]"
+                  className="bg-black text-white hover:bg-black/90"
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Create Your First Room

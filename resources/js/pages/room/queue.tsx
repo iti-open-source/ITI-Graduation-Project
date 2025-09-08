@@ -120,7 +120,7 @@ export default function Queue({
               asChild
               variant="outline"
               size="sm"
-              className="border-[var(--color-card-shadow)] text-[var(--color-text)]"
+              className="border-black text-black hover:bg-black hover:text-white"
             >
               <Link href="/lobby">
                 <ArrowLeft className="mr-2 h-4 w-4" />
@@ -255,7 +255,7 @@ export default function Queue({
               onClick={leaveQueue}
               variant="outline"
               disabled={isLeaving}
-              className="border-red-200 text-red-600 hover:bg-red-50"
+              className="border-black text-black hover:bg-black hover:text-white"
             >
               {isLeaving ? (
                 <>

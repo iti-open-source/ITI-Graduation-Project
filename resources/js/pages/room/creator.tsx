@@ -146,7 +146,7 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                 asChild
                 variant="outline"
                 size="sm"
-                className="border-[var(--color-card-shadow)] text-[var(--color-text)]"
+                className="border-black text-black hover:bg-black hover:text-white"
               >
                 <Link href="/lobby">
                   <ArrowLeft className="mr-2 h-4 w-4" />
@@ -172,7 +172,7 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
               <Button
                 onClick={copyRoomLink}
                 variant="outline"
-                className="border-[var(--color-card-shadow)] text-[var(--color-text)]"
+                className="border-black text-black hover:bg-black hover:text-white"
               >
                 <Copy className="mr-2 h-4 w-4" />
                 {copied ? "Copied!" : "Copy Link"}
@@ -181,7 +181,7 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
               <Button
                 onClick={deleteRoom}
                 variant="outline"
-                className="border-red-200 text-red-600 hover:bg-red-50"
+                className="border-black text-black hover:bg-black hover:text-white"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete Room
@@ -235,7 +235,7 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                           <Button
                             onClick={() => joinUser(queueItem.user.id)}
                             size="sm"
-                            className="bg-[var(--color-button-primary-bg)] text-white hover:bg-[var(--color-button-primary-hover)]"
+                            className="bg-black text-white hover:bg-black/90"
                             disabled={false}
                           >
                             <UserPlus className="mr-2 h-4 w-4" />
@@ -303,7 +303,7 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge className="bg-green-100 text-green-800">active</Badge>
-                              <Button asChild size="sm" variant="outline" className="border-[var(--color-card-shadow)]">
+                              <Button asChild size="sm" variant="outline" className="border-black text-black hover:bg-black hover:text-white">
                                 <a href={`/session/${s.session_code}`}>Open</a>
                               </Button>
                             </div>
@@ -335,7 +335,7 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                     onClick={copyRoomLink}
                     size="sm"
                     variant="outline"
-                    className="border-[var(--color-card-shadow)] text-[var(--color-text)]"
+                    className="border-black text-black hover:bg-black hover:text-white"
                   >
                     <Copy className="mr-2 h-4 w-4" />
                     Copy

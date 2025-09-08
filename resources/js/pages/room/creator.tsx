@@ -259,51 +259,51 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-[var(--color-text)]">
                     Active Sessions
-                    {Array.isArray((room as any).sessions) && (room as any).sessions.length > 0 && (
-                      <Badge className="bg-green-100 text-green-800">
-                        {(room as any).sessions.length}
-                      </Badge>
-                    )}
+                    {(() => {
+                      const sessions = Array.isArray((room as any).sessions)
+                        ? (room as any).sessions.filter((s: any) => s.status === 'active')
+                        : [];
+                      return sessions.length > 0 ? (
+                        <Badge className="bg-green-100 text-green-800">{sessions.length}</Badge>
+                      ) : null;
+                    })()}
                   </CardTitle>
                   <CardDescription className="text-[var(--color-text-secondary)]">
                     Ongoing sessions created from this lobby
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {Array.isArray((room as any).sessions) && (room as any).sessions.length > 0 ? (
-                    <div className="space-y-3">
-                      {(room as any).sessions.map((s: any) => (
-                        <div
-                          key={s.id}
-                          className="flex items-center justify-between rounded-lg bg-[var(--color-section-alt-bg)] p-3"
-                        >
-                          <div>
-                            <div className="font-medium text-[var(--color-text)]">
-                              Session: {s.session_code}
+                  {(() => {
+                    const sessions = Array.isArray((room as any).sessions)
+                      ? (room as any).sessions.filter((s: any) => s.status === 'active')
+                      : [];
+                    if (sessions.length === 0) {
+                      return (
+                        <div className="py-8 text-center text-[var(--color-text-secondary)]">No active sessions</div>
+                      );
+                    }
+                    return (
+                      <div className="space-y-3">
+                        {sessions.map((s: any) => (
+                          <div
+                            key={s.id}
+                            className="flex items-center justify-between rounded-lg bg-[var(--color-section-alt-bg)] p-3"
+                          >
+                            <div>
+                              <div className="font-medium text-[var(--color-text)]">Session: {s.session_code}</div>
+                              <div className="text-sm text-[var(--color-text-secondary)]">Status: {s.status}</div>
                             </div>
-                            <div className="text-sm text-[var(--color-text-secondary)]">
-                              Status: {s.status}
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-green-100 text-green-800">active</Badge>
+                              <Button asChild size="sm" variant="outline" className="border-[var(--color-card-shadow)]">
+                                <a href={`/session/${s.session_code}`}>Open</a>
+                              </Button>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Badge className="bg-blue-100 text-blue-800">active</Badge>
-                            <Button
-                              asChild
-                              size="sm"
-                              variant="outline"
-                              className="border-[var(--color-card-shadow)]"
-                            >
-                              <a href={`/session/${s.session_code}`}>Open</a>
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="py-8 text-center text-[var(--color-text-secondary)]">
-                      No active sessions
-                    </div>
-                  )}
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             </motion.div>

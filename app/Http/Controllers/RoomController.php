@@ -125,7 +125,7 @@ class RoomController extends Controller
 
         // Create a LobbySession record with per-session code
         $sessionCode = strtoupper(bin2hex(random_bytes(3)));
-        LobbySession::create([
+        $session = LobbySession::create([
             'session_code' => $sessionCode,
             'room_id' => $room->id,
             'creator_id' => $room->created_by,
@@ -135,6 +135,8 @@ class RoomController extends Controller
         ]);
 
         // Broadcast updates with sessionCode so both sides know where to go
+        // Reload room with updated sessions for broadcast
+        $room->load(['sessions' => function($q){ $q->where('status','active')->latest('id'); }]);
         event(new QueueUpdated($room->fresh(), 'accepted', $targetUser->user, $sessionCode));
         event(new RoomStatusUpdated($room->fresh(), 'participant_joined'));
 

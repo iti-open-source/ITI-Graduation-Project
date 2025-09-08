@@ -25,7 +25,11 @@ class QueueUpdated implements ShouldBroadcast
      */
     public function __construct(Room $room, string $action, $user = null, ?string $sessionCode = null)
     {
-        $this->room = $room->load(['queue.user', 'currentParticipant']);
+        $this->room = $room->load([
+            'queue.user',
+            'currentParticipant',
+            'sessions' => function($q) { $q->where('status','active')->latest('id'); }
+        ]);
         $this->action = $action; // 'joined', 'left', 'accepted'
         $this->user = $user;
         $this->sessionCode = $sessionCode;

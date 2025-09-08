@@ -64,6 +64,12 @@ class SessionController extends Controller
             'ended_at' => now(),
         ]);
 
+        // Broadcast room status so creator lobby updates Active Sessions
+        $room = \App\Models\Room::find($session->room_id);
+        if ($room) {
+            event(new \App\Events\RoomStatusUpdated($room->fresh(), 'call_ended'));
+        }
+
         return redirect()->route('lobby');
     }
 }

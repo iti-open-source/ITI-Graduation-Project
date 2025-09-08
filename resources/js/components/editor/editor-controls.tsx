@@ -29,7 +29,7 @@ export default function EditorControls({
           onChange={handleLanguageChange}
         >
           {languages.map((lang: string) => (
-            <option key={lang} value={lang}>
+            <option key={lang} value={lang} className="text-black">
               {lang.charAt(0).toUpperCase() + lang.slice(1)}
             </option>
           ))}

@@ -124,6 +124,14 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={`Room: ${room.name}`} />
 
+      {!isConnected && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div className="rounded border border-[var(--color-card-shadow)] bg-[var(--color-card-bg)] px-4 py-3 text-[var(--color-text)] shadow-lg">
+            Realtime connection lost. Reconnecting…
+          </div>
+        </div>
+      )}
+
       <div className="container mx-auto px-4 py-8">
         <motion.div
           variants={fadeIn}

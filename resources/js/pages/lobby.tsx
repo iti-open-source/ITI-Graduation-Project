@@ -8,8 +8,7 @@ import { type BreadcrumbItem } from "@/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import { Copy, Eye, EyeOff, Plus, Trash2, Users } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import Pusher from "pusher-js";
+import { useState } from "react";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -50,8 +49,6 @@ export default function Lobby({ userRooms }: LobbyProps) {
   const props = usePage().props;
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const [wsStatus, setWsStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
-  const pusherRef = useRef<Pusher | null>(null);
 
   const handleCreateRoom = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -96,33 +93,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
     }
   };
 
-  useEffect(() => {
-    const pusher = new Pusher((import.meta as any).env?.VITE_PUSHER_APP_KEY || "your-pusher-key", {
-      cluster: (import.meta as any).env?.VITE_PUSHER_APP_CLUSTER || "us2",
-      forceTLS: true,
-      // Pusher JS auto-reconnects; we only need to reflect status
-    });
-    pusherRef.current = pusher;
-
-    const updateFromState = (state: string) => {
-      if (state === "connected") setWsStatus("connected");
-      else if (state === "connecting" || state === "unavailable" || state === "failed") setWsStatus("connecting");
-      else setWsStatus("disconnected");
-    };
-
-    try {
-      pusher.connection.bind("state_change", (states: any) => {
-        updateFromState(states?.current as string);
-      });
-      const current = (pusher as any).connection?.state as string | undefined;
-      if (current) updateFromState(current);
-    } catch {}
-
-    return () => {
-      try { pusher.disconnect(); } catch {}
-      pusherRef.current = null;
-    };
-  }, []);
+  // No realtime overlay on lobby; realtime is handled inside room and session pages
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
@@ -133,13 +104,6 @@ export default function Lobby({ userRooms }: LobbyProps) {
     <CustomLayout>
       <Head title="Lobby" />
       <div className="container mx-auto px-4 py-8">
-        {wsStatus !== "connected" && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="rounded border border-[var(--color-card-shadow)] bg-[var(--color-card-bg)] px-4 py-3 text-[var(--color-text)] shadow-lg">
-              {wsStatus === "connecting" ? "Realtime connection lost. Reconnecting…" : "Realtime disconnected."}
-            </div>
-          </div>
-        )}
         <motion.div
           variants={fadeIn}
           initial="hidden"

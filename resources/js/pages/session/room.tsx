@@ -24,6 +24,7 @@ export default function SessionRoom(props: PageProps) {
   const [messages, setMessages] = useState<Array<{ from: "me" | "peer"; text: string }>>([]);
   const [chatReady, setChatReady] = useState(false);
   const [connStatus, setConnStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
+  const [wsStatus, setWsStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dcRef = useRef<RTCDataChannel | null>(null);
@@ -90,6 +91,18 @@ export default function SessionRoom(props: PageProps) {
       pusherRef.current = pusher;
       const channel = pusher.subscribe(`session.room.${roomCode}`);
       channelRef.current = channel;
+
+      // Track websocket (Pusher) connection state
+      try {
+        pusher.connection.bind("state_change", (states: any) => {
+          const current = (states?.current as string) || "connecting";
+          if (current === "connected") setWsStatus("connected");
+          else if (current === "connecting" || current === "unavailable" || current === "failed") setWsStatus("connecting");
+          else setWsStatus("disconnected");
+        });
+        const cur = (pusher as any).connection?.state as string | undefined;
+        if (cur === "connected") setWsStatus("connected");
+      } catch {}
       channel.bind("room-session-signaling", async (payload: any) => {
         try {
           if (payload.type === "terminated") {
@@ -161,6 +174,7 @@ export default function SessionRoom(props: PageProps) {
           channelRef.current = null;
         }
         if (pusherRef.current) {
+          try { (pusherRef.current as any).connection?.unbind?.("state_change"); } catch {}
           try { pusherRef.current.disconnect(); } catch {}
           pusherRef.current = null;
         }
@@ -169,6 +183,7 @@ export default function SessionRoom(props: PageProps) {
         iceQueueRef.current = [];
         setChatReady(false);
         setConnStatus("disconnected");
+        setWsStatus("disconnected");
       } catch {}
     };
   }, [roomCode, isCreator, pusherKey, pusherCluster]);
@@ -230,6 +245,13 @@ export default function SessionRoom(props: PageProps) {
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={`Session - ${roomCode}`} />
       <div className="container mx-auto px-4 py-6">
+        {wsStatus !== "connected" && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <div className="rounded border border-[var(--color-card-shadow)] bg-[var(--color-card-bg)] px-4 py-3 text-[var(--color-text)] shadow-lg">
+              {wsStatus === "connecting" ? "Realtime connection lost. Reconnecting…" : "Realtime disconnected."}
+            </div>
+          </div>
+        )}
         <div className="grid gap-4 md:grid-cols-[1fr_320px]">
           <div className="rounded border border-[var(--color-card-shadow)] bg-[var(--color-card-bg)] p-3">
             <div className="relative">

@@ -105,9 +105,9 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
     }
   };
 
-  const disconnectUser = () => {
-    router.post(`/room/${room.room_code}/disconnect`);
-  };
+  // const disconnectUser = () => {
+  //   router.post(`/room/${room.room_code}/disconnect`);
+  // };
 
   const deleteRoom = () => {
     if (confirm("Are you sure you want to delete this room?")) {
@@ -269,7 +269,7 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                     Active Sessions
                     {(() => {
                       const sessions = Array.isArray((room as any).sessions)
-                        ? (room as any).sessions.filter((s: any) => s.status === 'active')
+                        ? (room as any).sessions.filter((s: any) => s.status === "active")
                         : [];
                       return sessions.length > 0 ? (
                         <Badge className="bg-green-100 text-green-800">{sessions.length}</Badge>
@@ -283,11 +283,13 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                 <CardContent>
                   {(() => {
                     const sessions = Array.isArray((room as any).sessions)
-                      ? (room as any).sessions.filter((s: any) => s.status === 'active')
+                      ? (room as any).sessions.filter((s: any) => s.status === "active")
                       : [];
                     if (sessions.length === 0) {
                       return (
-                        <div className="py-8 text-center text-[var(--color-text-secondary)]">No active sessions</div>
+                        <div className="py-8 text-center text-[var(--color-text-secondary)]">
+                          No active sessions
+                        </div>
                       );
                     }
                     return (
@@ -298,12 +300,21 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                             className="flex items-center justify-between rounded-lg bg-[var(--color-section-alt-bg)] p-3"
                           >
                             <div>
-                              <div className="font-medium text-[var(--color-text)]">Session: {s.session_code}</div>
-                              <div className="text-sm text-[var(--color-text-secondary)]">Status: {s.status}</div>
+                              <div className="font-medium text-[var(--color-text)]">
+                                Session: {s.session_code}
+                              </div>
+                              <div className="text-sm text-[var(--color-text-secondary)]">
+                                Status: {s.status}
+                              </div>
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge className="bg-green-100 text-green-800">active</Badge>
-                              <Button asChild size="sm" variant="outline" className="border-black text-black hover:bg-black hover:text-white">
+                              <Button
+                                asChild
+                                size="sm"
+                                variant="outline"
+                                className="border-black text-black hover:bg-black hover:text-white"
+                              >
                                 <a href={`/session/${s.session_code}`}>Open</a>
                               </Button>
                             </div>

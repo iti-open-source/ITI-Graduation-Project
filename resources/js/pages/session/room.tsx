@@ -1,10 +1,10 @@
+import CollaborativeEditor from "@/components/editor/collaborative-editor";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
 import { Head, usePage } from "@inertiajs/react";
+import { Mic, MicOff, PhoneOff, Video as VideoIcon, VideoOff } from "lucide-react";
 import Pusher from "pusher-js";
 import { useEffect, useRef, useState } from "react";
-import CollaborativeEditor from "@/components/editor/collaborative-editor";
-import { Mic, MicOff, Video as VideoIcon, VideoOff, PhoneOff } from "lucide-react";
 
 interface PageProps {
   roomCode: string;
@@ -23,10 +23,16 @@ export default function SessionRoom(props: PageProps) {
   const localRef = useRef<HTMLVideoElement>(null);
   const remoteRef = useRef<HTMLVideoElement>(null);
   const [chatInput, setChatInput] = useState("");
-  const [messages, setMessages] = useState<Array<{ from: "me" | "peer"; text: string; author?: string }>>([]);
+  const [messages, setMessages] = useState<
+    Array<{ from: "me" | "peer"; text: string; author?: string }>
+  >([]);
   const [chatReady, setChatReady] = useState(false);
-  const [connStatus, setConnStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
-  const [wsStatus, setWsStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
+  const [connStatus, setConnStatus] = useState<"connecting" | "connected" | "disconnected">(
+    "connecting",
+  );
+  const [wsStatus, setWsStatus] = useState<"connecting" | "connected" | "disconnected">(
+    "connecting",
+  );
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
 
@@ -74,7 +80,8 @@ export default function SessionRoom(props: PageProps) {
       pc.oniceconnectionstatechange = () => {
         const state = pc.iceConnectionState;
         if (state === "connected" || state === "completed") setConnStatus("connected");
-        else if (state === "disconnected" || state === "failed" || state === "closed") setConnStatus("disconnected");
+        else if (state === "disconnected" || state === "failed" || state === "closed")
+          setConnStatus("disconnected");
         else setConnStatus("connecting");
       };
 
@@ -85,7 +92,10 @@ export default function SessionRoom(props: PageProps) {
         channel.onmessage = (ev) => {
           try {
             const data = JSON.parse(String(ev.data));
-            setMessages((m) => [...m, { from: "peer", text: String(data.text ?? ""), author: data.author }]);
+            setMessages((m) => [
+              ...m,
+              { from: "peer", text: String(data.text ?? ""), author: data.author },
+            ]);
           } catch {
             setMessages((m) => [...m, { from: "peer", text: String(ev.data) }]);
           }
@@ -108,22 +118,49 @@ export default function SessionRoom(props: PageProps) {
         pusher.connection.bind("state_change", (states: any) => {
           const current = (states?.current as string) || "connecting";
           if (current === "connected") setWsStatus("connected");
-          else if (current === "connecting" || current === "unavailable" || current === "failed") setWsStatus("connecting");
+          else if (current === "connecting" || current === "unavailable" || current === "failed")
+            setWsStatus("connecting");
           else setWsStatus("disconnected");
         });
         const cur = (pusher as any).connection?.state as string | undefined;
         if (cur === "connected") setWsStatus("connected");
-      } catch {}
+      } catch (err) {
+        console.error(err);
+      }
       channel.bind("room-session-signaling", async (payload: any) => {
         try {
           if (payload.type === "terminated") {
             // Remote side ended session; cleanup and leave
             try {
-              if (dcRef.current) { try { dcRef.current.close(); } catch {} dcRef.current = null; }
-              if (pcRef.current) { try { pcRef.current.close(); } catch {} pcRef.current = null; }
-              if (streamRef.current) { try { streamRef.current.getTracks().forEach((t)=>t.stop()); } catch {} streamRef.current = null; }
-            } catch {}
-            window.location.href = '/lobby';
+              if (dcRef.current) {
+                try {
+                  dcRef.current.close();
+                } catch (err) {
+                  console.error(err);
+                }
+
+                dcRef.current = null;
+              }
+              if (pcRef.current) {
+                try {
+                  pcRef.current.close();
+                } catch (err) {
+                  console.error(err);
+                }
+                pcRef.current = null;
+              }
+              if (streamRef.current) {
+                try {
+                  streamRef.current.getTracks().forEach((t) => t.stop());
+                } catch (err) {
+                  console.error(err);
+                }
+                streamRef.current = null;
+              }
+            } catch (err) {
+              console.error(err);
+            }
+            window.location.href = "/lobby";
             return;
           }
           if (payload.type === "ready") {
@@ -166,27 +203,63 @@ export default function SessionRoom(props: PageProps) {
       isMounted = false;
       try {
         if (dcRef.current) {
-          try { dcRef.current.close(); } catch {}
+          try {
+            dcRef.current.close();
+          } catch (err) {
+            console.error(err);
+          }
           dcRef.current = null;
         }
         if (pcRef.current) {
-          try { pcRef.current.ontrack = null; } catch {}
-          try { pcRef.current.onicecandidate = null; } catch {}
-          try { pcRef.current.close(); } catch {}
+          try {
+            pcRef.current.ontrack = null;
+          } catch (err) {
+            console.error(err);
+          }
+          try {
+            pcRef.current.onicecandidate = null;
+          } catch (err) {
+            console.error(err);
+          }
+          try {
+            pcRef.current.close();
+          } catch (err) {
+            console.error(err);
+          }
           pcRef.current = null;
         }
         if (streamRef.current) {
-          try { streamRef.current.getTracks().forEach((t) => t.stop()); } catch {}
+          try {
+            streamRef.current.getTracks().forEach((t) => t.stop());
+          } catch (err) {
+            console.error(err);
+          }
           streamRef.current = null;
         }
         if (channelRef.current) {
-          try { channelRef.current.unbind_all(); } catch {}
-          try { pusherRef.current?.unsubscribe(`session.room.${roomCode}`); } catch {}
+          try {
+            channelRef.current.unbind_all();
+          } catch (err) {
+            console.error(err);
+          }
+          try {
+            pusherRef.current?.unsubscribe(`session.room.${roomCode}`);
+          } catch (err) {
+            console.error(err);
+          }
           channelRef.current = null;
         }
         if (pusherRef.current) {
-          try { (pusherRef.current as any).connection?.unbind?.("state_change"); } catch {}
-          try { pusherRef.current.disconnect(); } catch {}
+          try {
+            (pusherRef.current as any).connection?.unbind?.("state_change");
+          } catch (err) {
+            console.error(err);
+          }
+          try {
+            pusherRef.current.disconnect();
+          } catch (err) {
+            console.error(err);
+          }
           pusherRef.current = null;
         }
         peerReadyRef.current = false;
@@ -195,7 +268,9 @@ export default function SessionRoom(props: PageProps) {
         setChatReady(false);
         setConnStatus("disconnected");
         setWsStatus("disconnected");
-      } catch {}
+      } catch (err) {
+        console.error(err);
+      }
     };
   }, [roomCode, isCreator, pusherKey, pusherCluster]);
 
@@ -280,7 +355,9 @@ export default function SessionRoom(props: PageProps) {
         {wsStatus !== "connected" && (
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <div className="rounded border border-[var(--color-card-shadow)] bg-[var(--color-card-bg)] px-4 py-3 text-[var(--color-text)] shadow-lg">
-              {wsStatus === "connecting" ? "Realtime connection lost. Reconnecting…" : "Realtime disconnected."}
+              {wsStatus === "connecting"
+                ? "Realtime connection lost. Reconnecting…"
+                : "Realtime disconnected."}
             </div>
           </div>
         )}
@@ -295,7 +372,9 @@ export default function SessionRoom(props: PageProps) {
               />
               {connStatus !== "connected" && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className={`px-3 py-1 rounded text-sm font-medium ${connStatus === "connecting" ? "bg-yellow-500 text-black" : "bg-red-600 text-white"}`}>
+                  <div
+                    className={`rounded px-3 py-1 text-sm font-medium ${connStatus === "connecting" ? "bg-yellow-500 text-black" : "bg-red-600 text-white"}`}
+                  >
                     {connStatus === "connecting" ? "Connecting…" : "Disconnected"}
                   </div>
                 </div>
@@ -321,7 +400,11 @@ export default function SessionRoom(props: PageProps) {
                 className={`inline-flex items-center justify-center rounded px-3 py-1 text-white ${isVideoEnabled ? "bg-gray-700 hover:bg-gray-600" : "bg-red-600 hover:bg-red-700"}`}
                 title={isVideoEnabled ? "Turn camera off" : "Turn camera on"}
               >
-                {isVideoEnabled ? <VideoIcon className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
+                {isVideoEnabled ? (
+                  <VideoIcon className="h-4 w-4" />
+                ) : (
+                  <VideoOff className="h-4 w-4" />
+                )}
               </button>
               <form method="POST" action={`/session/${roomCode}/terminate`}>
                 <input
@@ -348,9 +431,14 @@ export default function SessionRoom(props: PageProps) {
             </div>
             <div className="h-72 overflow-y-auto rounded bg-[var(--color-section-alt-bg)] p-2">
               {messages.map((m, i) => (
-                <div key={i} className={`mb-1 text-sm ${m.from === "me" ? "text-right" : "text-left"}`}>
+                <div
+                  key={i}
+                  className={`mb-1 text-sm ${m.from === "me" ? "text-right" : "text-left"}`}
+                >
                   {m.author && (
-                    <div className="mb-0.5 text-xs text-[var(--color-text-secondary)]">{m.author}</div>
+                    <div className="mb-0.5 text-xs text-[var(--color-text-secondary)]">
+                      {m.author}
+                    </div>
                   )}
                   <span
                     className={`inline-block rounded px-2 py-1 ${m.from === "me" ? "bg-blue-600 text-white" : "bg-gray-700 text-white"}`}

@@ -44,7 +44,9 @@ class RoomController extends Controller
     public function show($roomCode)
     {
         $room = Room::where('room_code', $roomCode)
-            ->with(['creator', 'currentParticipant', 'queue.user', 'sessions' => function($q){ $q->where('status','active')->latest('id'); }])
+            ->with(['creator', 'currentParticipant', 'queue.user', 'sessions' => function ($q) {
+                $q->where('status', 'active')->latest('id');
+            }])
             ->firstOrFail();
 
         $user = Auth::user();
@@ -136,7 +138,9 @@ class RoomController extends Controller
 
         // Broadcast updates with sessionCode so both sides know where to go
         // Reload room with updated sessions for broadcast
-        $room->load(['sessions' => function($q){ $q->where('status','active')->latest('id'); }]);
+        $room->load(['sessions' => function ($q) {
+            $q->where('status', 'active')->latest('id');
+        }]);
         event(new QueueUpdated($room->fresh(), 'accepted', $targetUser->user, $sessionCode));
         event(new RoomStatusUpdated($room->fresh(), 'participant_joined'));
 

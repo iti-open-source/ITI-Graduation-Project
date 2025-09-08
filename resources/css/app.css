@@ -175,6 +175,9 @@
 }
 
 .dark {
+  --color-bg: #1f2937;
+  --color-text: #e2e8f0;
+
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.145 0 0);

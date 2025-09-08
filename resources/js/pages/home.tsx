@@ -63,7 +63,7 @@ export default function Home({ features = [] }) {
               <Button asChild size="lg">
                 <Link href="/lobby">Create a Room</Link>
               </Button>
-              <Button variant="outline" size="lg" asChild>
+              <Button variant="outline" className="text-[var(--color-text)]" size="lg" asChild>
                 <Link href="/lobby">Join Random Room</Link>
               </Button>
             </div>

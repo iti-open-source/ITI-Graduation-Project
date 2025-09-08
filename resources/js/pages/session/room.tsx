@@ -3,6 +3,7 @@ import { type BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
 import Pusher from "pusher-js";
 import { useEffect, useRef, useState } from "react";
+import CollaborativeEditor from "@/components/editor/collaborative-editor";
 
 interface PageProps {
   roomCode: string;
@@ -333,6 +334,10 @@ export default function SessionRoom(props: PageProps) {
               </button>
             </div>
           </div>
+        </div>
+        <div className="mt-4 rounded border border-[var(--color-card-shadow)] bg-[var(--color-card-bg)] p-3">
+          <div className="mb-2 font-semibold text-[var(--color-text)]">Collaborative Editor</div>
+          <CollaborativeEditor id={`session-${roomCode}`} />
         </div>
       </div>
     </AppLayout>

@@ -245,14 +245,6 @@ export default function SessionRoom(props: PageProps) {
               />
             </div>
             <div className="mt-3 flex gap-2">
-              {isCreator && (
-                <button
-                  onClick={startCall}
-                  className="inline-block rounded bg-[var(--color-button-primary-bg)] px-3 py-1 text-white hover:bg-[var(--color-button-primary-hover)]"
-                >
-                  Start Call
-                </button>
-              )}
               <form method="POST" action={`/session/${roomCode}/terminate`}>
                 <input
                   type="hidden"

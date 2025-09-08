@@ -1,6 +1,6 @@
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
-import { Head } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import Pusher from "pusher-js";
 import { useEffect, useRef, useState } from "react";
 import CollaborativeEditor from "@/components/editor/collaborative-editor";
@@ -23,7 +23,7 @@ export default function SessionRoom(props: PageProps) {
   const localRef = useRef<HTMLVideoElement>(null);
   const remoteRef = useRef<HTMLVideoElement>(null);
   const [chatInput, setChatInput] = useState("");
-  const [messages, setMessages] = useState<Array<{ from: "me" | "peer"; text: string }>>([]);
+  const [messages, setMessages] = useState<Array<{ from: "me" | "peer"; text: string; author?: string }>>([]);
   const [chatReady, setChatReady] = useState(false);
   const [connStatus, setConnStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
   const [wsStatus, setWsStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
@@ -31,6 +31,7 @@ export default function SessionRoom(props: PageProps) {
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
+  const currentUserName = (usePage().props as any)?.auth?.user?.name || "Me";
   const dcRef = useRef<RTCDataChannel | null>(null);
   const iceQueueRef = useRef<RTCIceCandidate[]>([]);
   const peerReadyRef = useRef(false);
@@ -81,8 +82,14 @@ export default function SessionRoom(props: PageProps) {
         dcRef.current = channel;
         channel.onopen = () => setChatReady(true);
         channel.onclose = () => setChatReady(false);
-        channel.onmessage = (ev) =>
-          setMessages((m) => [...m, { from: "peer", text: String(ev.data) }]);
+        channel.onmessage = (ev) => {
+          try {
+            const data = JSON.parse(String(ev.data));
+            setMessages((m) => [...m, { from: "peer", text: String(data.text ?? ""), author: data.author }]);
+          } catch {
+            setMessages((m) => [...m, { from: "peer", text: String(ev.data) }]);
+          }
+        };
       };
 
       if (isCreator) {
@@ -260,8 +267,9 @@ export default function SessionRoom(props: PageProps) {
   const sendChat = () => {
     const text = chatInput.trim();
     if (!text || !dcRef.current || dcRef.current.readyState !== "open") return;
-    dcRef.current.send(text);
-    setMessages((m) => [...m, { from: "me", text }]);
+    const payload = JSON.stringify({ text, author: currentUserName });
+    dcRef.current.send(payload);
+    setMessages((m) => [...m, { from: "me", text, author: currentUserName }]);
     setChatInput("");
   };
 
@@ -340,7 +348,10 @@ export default function SessionRoom(props: PageProps) {
             </div>
             <div className="h-72 overflow-y-auto rounded bg-[var(--color-section-alt-bg)] p-2">
               {messages.map((m, i) => (
-                <div key={i} className={`text-sm ${m.from === "me" ? "text-right" : "text-left"}`}>
+                <div key={i} className={`mb-1 text-sm ${m.from === "me" ? "text-right" : "text-left"}`}>
+                  {m.author && (
+                    <div className="mb-0.5 text-xs text-[var(--color-text-secondary)]">{m.author}</div>
+                  )}
                   <span
                     className={`inline-block rounded px-2 py-1 ${m.from === "me" ? "bg-blue-600 text-white" : "bg-gray-700 text-white"}`}
                   >

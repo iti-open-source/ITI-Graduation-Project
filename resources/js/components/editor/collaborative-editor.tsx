@@ -286,7 +286,7 @@ function CollaborativeEditorInner() {
   }, []);
 
   return (
-    <div>
+    <div className="space-y-4">
       <EditorControls
         selectedLanguage={language as string}
         languages={Object.keys(langs)}
@@ -296,23 +296,28 @@ function CollaborativeEditorInner() {
         userInputs={userInputs as string[]}
       />
 
-      <Editor
-        onMount={handleOnMount}
-        height="50vh"
-        width="100%"
-        theme={localStorage.getItem("theme") === "dark" ? "vs-dark" : "light"}
-        defaultLanguage={language as string}
-        language={language as string}
-        defaultValue={languageTemplates[language as string as keyof typeof languageTemplates]}
-        options={{
-          tabSize: 2,
-          cursorBlinking: "smooth",
-          fontSize: 16,
-          minimap: { enabled: false },
-          overviewRulerLanes: 0,
-          padding: { top: 20, bottom: 20 },
-        }}
-      />
+      <div className="overflow-hidden rounded-lg border border-[var(--color-border)]">
+        <Editor
+          onMount={handleOnMount}
+          height="50vh"
+          width="100%"
+          theme={localStorage.getItem("theme") === "dark" ? "vs-dark" : "light"}
+          defaultLanguage={language as string}
+          language={language as string}
+          defaultValue={languageTemplates[language as string as keyof typeof languageTemplates]}
+          options={{
+            tabSize: 2,
+            cursorBlinking: "smooth",
+            fontSize: 16,
+            minimap: { enabled: false },
+            overviewRulerLanes: 0,
+            padding: { top: 20, bottom: 20 },
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+          }}
+        />
+      </div>
+
       <Terminal
         output={output as string}
         isWaitingForInput={isWaitingForInput as boolean}

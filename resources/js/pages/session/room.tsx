@@ -351,130 +351,187 @@ export default function SessionRoom(props: PageProps) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={`Session - ${roomCode}`} />
-      <div className="container mx-auto px-4 py-6">
+
+      <div className="min-h-screen bg-[var(--background)] px-4 py-8">
         {wsStatus !== "connected" && (
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <div className="rounded border border-[var(--color-card-shadow)] bg-[var(--color-card-bg)] px-4 py-3 text-[var(--color-text)] shadow-lg">
-              {wsStatus === "connecting"
-                ? "Realtime connection lost. Reconnecting…"
-                : "Realtime disconnected."}
+            <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] px-6 py-4 text-[var(--color-text)] shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+                {wsStatus === "connecting"
+                  ? "Realtime connection lost. Reconnecting…"
+                  : "Realtime disconnected."}
+              </div>
             </div>
           </div>
         )}
-        <div className="grid gap-4 md:grid-cols-[1fr_320px]">
-          <div className="rounded border border-[var(--color-card-shadow)] bg-[var(--color-card-bg)] p-3">
-            <div className="relative">
-              <video
-                ref={remoteRef}
-                autoPlay
-                playsInline
-                className="h-[360px] w-full rounded bg-black"
-              />
-              {connStatus !== "connected" && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div
-                    className={`rounded px-3 py-1 text-sm font-medium ${connStatus === "connecting" ? "bg-yellow-500 text-black" : "bg-red-600 text-white"}`}
-                  >
-                    {connStatus === "connecting" ? "Connecting…" : "Disconnected"}
-                  </div>
-                </div>
-              )}
-              <video
-                ref={localRef}
-                autoPlay
-                playsInline
-                muted
-                className="absolute right-2 bottom-2 h-28 w-44 rounded border border-white bg-black"
-              />
-            </div>
-            <div className="mt-3 flex gap-2">
-              <button
-                onClick={toggleAudio}
-                className={`inline-flex items-center justify-center rounded px-3 py-1 text-white ${isAudioEnabled ? "bg-gray-700 hover:bg-gray-600" : "bg-red-600 hover:bg-red-700"}`}
-                title={isAudioEnabled ? "Mute microphone" : "Unmute microphone"}
-              >
-                {isAudioEnabled ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
-              </button>
-              <button
-                onClick={toggleVideo}
-                className={`inline-flex items-center justify-center rounded px-3 py-1 text-white ${isVideoEnabled ? "bg-gray-700 hover:bg-gray-600" : "bg-red-600 hover:bg-red-700"}`}
-                title={isVideoEnabled ? "Turn camera off" : "Turn camera on"}
-              >
-                {isVideoEnabled ? (
-                  <VideoIcon className="h-4 w-4" />
-                ) : (
-                  <VideoOff className="h-4 w-4" />
-                )}
-              </button>
-              <form method="POST" action={`/session/${roomCode}/terminate`}>
-                <input
-                  type="hidden"
-                  name="_token"
-                  value={
-                    (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)
-                      ?.content || ""
-                  }
-                />
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700"
-                  title="End Call"
-                >
-                  <PhoneOff className="h-4 w-4" />
-                </button>
-              </form>
-            </div>
-          </div>
-          <div className="rounded border border-[var(--color-card-shadow)] bg-[var(--color-card-bg)] p-3">
-            <div className="mb-1 font-semibold text-[var(--color-text)]">
-              Chat {chatReady ? "" : "(connecting...)"}
-            </div>
-            <div className="h-72 overflow-y-auto rounded bg-[var(--color-section-alt-bg)] p-2">
-              {messages.map((m, i) => (
-                <div
-                  key={i}
-                  className={`mb-1 text-sm ${m.from === "me" ? "text-right" : "text-left"}`}
-                >
-                  {m.author && (
-                    <div className="mb-0.5 text-xs text-[var(--color-text-secondary)]">
-                      {m.author}
+
+        <div className="mx-4">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
+            {/* Left Column - Video and Chat */}
+            <div className="flex h-full flex-col space-y-6">
+              {/* Video Section */}
+              <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-6 shadow-sm">
+                <div className="relative">
+                  <video
+                    ref={remoteRef}
+                    autoPlay
+                    playsInline
+                    className="min-h-[40vh] w-full rounded-lg bg-gray-900"
+                  />
+                  {connStatus !== "connected" && (
+                    <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
+                      <div
+                        className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                          connStatus === "connecting"
+                            ? "bg-yellow-500 text-black"
+                            : "bg-red-600 text-white"
+                        }`}
+                      >
+                        {connStatus === "connecting" ? "Connecting…" : "Disconnected"}
+                      </div>
                     </div>
                   )}
-                  <span
-                    className={`inline-block rounded px-2 py-1 ${m.from === "me" ? "bg-blue-600 text-white" : "bg-gray-700 text-white"}`}
-                  >
-                    {m.text}
-                  </span>
+                  <video
+                    ref={localRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="absolute right-4 bottom-4 h-24 w-32 rounded-lg border-2 border-white bg-gray-900 shadow-lg"
+                  />
                 </div>
-              ))}
-              {messages.length === 0 && (
-                <div className="text-sm text-[var(--color-text-secondary)]">No messages yet.</div>
-              )}
+
+                {/* Video Controls */}
+                <div className="mt-4 flex items-center gap-3">
+                  <button
+                    onClick={toggleAudio}
+                    className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-white transition-colors ${
+                      isAudioEnabled
+                        ? "bg-slate-600 hover:bg-slate-700"
+                        : "bg-red-600 hover:bg-red-700"
+                    }`}
+                    title={isAudioEnabled ? "Mute microphone" : "Unmute microphone"}
+                  >
+                    {isAudioEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
+                  </button>
+
+                  <button
+                    onClick={toggleVideo}
+                    className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-white transition-colors ${
+                      isVideoEnabled
+                        ? "bg-slate-600 hover:bg-slate-700"
+                        : "bg-red-600 hover:bg-red-700"
+                    }`}
+                    title={isVideoEnabled ? "Turn camera off" : "Turn camera on"}
+                  >
+                    {isVideoEnabled ? (
+                      <VideoIcon className="h-5 w-5" />
+                    ) : (
+                      <VideoOff className="h-5 w-5" />
+                    )}
+                  </button>
+
+                  <form method="POST" action={`/session/${roomCode}/terminate`}>
+                    <input
+                      type="hidden"
+                      name="_token"
+                      value={
+                        (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)
+                          ?.content || ""
+                      }
+                    />
+                    <button
+                      type="submit"
+                      className="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700"
+                      title="End Call"
+                    >
+                      <PhoneOff className="h-5 w-5" />
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              {/* Chat Section */}
+              <div className="flex flex-1 flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-6 shadow-sm">
+                {/* Chat Messages */}
+                <div className="mb-4 flex-1 overflow-y-auto rounded-lg border border-[var(--color-border)] bg-transparent p-4">
+                  {messages.map((m, i) => (
+                    <div key={i} className={`mb-3 ${m.from === "me" ? "text-right" : "text-left"}`}>
+                      {m.author && (
+                        <div className="mb-1 text-xs text-[var(--color-text-secondary)]">
+                          {m.author}
+                        </div>
+                      )}
+                      <span
+                        className={`inline-block rounded-lg px-3 py-2 text-sm ${
+                          m.from === "me"
+                            ? "bg-blue-500 text-white"
+                            : "bg-slate-600 text-white dark:bg-slate-700"
+                        }`}
+                      >
+                        {m.text}
+                      </span>
+                    </div>
+                  ))}
+                  {messages.length === 0 && (
+                    <div className="flex h-full items-center justify-center">
+                      <div className="text-center">
+                        <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-card-bg)]">
+                          <svg
+                            className="h-6 w-6 text-[var(--color-text-secondary)]"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                            />
+                          </svg>
+                        </div>
+                        <p className="text-sm text-[var(--color-text-secondary)]">
+                          No messages yet
+                        </p>
+                        <p className="text-xs text-[var(--color-text-secondary)]">
+                          Start the conversation!
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Chat Input */}
+                <div className="flex gap-3">
+                  <input
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") sendChat();
+                    }}
+                    className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-secondary)] focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    placeholder={chatReady ? "Type a message…" : "Waiting for connection…"}
+                    disabled={!chatReady}
+                  />
+                  <button
+                    onClick={sendChat}
+                    disabled={!chatReady || !chatInput.trim()}
+                    className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:bg-slate-300 disabled:text-slate-500"
+                  >
+                    Send
+                  </button>
+                </div>
+              </div>
             </div>
-            <div className="mt-2 flex gap-2">
-              <input
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") sendChat();
-                }}
-                className="flex-1 rounded border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)] px-2 py-1 text-sm"
-                placeholder={chatReady ? "Type a message…" : "Waiting for connection…"}
-                disabled={!chatReady}
-              />
-              <button
-                onClick={sendChat}
-                disabled={!chatReady || !chatInput.trim()}
-                className="rounded bg-gray-700 px-3 py-1 text-white"
-              >
-                Send
-              </button>
+
+            {/* Right Column - Collaborative Editor */}
+            <div className="space-y-6">
+              <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-6 shadow-sm">
+                <CollaborativeEditor id={`session-${roomCode}`} />
+              </div>
             </div>
           </div>
-        </div>
-        <div className="mt-4 rounded border border-[var(--color-card-shadow)] bg-[var(--color-card-bg)] p-3">
-          <div className="mb-2 font-semibold text-[var(--color-text)]">Collaborative Editor</div>
-          <CollaborativeEditor id={`session-${roomCode}`} />
         </div>
       </div>
     </AppLayout>

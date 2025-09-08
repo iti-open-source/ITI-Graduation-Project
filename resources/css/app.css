@@ -138,7 +138,7 @@
   --color-text: #0f172a;
 
   /* Light theme variables */
-  --background: oklch(0.985 0 0);
+  --background: oklch(99.336% 0.00316 15.246);
   --foreground: oklch(0.145 0 0);
   --card: oklch(0.985 0 0);
   --card-foreground: oklch(0.145 0 0);

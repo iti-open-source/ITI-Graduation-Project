@@ -30,6 +30,9 @@ export default function SessionRoom(props: PageProps) {
   const iceQueueRef = useRef<RTCIceCandidate[]>([]);
   const peerReadyRef = useRef(false);
   const weReadyRef = useRef(false);
+  const streamRef = useRef<MediaStream | null>(null);
+  const pusherRef = useRef<Pusher | null>(null);
+  const channelRef = useRef<any>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -37,6 +40,7 @@ export default function SessionRoom(props: PageProps) {
     (async () => {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       if (!isMounted) return;
+      streamRef.current = stream;
       if (localRef.current) localRef.current.srcObject = stream;
 
       const pc = new RTCPeerConnection({
@@ -83,7 +87,9 @@ export default function SessionRoom(props: PageProps) {
       }
 
       const pusher = new Pusher(pusherKey, { cluster: pusherCluster, forceTLS: true });
+      pusherRef.current = pusher;
       const channel = pusher.subscribe(`session.room.${roomCode}`);
+      channelRef.current = channel;
       channel.bind("room-session-signaling", async (payload: any) => {
         try {
           if (payload.type === "ready") {
@@ -124,6 +130,36 @@ export default function SessionRoom(props: PageProps) {
 
     return () => {
       isMounted = false;
+      try {
+        if (dcRef.current) {
+          try { dcRef.current.close(); } catch {}
+          dcRef.current = null;
+        }
+        if (pcRef.current) {
+          try { pcRef.current.ontrack = null; } catch {}
+          try { pcRef.current.onicecandidate = null; } catch {}
+          try { pcRef.current.close(); } catch {}
+          pcRef.current = null;
+        }
+        if (streamRef.current) {
+          try { streamRef.current.getTracks().forEach((t) => t.stop()); } catch {}
+          streamRef.current = null;
+        }
+        if (channelRef.current) {
+          try { channelRef.current.unbind_all(); } catch {}
+          try { pusherRef.current?.unsubscribe(`session.room.${roomCode}`); } catch {}
+          channelRef.current = null;
+        }
+        if (pusherRef.current) {
+          try { pusherRef.current.disconnect(); } catch {}
+          pusherRef.current = null;
+        }
+        peerReadyRef.current = false;
+        weReadyRef.current = false;
+        iceQueueRef.current = [];
+        setChatReady(false);
+        setConnStatus("disconnected");
+      } catch {}
     };
   }, [roomCode, isCreator, pusherKey, pusherCluster]);
 

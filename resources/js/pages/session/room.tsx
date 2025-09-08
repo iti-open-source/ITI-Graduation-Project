@@ -23,6 +23,7 @@ export default function SessionRoom(props: PageProps) {
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState<Array<{ from: "me" | "peer"; text: string }>>([]);
   const [chatReady, setChatReady] = useState(false);
+  const [connStatus, setConnStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dcRef = useRef<RTCDataChannel | null>(null);
@@ -53,6 +54,18 @@ export default function SessionRoom(props: PageProps) {
       };
       pc.onicecandidate = (ev) => {
         if (ev.candidate) sendSignal("ice-candidate", ev.candidate);
+      };
+      pc.onconnectionstatechange = () => {
+        const state = pc.connectionState;
+        if (state === "connected") setConnStatus("connected");
+        else if (state === "disconnected" || state === "failed") setConnStatus("disconnected");
+        else setConnStatus("connecting");
+      };
+      pc.oniceconnectionstatechange = () => {
+        const state = pc.iceConnectionState;
+        if (state === "connected" || state === "completed") setConnStatus("connected");
+        else if (state === "disconnected" || state === "failed" || state === "closed") setConnStatus("disconnected");
+        else setConnStatus("connecting");
       };
 
       const setupDC = (channel: RTCDataChannel) => {
@@ -180,6 +193,13 @@ export default function SessionRoom(props: PageProps) {
                 playsInline
                 className="h-[360px] w-full rounded bg-black"
               />
+              {connStatus !== "connected" && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className={`px-3 py-1 rounded text-sm font-medium ${connStatus === "connecting" ? "bg-yellow-500 text-black" : "bg-red-600 text-white"}`}>
+                    {connStatus === "connecting" ? "Connecting…" : "Disconnected"}
+                  </div>
+                </div>
+              )}
               <video
                 ref={localRef}
                 autoPlay

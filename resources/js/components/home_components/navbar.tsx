@@ -11,7 +11,7 @@ import { useInitials } from "@/hooks/use-initials";
 import { Link, usePage } from "@inertiajs/react";
 import { Toaster } from "react-hot-toast";
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface NavbarProps {
@@ -23,25 +23,61 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
   const { auth } = page.props as any;
   const getInitials = useInitials();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const currentUrl = page.url;
 
   const user = auth?.user;
   const isAuthenticated = !!user;
+  const [activeSection, setActiveSection] = useState<string>("home");
+  const shouldHighlight = !currentUrl.startsWith("/login") && !currentUrl.startsWith("/register");
+
+
+  useEffect(() => {
+    const sections = document.querySelectorAll("section[id]");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: "-50% 0px -50% 0px" }
+    );
+
+    sections.forEach((sec) => observer.observe(sec));
+
+    // 👇 Fix: when scroll at top, force "home"
+    const handleScroll = () => {
+      if (window.scrollY < 100) {
+        setActiveSection("home");
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      sections.forEach((sec) => observer.unobserve(sec));
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+
+
 
   const navLinks = [
-  { href: "#home", label: "Home" },
-  { href: "#about", label: "About" },
-  { href: "#services", label: "Services" },
-  { href: "#features", label: "Features" },
-  { href: "#pricing", label: "Pricing" },
-  { href: "#contact", label: "Contact" },
-  ...(isAuthenticated ? [{ href: "/dashboard", label: "Dashboard" }] : []),
-];
+    { href: "#home", label: "Home" },
+    { href: "#about", label: "About" },
+    { href: "#services", label: "Services" },
+    { href: "#features", label: "Features" },
+    { href: "#pricing", label: "Pricing" },
+    { href: "#contact", label: "Contact" },
+    ...(isAuthenticated ? [{ href: "/dashboard", label: "Dashboard" }] : []),
+  ];
 
   return (
     <>
       <nav className="sticky top-0 z-50 w-full border-b border-border bg-sidebar/80 backdrop-blur-sm text-sidebar-foreground shadow-sm">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Logo */}
+
           <Link
             href="/"
             className="flex items-center gap-2 hover:opacity-80 transition"
@@ -50,33 +86,71 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
             <span className="text-lg font-bold">MockMate</span>
           </Link>
 
-          {/* Desktop Nav Links */}
+
           <div className="hidden md:flex items-center gap-6">
-            
+
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="relative inline-block text-foreground after:content-[''] after:absolute after:w-0 after:h-[3px] after:left-0 after:-bottom-1 after:bg-blue-500 after:transition-all after:duration-500 hover:after:w-full"
+                className={`relative inline-block transition 
+  ${shouldHighlight && activeSection === link.href.replace("#", "")
+                    ? "text-primary font-semibold after:w-full"
+                    : "text-foreground after:w-0"
+                  }
+  after:content-[''] after:absolute after:h-[3px] after:left-0 after:-bottom-1 
+  after:bg-blue-500 after:transition-all after:duration-500
+`}
+
 
               >
                 {link.label}
               </Link>
             ))}
+
           </div>
 
-          {/* Right side actions */}
           <div className="flex items-center gap-4">
-            {!isAuthenticated && (
-              <div className="hidden md:flex items-center gap-3">
-                <Button variant="ghost" asChild>
-                  <Link href="/login">Login</Link>
-                </Button>
-                <Button asChild>
-                  <Link href="/register">Register</Link>
-                </Button>
-              </div>
-            )}
+           {!isAuthenticated && (
+  <div className="hidden md:flex items-center gap-3">
+    <AppearanceToggleDropdown />
+
+    {/* Login button */}
+    <Button
+      variant={currentUrl.startsWith("/login") ? "default" : "ghost"}
+      asChild
+    >
+      <Link
+        href="/login"
+        className={`${
+          currentUrl.startsWith("/login")
+            ? "bg-primary text-white dark:text-black hover:bg-primary/90"
+            : "text-foreground border border:black dark:text-foreground"
+        }`}
+      >
+        Login
+      </Link>
+    </Button>
+
+    {/* Register button */}
+    <Button
+      variant={currentUrl.startsWith("/register") ? "default" : "secondary"}
+      asChild
+    >
+      <Link
+        href="/register"
+        className={`${
+          currentUrl.startsWith("/register")
+            ? "bg-primary text-white dark:text-black hover:bg-primary/90"
+            : "text-foreground dark:text-foreground"
+        }`}
+      >
+        Register
+      </Link>
+    </Button>
+  </div>
+)}
+
 
             {isAuthenticated && (
               <div className="flex items-center gap-2">

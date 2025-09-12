@@ -4,7 +4,7 @@ export default function Works() {
 
     return(
         <section
-  id="how-it-works"
+  id="features"
   className="relative py-24 bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-slate-900 dark:via-slate-950 dark:to-blue-950"
 >
   <div className="absolute inset-0">

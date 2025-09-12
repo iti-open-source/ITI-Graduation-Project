@@ -20,141 +20,138 @@ interface LoginProps {
 
 export default function Login({ status, canResetPassword }: LoginProps) {
   return (
-    <>
-      <AuthLayout title="Welcome Back 👋" description="Log in to access your account">
-        <Head title="Log in" />
+    <AuthLayout title="Welcome Back 👋" description="Log in to access your account">
+      <Head title="Log in" />
 
-        <Form
-          {...AuthenticatedSessionController.store.form()}
-          resetOnSuccess={["password"]}
-          className="flex flex-col gap-6"
-        >
-          {({ processing, errors }) => (
-            <>
-              {/* Continue with Google & LinkedIn */}
-              <Button
-                type="button"
-                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-sm font-medium text-[var(--color-text)] shadow-lg transition-colors duration-200 hover:bg-[var(--color-section-alt-bg)]/90"
-                onClick={() => {
-                  window.location.href = "/auth/google";
-                }}
-              >
-                <FcGoogle className="h-5 w-5" /> Continue with Google
-              </Button>
-              <Button
-                type="button"
-                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-[var(--color-card-shadow)] bg-[#0077B5]/70 text-sm font-medium text-white shadow-lg transition-colors duration-200 hover:bg-[#0077B5]/90"
-                onClick={() => {
-                  window.location.href = "/auth/linkedin";
-                }}
-              >
-                <FaLinkedin className="h-5 w-5" /> Continue with LinkedIn
-              </Button>
-              {/* <Button
-                                type="button"
-                                className=" w-full flex items-center justify-center gap-1 rounded-lg border border-[var(--color-card-shadow)] 
-       bg-[#000]/70 py-3 text-sm font-medium text-white 
-       shadow-lg transition-colors duration-200 hover:bg-[#0052]/90 cursor-pointer"
-                                onClick={() => {
-                                    window.location.href = '/auth/github';
-                                }}
-                            >
-                                <FaGithub className="h-5 w-5" /> Continue with Github
-                            </Button> */}
+      <Form
+        {...AuthenticatedSessionController.store.form()}
+        resetOnSuccess={["password"]}
+        className="flex flex-col gap-6"
+      >
+        {({ processing, errors }) => (
+          <>
+            {/* Continue with Google & LinkedIn */}
+            <Button
+              type="button"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-100 transition dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
+              onClick={() => {
+                window.location.href = "/auth/google";
+              }}
+            >
+              <FcGoogle className="h-5 w-5" /> Continue with Google
+            </Button>
 
-              {/* Divider */}
-              <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
-                <span className="flex-1 border-t border-[var(--color-card-shadow)]"></span>
-                OR
-                <span className="flex-1 border-t border-[var(--color-card-shadow)]"></span>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email" className="text-[var(--color-text)]">
-                  Email address
+            <Button
+              type="button"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#0077B5] bg-[#0077B5] text-sm font-medium text-white shadow-md hover:bg-[#005f91] transition"
+              onClick={() => {
+                window.location.href = "/auth/linkedin";
+              }}
+            >
+              <FaLinkedin className="h-5 w-5" /> Continue with LinkedIn
+            </Button>
+
+            {/* Divider */}
+            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <span className="flex-1 border-t border-gray-300 dark:border-gray-700"></span>
+              OR
+              <span className="flex-1 border-t border-gray-300 dark:border-gray-700"></span>
+            </div>
+
+            {/* Email */}
+            <div className="grid gap-2">
+              <Label htmlFor="email" className="text-gray-800 dark:text-gray-200">
+                Email address
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                name="email"
+                required
+                tabIndex={1}
+                autoComplete="email"
+                placeholder="email@example.com"
+                className="rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+              />
+              <InputError message={errors.email} />
+            </div>
+
+            {/* Password */}
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="password" className="text-gray-800 dark:text-gray-200">
+                  Password
                 </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  name="email"
-                  required
-                  tabIndex={1}
-                  autoComplete="email"
-                  placeholder="email@example.com"
-                  className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
-                />
-                <InputError message={errors.email} />
+                {canResetPassword && (
+                  <TextLink
+                    href={request()}
+                    className="ml-auto text-sm text-blue-600 hover:underline dark:text-blue-400"
+                    tabIndex={5}
+                  >
+                    Forgot password?
+                  </TextLink>
+                )}
               </div>
+              <Input
+                id="password"
+                type="password"
+                name="password"
+                required
+                tabIndex={2}
+                autoComplete="current-password"
+                placeholder="••••••••"
+                className="rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+              />
+              <InputError message={errors.password} />
+            </div>
 
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password" className="text-[var(--color-text)]">
-                    Password
-                  </Label>
-                  {canResetPassword && (
-                    <TextLink
-                      href={request()}
-                      className="ml-auto text-sm text-[var(--color-accent)] hover:underline"
-                      tabIndex={5}
-                    >
-                      Forgot password?
-                    </TextLink>
-                  )}
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  name="password"
-                  required
-                  tabIndex={2}
-                  autoComplete="current-password"
-                  placeholder="••••••••"
-                  className="rounded-lg border border-[var(--color-card-shadow)] bg-[var(--color-section-alt-bg)]/70 text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)]"
-                />
-                <InputError message={errors.password} />
-              </div>
+            {/* Remember Me */}
+            <div className="flex items-center space-x-3">
+              <Checkbox
+                id="remember"
+                name="remember"
+                tabIndex={3}
+                className="border-gray-300 dark:border-gray-600 data-[state=checked]:bg-blue-600"
+              />
+              <Label htmlFor="remember" className="text-gray-600 dark:text-gray-400">
+                Remember me
+              </Label>
+            </div>
 
-              <div className="flex items-center space-x-3">
-                <Checkbox
-                  id="remember"
-                  name="remember"
-                  tabIndex={3}
-                  className="border-[var(--color-card-shadow)] data-[state=checked]:bg-[var(--color-accent)]"
-                />
-                <Label htmlFor="remember" className="text-[var(--color-text-secondary)]">
-                  Remember me
-                </Label>
-              </div>
-
-              <Button
-                type="submit"
-                className="mt-4 w-full transform rounded-lg bg-[var(--color-button-primary-bg)] py-3 font-semibold text-white shadow-lg transition hover:scale-[1.02] hover:bg-[var(--color-button-primary-hover)]"
-                tabIndex={4}
-                disabled={processing}
-              >
-                {processing && <LoaderCircle className="mr-2 inline h-4 w-4 animate-spin" />}
-                Log in
-              </Button>
-            </>
-          )}
-        </Form>
-
-        <div className="my-8 border-t border-[var(--color-card-shadow)]"></div>
-
-        <div className="text-center text-sm text-[var(--color-text-secondary)]">
-          Don’t have an account?{" "}
-          <TextLink
-            href={register()}
-            tabIndex={6}
-            className="font-medium text-[var(--color-accent)] hover:underline"
-          >
-            Sign up
-          </TextLink>
-        </div>
-
-        {status && (
-          <div className="mt-4 text-center text-sm font-medium text-green-600">{status}</div>
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              className="mt-4 w-full transform rounded-lg bg-blue-600 py-3 font-semibold text-white shadow-md transition hover:scale-[1.02] hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+              tabIndex={4}
+              disabled={processing}
+            >
+              {processing && <LoaderCircle className="mr-2 inline h-4 w-4 animate-spin" />}
+              Log in
+            </Button>
+          </>
         )}
-      </AuthLayout>
-    </>
+      </Form>
+
+      {/* Divider */}
+      <div className="my-8 border-t border-gray-300 dark:border-gray-700"></div>
+
+      {/* Sign up link */}
+      <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+        Don’t have an account?{" "}
+        <TextLink
+          href={register()}
+          tabIndex={6}
+          className="font-medium text-blue-600 hover:underline dark:text-blue-400"
+        >
+          Sign up
+        </TextLink>
+      </div>
+
+      {status && (
+        <div className="mt-4 text-center text-sm font-medium text-green-600 dark:text-green-400">
+          {status}
+        </div>
+      )}
+    </AuthLayout>
   );
 }

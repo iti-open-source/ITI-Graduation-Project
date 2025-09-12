@@ -24,6 +24,7 @@
         "typescript-eslint": "^8.23.0"
     },
     "dependencies": {
+        "@excalidraw/excalidraw": "^0.18.0",
         "@headlessui/react": "^2.2.0",
         "@inertiajs/react": "^2.1.0",
         "@liveblocks/client": "^3.5.2",
@@ -51,6 +52,8 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "concurrently": "^9.0.1",
+        "cors": "^2.8.5",
+        "express": "^5.1.0",
         "framer-motion": "^12.23.12",
         "globals": "^15.14.0",
         "laravel-vite-plugin": "^2.0",
@@ -62,6 +65,8 @@
         "react-hot-toast": "^2.6.0",
         "react-icons": "^5.5.0",
         "react-player": "^3.3.2",
+        "socket.io": "^4.8.1",
+        "socket.io-client": "^4.8.1",
         "swiper": "^11.2.10",
         "tailwind-merge": "^3.0.1",
         "tailwindcss": "^4.0.0",

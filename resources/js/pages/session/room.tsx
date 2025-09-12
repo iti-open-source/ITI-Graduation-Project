@@ -1,4 +1,5 @@
 import CollaborativeEditor from "@/components/editor/collaborative-editor";
+import Whiteboard from "@/components/whiteboard/collaborative-whiteboard";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
 import { Head, usePage } from "@inertiajs/react";
@@ -36,6 +37,9 @@ export default function SessionRoom(props: PageProps) {
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
 
+  const [activeTab, setActiveTab] = useState("editor");
+  const [pusher, setPusher] = useState<Pusher | null>(null);
+
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const currentUserName = (usePage().props as any)?.auth?.user?.name || "Me";
   const dcRef = useRef<RTCDataChannel | null>(null);
@@ -43,7 +47,6 @@ export default function SessionRoom(props: PageProps) {
   const peerReadyRef = useRef(false);
   const weReadyRef = useRef(false);
   const streamRef = useRef<MediaStream | null>(null);
-  const pusherRef = useRef<Pusher | null>(null);
   const channelRef = useRef<any>(null);
 
   useEffect(() => {
@@ -109,7 +112,8 @@ export default function SessionRoom(props: PageProps) {
       }
 
       const pusher = new Pusher(pusherKey, { cluster: pusherCluster, forceTLS: true });
-      pusherRef.current = pusher;
+
+      setPusher(pusher);
       const channel = pusher.subscribe(`session.room.${roomCode}`);
       channelRef.current = channel;
 
@@ -201,6 +205,7 @@ export default function SessionRoom(props: PageProps) {
 
     return () => {
       isMounted = false;
+
       try {
         if (dcRef.current) {
           try {
@@ -236,31 +241,14 @@ export default function SessionRoom(props: PageProps) {
           }
           streamRef.current = null;
         }
-        if (channelRef.current) {
+        if (pusher) {
           try {
-            channelRef.current.unbind_all();
+            // The disconnect method is the primary way to clean up.
+            // It handles unsubscribing from all channels and closing the connection.
+            pusher.disconnect();
           } catch (err) {
-            console.error(err);
+            console.error("Error disconnecting Pusher:", err);
           }
-          try {
-            pusherRef.current?.unsubscribe(`session.room.${roomCode}`);
-          } catch (err) {
-            console.error(err);
-          }
-          channelRef.current = null;
-        }
-        if (pusherRef.current) {
-          try {
-            (pusherRef.current as any).connection?.unbind?.("state_change");
-          } catch (err) {
-            console.error(err);
-          }
-          try {
-            pusherRef.current.disconnect();
-          } catch (err) {
-            console.error(err);
-          }
-          pusherRef.current = null;
         }
         peerReadyRef.current = false;
         weReadyRef.current = false;
@@ -528,7 +516,39 @@ export default function SessionRoom(props: PageProps) {
             {/* Right Column - Collaborative Editor */}
             <div className="space-y-6">
               <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-6 shadow-sm">
-                <CollaborativeEditor id={`session-${roomCode}`} />
+                {/* Tabs */}
+                <div className="mb-4 flex gap-2">
+                  <button
+                    onClick={() => setActiveTab("editor")}
+                    className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                      activeTab === "editor"
+                        ? "bg-blue-500 text-white"
+                        : "bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200"
+                    }`}
+                  >
+                    Code Editor
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("whiteboard")}
+                    className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                      activeTab === "whiteboard"
+                        ? "bg-blue-500 text-white"
+                        : "bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200"
+                    }`}
+                  >
+                    Whiteboard
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div className="60vh">
+                  <div className={activeTab === "editor" ? "block h-full" : "hidden h-full"}>
+                    <CollaborativeEditor id={`session-${roomCode}`} />
+                  </div>
+                  <div className={activeTab === "whiteboard" ? "block h-full" : "hidden h-full"}>
+                    <Whiteboard roomCode={roomCode} />
+                  </div>
+                </div>
               </div>
             </div>
           </div>

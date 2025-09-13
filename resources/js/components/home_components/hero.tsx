@@ -86,7 +86,7 @@ export default function Hero() {
                 <Link href="/lobby">🎯 Join Random Room</Link>
               </Button>
             </motion.div>
-          )} */}
+          )} 
 
           {/* Student → Join Room + Join Random Room */}
           {userRole === "student" && (

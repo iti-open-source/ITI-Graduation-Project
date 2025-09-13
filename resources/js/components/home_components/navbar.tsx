@@ -66,7 +66,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
     { href: "#features", label: "Features" },
     // { href: "#pricing", label: "Pricing" },
     { href: "#contact", label: "Contact" },
-    ...(isAuthenticated ? [{ href: "/dashboard", label: "Dashboard" }] : []),
+    ...(isAuthenticated && user?.role !== null ? [{ href: "/dashboard", label: "Dashboard" }] : []),
   ];
 
   return (

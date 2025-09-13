@@ -55,7 +55,11 @@ export default function Hero() {
           {/* Guest → Get Started */}
           {userRole === "guest" && (
             <motion.div variants={fadeIn}>
-              <Button asChild size="lg" className="shadow-lg transition hover:scale-105">
+              <Button
+                asChild
+                size="lg"
+                className="py-6 text-xl shadow-lg transition hover:scale-105"
+              >
                 <Link href="/login">✨ Get Started</Link>
               </Button>
             </motion.div>
@@ -63,14 +67,14 @@ export default function Hero() {
           {/* Instructor or Admin → Create Room */}
           {(userRole === "instructor" || userRole === "admin") && (
             <motion.div variants={fadeIn}>
-              <Button asChild size="lg" className="shadow-lg transition hover:scale-105">
+              <Button asChild className="py-6 text-xl shadow-lg transition hover:scale-105">
                 <Link href="/lobby">🚀 Create a Room</Link>
               </Button>
             </motion.div>
           )}
 
           {/* User → Join Random Room */}
-          {userRole === "user" && (
+          {/* {userRole === "user" && (
             <motion.div variants={fadeIn}>
               <Button
                 variant="outline"
@@ -81,17 +85,21 @@ export default function Hero() {
                 <Link href="/lobby">🎯 Join Random Room</Link>
               </Button>
             </motion.div>
-          )}
+          )} */}
 
           {/* Student → Join Room + Join Random Room */}
           {userRole === "student" && (
             <>
               <motion.div variants={fadeIn}>
-                <Button asChild size="lg" className="shadow-lg transition hover:scale-105">
+                <Button
+                  asChild
+                  size="lg"
+                  className="py-6 text-xl shadow-lg transition hover:scale-105"
+                >
                   <Link href="/lobby">📚 Join Room</Link>
                 </Button>
               </motion.div>
-              <motion.div variants={fadeIn}>
+              {/* <motion.div variants={fadeIn}>
                 <Button
                   variant="outline"
                   size="lg"
@@ -100,7 +108,7 @@ export default function Hero() {
                 >
                   <Link href="/lobby">🎯 Join Random Room</Link>
                 </Button>
-              </motion.div>
+              </motion.div> */}
             </>
           )}
         </motion.div>

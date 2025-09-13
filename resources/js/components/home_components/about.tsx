@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { BarChart3, Code2, MessageSquare } from "lucide-react";
+import { BarChart3, Brain, Code2, MessageSquare } from "lucide-react";
 
 export default function About() {
   return (
@@ -105,10 +105,14 @@ export default function About() {
               <span className="text-gray-800 dark:text-gray-200">Live coding sessions</span>
             </div>
             <div className="flex items-center gap-3">
-              <MessageSquare className="text-blue-500" />
+              <Brain className="text-blue-500" />
               <span className="text-gray-800 dark:text-gray-200">
-                Personalized behavioral feedback
+                Interactive whiteboard for problem-solving
               </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <MessageSquare className="text-blue-500" />
+              <span className="text-gray-800 dark:text-gray-200">Personalized feedback</span>
             </div>
             <div className="flex items-center gap-3">
               <BarChart3 className="text-blue-500" />

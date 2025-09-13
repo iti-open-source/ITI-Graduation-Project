@@ -2,7 +2,6 @@ import About from "@/components/home_components/about";
 import Features from "@/components/home_components/features";
 import Footer from "@/components/home_components/footer";
 import Hero from "@/components/home_components/hero";
-import Pricing from "@/components/home_components/pricing";
 import Services from "@/components/home_components/services";
 import Works from "@/components/home_components/works";
 import { Button } from "@/components/ui/button";
@@ -33,7 +32,7 @@ export default function Home() {
 
   return (
     <CustomLayout>
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen overflow-y-hidden bg-background text-foreground">
         {/* Hero */}
         <Hero />
 
@@ -120,38 +119,45 @@ export default function Home() {
         </section> */}
 
         {/* CTA */}
-        <section className="relative bg-gradient-to-r from-slate-100 via-blue-100 to-indigo-100 py-16 text-center dark:from-slate-900 dark:via-blue-900 dark:to-indigo-800">
-          <div className="mx-auto max-w-4xl">
-            <motion.h2
-              variants={fadeIn}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="text-3xl font-bold md:text-4xl"
-            >
-              Ready to level up your interview skills?
-            </motion.h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Join thousands of candidates and recruiters who trust MockMate.
-            </p>
-            <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-              <Button asChild size="lg" className="shadow-lg transition hover:scale-105">
-                <Link href={getStartedLink}>Get Started</Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="border-border text-foreground transition hover:scale-105"
+
+        {userRole === "guest" && (
+          <section className="relative bg-gradient-to-r from-slate-100 via-blue-100 to-indigo-100 py-16 text-center dark:from-slate-900 dark:via-blue-900 dark:to-indigo-800">
+            <div className="mx-auto max-w-4xl">
+              <motion.h2
+                variants={fadeIn}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                className="text-3xl font-bold md:text-4xl"
               >
-                <Link href="/lobby">Try a Demo</Link>
-              </Button>
+                Ready to level up your interview skills?
+              </motion.h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Join thousands of candidates and recruiters who trust MockMate.
+              </p>
+              <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+                <Button
+                  asChild
+                  size="lg"
+                  className="py-6 text-xl shadow-lg transition hover:scale-105"
+                >
+                  <Link href={getStartedLink}>Get Started!</Link>
+                </Button>
+                {/* <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="border-border text-foreground transition hover:scale-105"
+                >
+                  <Link href="/lobby">Try a Demo</Link>
+                </Button> */}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Pricing */}
-        <Pricing />
+        {/* <Pricing /> */}
 
         {/* Contact */}
         <section id="contact" className="relative overflow-hidden py-28 text-center">
@@ -166,7 +172,7 @@ export default function Home() {
             transition={{ duration: 0.7 }}
           >
             <h2 className="mb-6 bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 bg-clip-text text-5xl font-extrabold text-transparent sm:text-6xl">
-              Let’s Connect 🌸
+              Let’s Connect!
             </h2>
             <p className="mb-12 text-lg text-slate-700 sm:text-xl dark:text-slate-300">
               Have a question or just want to say hi? We’d love to hear from you.

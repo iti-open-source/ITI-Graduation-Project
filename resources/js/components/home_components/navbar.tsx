@@ -9,10 +9,10 @@ import {
 import { UserMenuContent } from "@/components/user-menu-content";
 import { useInitials } from "@/hooks/use-initials";
 import { Link, usePage } from "@inertiajs/react";
-import { Toaster } from "react-hot-toast";
+import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Toaster } from "react-hot-toast";
 
 interface NavbarProps {
   isLoggedIn?: boolean;
@@ -30,7 +30,6 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
   const [activeSection, setActiveSection] = useState<string>("home");
   const shouldHighlight = !currentUrl.startsWith("/login") && !currentUrl.startsWith("/register");
 
-
   useEffect(() => {
     const sections = document.querySelectorAll("section[id]");
     const observer = new IntersectionObserver(
@@ -41,7 +40,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
           }
         });
       },
-      { rootMargin: "-50% 0px -50% 0px" }
+      { rootMargin: "-50% 0px -50% 0px" },
     );
 
     sections.forEach((sec) => observer.observe(sec));
@@ -60,107 +59,85 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
     };
   }, []);
 
-
-
-
   const navLinks = [
     { href: "#home", label: "Home" },
     { href: "#about", label: "About" },
     { href: "#services", label: "Services" },
     { href: "#features", label: "Features" },
-    { href: "#pricing", label: "Pricing" },
+    // { href: "#pricing", label: "Pricing" },
     { href: "#contact", label: "Contact" },
     ...(isAuthenticated ? [{ href: "/dashboard", label: "Dashboard" }] : []),
   ];
 
   return (
     <>
-      <nav className="sticky top-0 z-50 w-full border-b border-border bg-sidebar/80 backdrop-blur-sm text-sidebar-foreground shadow-sm">
+      <nav className="sticky top-0 z-50 w-full border-b border-border bg-sidebar/80 text-sidebar-foreground shadow-sm backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-
-          <Link
-            href="/"
-            className="flex items-center gap-2 hover:opacity-80 transition"
-          >
+          <Link href="/" className="flex items-center gap-2 transition hover:opacity-80">
             <img src="/apple-touch-icon.png" alt="Logo" className="size-8" />
             <span className="text-lg font-bold">MockMate</span>
           </Link>
 
-
-          <div className="hidden md:flex items-center gap-6">
-
+          <div className="hidden items-center gap-6 md:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`relative inline-block transition 
-  ${shouldHighlight && activeSection === link.href.replace("#", "")
-                    ? "text-primary font-semibold after:w-full"
+                className={`relative inline-block transition ${
+                  shouldHighlight && activeSection === link.href.replace("#", "")
+                    ? "font-semibold text-primary after:w-full"
                     : "text-foreground after:w-0"
-                  }
-  after:content-[''] after:absolute after:h-[3px] after:left-0 after:-bottom-1 
-  after:bg-blue-500 after:transition-all after:duration-500
-`}
-
-
+                } after:absolute after:-bottom-1 after:left-0 after:h-[3px] after:bg-blue-500 after:transition-all after:duration-500 after:content-['']`}
               >
                 {link.label}
               </Link>
             ))}
-
           </div>
 
           <div className="flex items-center gap-4">
-           {!isAuthenticated && (
-  <div className="hidden md:flex items-center gap-3">
-    <AppearanceToggleDropdown />
+            {!isAuthenticated && (
+              <div className="hidden items-center gap-3 md:flex">
+                <AppearanceToggleDropdown />
 
-    {/* Login button */}
-    <Button
-      variant={currentUrl.startsWith("/login") ? "default" : "ghost"}
-      asChild
-    >
-      <Link
-        href="/login"
-        className={`${
-          currentUrl.startsWith("/login")
-            ? "bg-primary text-white dark:text-black hover:bg-primary/90"
-            : "text-foreground border border:black dark:text-foreground"
-        }`}
-      >
-        Login
-      </Link>
-    </Button>
+                {/* Login button */}
+                <Button variant={currentUrl.startsWith("/login") ? "default" : "ghost"} asChild>
+                  <Link
+                    href="/login"
+                    className={`${
+                      currentUrl.startsWith("/login")
+                        ? "bg-primary text-white hover:bg-primary/90 dark:text-black"
+                        : "border:black border text-foreground dark:text-foreground"
+                    }`}
+                  >
+                    Login
+                  </Link>
+                </Button>
 
-    {/* Register button */}
-    <Button
-      variant={currentUrl.startsWith("/register") ? "default" : "secondary"}
-      asChild
-    >
-      <Link
-        href="/register"
-        className={`${
-          currentUrl.startsWith("/register")
-            ? "bg-primary text-white dark:text-black hover:bg-primary/90"
-            : "text-foreground dark:text-foreground"
-        }`}
-      >
-        Register
-      </Link>
-    </Button>
-  </div>
-)}
-
+                {/* Register button */}
+                <Button
+                  variant={currentUrl.startsWith("/register") ? "default" : "secondary"}
+                  asChild
+                >
+                  <Link
+                    href="/register"
+                    className={`${
+                      currentUrl.startsWith("/register")
+                        ? "bg-primary text-white hover:bg-primary/90 dark:text-black"
+                        : "text-foreground dark:text-foreground"
+                    }`}
+                  >
+                    Register
+                  </Link>
+                </Button>
+              </div>
+            )}
 
             {isAuthenticated && (
               <div className="flex items-center gap-2">
                 <AppearanceToggleDropdown />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="size-10 rounded-full p-1 hover:bg-muted"
-                    >
+                    <Button variant="ghost" className="size-10 rounded-full p-1 hover:bg-muted">
                       <Avatar className="size-8 overflow-hidden rounded-full">
                         <AvatarImage src={user?.avatar} alt={user?.name} />
                         <AvatarFallback className="rounded-full bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
@@ -178,7 +155,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden p-2 rounded-md hover:bg-muted"
+              className="rounded-md p-2 hover:bg-muted md:hidden"
               onClick={() => setMobileOpen((prev) => !prev)}
               aria-label="Toggle menu"
             >
@@ -195,7 +172,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden border-t border-border bg-sidebar px-4 py-3 space-y-3"
+              className="space-y-3 border-t border-border bg-sidebar px-4 py-3 md:hidden"
             >
               {navLinks.map((link) => (
                 <Link

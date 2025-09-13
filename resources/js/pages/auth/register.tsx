@@ -46,15 +46,11 @@ export default function Register() {
             <div className="flex flex-col items-center gap-2">
               <Label
                 htmlFor="avatar"
-                className="relative flex cursor-pointer flex-col items-center group"
+                className="group relative flex cursor-pointer flex-col items-center"
               >
                 <div className="mb-2 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-gray-300 bg-gray-100 text-gray-500 shadow-inner transition group-hover:ring-2 group-hover:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
                   {preview ? (
-                    <img
-                      src={preview}
-                      alt="Preview"
-                      className="h-full w-full object-cover"
-                    />
+                    <img src={preview} alt="Preview" className="h-full w-full object-cover" />
                   ) : (
                     <User className="h-10 w-10" />
                   )}
@@ -135,10 +131,7 @@ export default function Register() {
 
               {/* Confirm Password */}
               <div className="grid gap-2">
-                <Label
-                  htmlFor="password_confirmation"
-                  className="text-gray-800 dark:text-gray-200"
-                >
+                <Label htmlFor="password_confirmation" className="text-gray-800 dark:text-gray-200">
                   Confirm password
                 </Label>
                 <Input
@@ -161,9 +154,7 @@ export default function Register() {
                 tabIndex={5}
                 disabled={processing}
               >
-                {processing && (
-                  <LoaderCircle className="mr-2 inline h-4 w-4 animate-spin" />
-                )}
+                {processing && <LoaderCircle className="mr-2 inline h-4 w-4 animate-spin" />}
                 Create account
               </Button>
             </div>

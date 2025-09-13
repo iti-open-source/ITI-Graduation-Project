@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Code2, MessageSquare, MicVocal } from "lucide-react";
+import { Brain, Code2, MessageSquare, MicVocal } from "lucide-react";
 
 export default function Features() {
   const features = [
@@ -7,6 +7,11 @@ export default function Features() {
       icon: Code2,
       title: "Real-Time Coding Practice",
       desc: "Collaborate in a live coding environment tailored for technical interviews.",
+    },
+    {
+      icon: Brain,
+      title: "Collaborative Whiteboard",
+      desc: "Explain your thought process clearly and visually with a real-time collaborative whiteboard.",
     },
     {
       icon: MessageSquare,

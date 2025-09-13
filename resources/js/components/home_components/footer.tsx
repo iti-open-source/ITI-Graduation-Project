@@ -36,11 +36,11 @@ export default function Footer() {
                   About
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link href="#pricing" className="hover:text-foreground dark:hover:text-white">
                   Pricing
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link href="#services" className="hover:text-foreground dark:hover:text-white">
                   Services

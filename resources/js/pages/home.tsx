@@ -12,20 +12,17 @@ import "swiper/css";
 import "swiper/css/navigation";
 
 export default function Home() {
+  const { auth } = usePage().props as { auth?: { user?: { role: string } } };
+  const userRole = auth?.user?.role;
+  let getStartedLink: string | null = null;
 
-    const { auth } = usePage().props as { auth: { user?: { role: string } } };
-const userRole = auth?.user?.role; 
- let getStartedLink: string | null = null;
-
- if (!auth?.user) {
- 
-  getStartedLink = "/login";
-} else if (["admin", "instructor", "student"].includes(userRole || "")) {
-  getStartedLink = "/dashboard";
-} else if (userRole === null) {
-  getStartedLink = null; 
-}
-
+  if (!auth?.user) {
+    getStartedLink = "/login";
+  } else if (["admin", "instructor", "student"].includes(userRole || "")) {
+    getStartedLink = "/dashboard";
+  } else if (userRole === null) {
+    getStartedLink = null;
+  }
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
@@ -121,9 +118,7 @@ const userRole = auth?.user?.role;
         </section> */}
 
         {/* CTA */}
-        <section className="relative py-16 text-center 
-          bg-gradient-to-r from-slate-100 via-blue-100 to-indigo-100 
-          dark:from-slate-900 dark:via-blue-900 dark:to-indigo-800">
+        <section className="relative bg-gradient-to-r from-slate-100 via-blue-100 to-indigo-100 py-16 text-center dark:from-slate-900 dark:via-blue-900 dark:to-indigo-800">
           <div className="mx-auto max-w-4xl">
             <motion.h2
               variants={fadeIn}
@@ -137,9 +132,9 @@ const userRole = auth?.user?.role;
             <p className="mt-4 text-lg text-muted-foreground">
               Join thousands of candidates and recruiters who trust MockMate.
             </p>
-            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+            <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
               {getStartedLink && (
-                <Button asChild size="lg" className="shadow-lg hover:scale-105 transition">
+                <Button asChild size="lg" className="shadow-lg transition hover:scale-105">
                   <Link href={getStartedLink}>Get Started</Link>
                 </Button>
               )}
@@ -154,7 +149,6 @@ const userRole = auth?.user?.role;
             </div>
           </div>
         </section>
-
 
         {/* Pricing */}
         {/* <Pricing /> */}

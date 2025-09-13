@@ -10,7 +10,7 @@ export default function Hero() {
     auth: { user?: { role: string } };
   };
 
-  const userRole = auth?.user?.role ?? "guest";
+  const userRole = auth?.user?.role;
 
 
   // Animation variants
@@ -60,7 +60,7 @@ export default function Hero() {
           className="flex flex-col justify-center gap-4 sm:flex-row"
         >
            {/* Guest → Get Started */}
-          {userRole === "guest" && (
+          {!auth?.user && (
             <motion.div variants={fadeIn}>
               <Button asChild size="lg" className="shadow-lg hover:scale-105 transition">
                 <Link href="/login">✨ Get Started</Link>
@@ -76,8 +76,8 @@ export default function Hero() {
             </motion.div>
           )}
 
-          {/* User → Join Random Room */}
-          {userRole === "user" && (
+          {/* Unassigned → Join Random Room */}
+          {userRole === null && (
             <motion.div variants={fadeIn}>
               <Button
                 variant="outline"

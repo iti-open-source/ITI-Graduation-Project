@@ -106,7 +106,10 @@ export default function UsersPage({ users }: UsersPageProps) {
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesRole = roleFilter ? user.role === roleFilter : true;
+    const matchesRole = roleFilter
+  ? (roleFilter === "null" ? user.role === null : user.role === roleFilter)
+  : true;
+
 
     return matchesSearch && matchesRole;
   });
@@ -209,17 +212,18 @@ export default function UsersPage({ users }: UsersPageProps) {
               </Button>
               {/* Role filter */}
               <select
-                name="role"
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
-                className="rounded border p-2 text-sm capitalize"
-              >
-                <option value="">All Roles</option>
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-                <option value="instructor">Instructor</option>
-                <option value="student">Student</option>
-              </select>
+  name="role"
+  value={roleFilter}
+  onChange={(e) => setRoleFilter(e.target.value)}
+  className="rounded border p-2 text-sm capitalize"
+>
+  <option value="">All Roles</option>
+  <option value="null">Unassigned</option>
+  <option value="admin">Admin</option>
+  <option value="instructor">Instructor</option>
+  <option value="student">Student</option>
+</select>
+
 
               <Button variant="outline">
                 <Download className="mr-2 h-4 w-4" />
@@ -278,19 +282,20 @@ export default function UsersPage({ users }: UsersPageProps) {
                       </Link>
                     </Button>
                     <select
-                      defaultValue={user.role}
-                      onChange={(e) =>
-                        router.patch(`/admin/users/${user.id}`, {
-                          role: e.target.value,
-                        })
-                      }
-                      className="rounded border p-1 text-sm capitalize"
-                    >
-                      <option value="user">User</option>
-                      <option value="admin">Admin</option>
-                      <option value="instructor">Instructor</option>
-                      <option value="student">Student</option>
-                    </select>
+  defaultValue={user.role ?? "null"}
+  onChange={(e) =>
+    router.patch(`/admin/users/${user.id}`, {
+      role: e.target.value === "null" ? null : e.target.value,
+    })
+  }
+  className="rounded border p-1 text-sm capitalize"
+>
+  <option value="null">Unassigned</option>
+  <option value="admin">Admin</option>
+  <option value="instructor">Instructor</option>
+  <option value="student">Student</option>
+</select>
+
                     <Form
                       method="patch"
                       action={`/admin/users/${user.id}/toggle-status`}

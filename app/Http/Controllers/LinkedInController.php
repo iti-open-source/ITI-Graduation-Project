@@ -34,7 +34,6 @@ class LinkedInController extends Controller
                 'email' => $linkedInUser->getEmail(),
                 'linkedin_id' => $linkedInUser->getId(),
                 'password' => bcrypt(uniqid()),
-                'role' => 'user',
                 'avatar' => $linkedInUser->getAvatar(),
                 'email_verified_at' => now(),
             ]);

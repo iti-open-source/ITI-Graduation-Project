@@ -201,19 +201,20 @@ export default function AdminDashboard({ users, stats }: AdminDashboardProps) {
 
                       {/* Role dropdown */}
                       <select
-                        value={user.role}
-                        onChange={(e) =>
-                          router.patch(`/admin/users/${user.id}`, {
-                            role: e.target.value,
-                          })
-                        }
-                        className="rounded border p-1 text-sm"
-                      >
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                        <option value="instructor">Instructor</option>
-                        <option value="student">Student</option>
-                      </select>
+  defaultValue={user.role ?? "null"}
+  onChange={(e) =>
+    router.patch(`/admin/users/${user.id}`, {
+      role: e.target.value === "null" ? null : e.target.value,
+    })
+  }
+  className="w-full rounded-md border p-2 capitalize"
+>
+  <option value="null">Unassigned</option>
+  <option value="admin">Admin</option>
+  <option value="student">Student</option>
+  <option value="instructor">Instructor</option>
+</select>
+
                     </div>
                   </div>
                 ))}

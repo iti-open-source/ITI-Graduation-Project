@@ -193,7 +193,7 @@ export default function UserDetail({ user }: UserDetailProps) {
                 <div className="flex items-center justify-between">
   <span className="text-sm font-medium">Role</span>
   <Badge variant="outline" className="capitalize">
-    {user.role}
+    {user.role ? user.role : "Unassigned"}
   </Badge>
 </div>
 
@@ -290,19 +290,20 @@ export default function UserDetail({ user }: UserDetailProps) {
               <div className="space-y-2 mb-3">
         <Label className="text-sm font-medium">Change Role</Label>
         <select
-          defaultValue={user.role}
-          onChange={(e) =>
-            router.patch(`/admin/users/${user.id}`, {
-  role: e.target.value,
-})
-          }
-          className="w-full rounded-md border p-2 capitalize"
-        >
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-          <option value="student">Student</option>
-          <option value="instructor">Instructor</option>
-        </select>
+  defaultValue={user.role ?? "null"}
+  onChange={(e) =>
+    router.patch(`/admin/users/${user.id}`, {
+      role: e.target.value === "null" ? null : e.target.value,
+    })
+  }
+  className="w-full rounded-md border p-2 capitalize"
+>
+  <option value="null">Unassigned</option>
+  <option value="admin">Admin</option>
+  <option value="student">Student</option>
+  <option value="instructor">Instructor</option>
+</select>
+
       </div>
               <div className="space-y-3">
                 <Button

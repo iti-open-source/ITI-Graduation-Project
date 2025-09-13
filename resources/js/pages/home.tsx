@@ -15,17 +15,18 @@ import Pricing from "@/components/home_components/pricing";
 export default function Home() {
 
     const { auth } = usePage().props as { auth: { user?: { role: string } } };
-  const userRole = auth?.user?.role ?? "guest"; // fallback to guest if no user
+const userRole = auth?.user?.role; 
+ let getStartedLink: string | null = null;
 
-  // Decide Get Started link based on role
-  const getStartedLink =
-    userRole === "guest"
-      ? "/login"
-      :  userRole === "admin"
-      ? "/dashboard"
-      : userRole === "instructor"
-      ? "/dashboard"
-      : "/dashboard";
+ if (!auth?.user) {
+ 
+  getStartedLink = "/login";
+} else if (["admin", "instructor", "student"].includes(userRole || "")) {
+  getStartedLink = "/dashboard";
+} else if (userRole === null) {
+  getStartedLink = null; 
+}
+
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
@@ -146,17 +147,19 @@ export default function Home() {
               Join thousands of candidates and recruiters who trust MockMate.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-              <Button asChild size="lg" className="shadow-lg hover:scale-105 transition">
-                <Link href={getStartedLink}>Get Started</Link>
-              </Button>
-              <Button
+              {getStartedLink && (
+                <Button asChild size="lg" className="shadow-lg hover:scale-105 transition">
+                  <Link href={getStartedLink}>Get Started</Link>
+                </Button>
+              )}
+              {/* <Button
                 asChild
                 size="lg"
                 variant="outline"
                 className="border-border text-foreground hover:scale-105 transition"
               >
                 <Link href="/lobby">Try a Demo</Link>
-              </Button>
+              </Button> */}
             </div>
           </div>
         </section>

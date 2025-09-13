@@ -45,14 +45,14 @@ class AdminController extends Controller
 {
     return Inertia::render('admin/edit-user', [
         'user' => $user,
-        'roles' => ['admin', 'user', 'instructor', 'student'], 
+        'roles' => ['admin', null, 'instructor', 'student'], 
     ]);
 }
 
 public function updateUserRole(Request $request, User $user)
 {
     $request->validate([
-        'role' => ['required', Rule::in(['user', 'admin', 'instructor', 'student'])],
+        'role' => ['required', Rule::in([null, 'admin', 'instructor', 'student'])],
     ]);
 
     $user->update(['role' => $request->role]);
@@ -66,7 +66,7 @@ public function updateUser(Request $request, User $user)
     $validated = $request->validate([
         'name' => 'required|string|max:255',
         'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-        'role' => ['required', Rule::in(['admin', 'user', 'instructor', 'student'])],
+        'role' => ['required', Rule::in(['admin', null, 'instructor', 'student'])],
         // 'password' => 'nullable|string|min:8|confirmed',
         // 'password_confirmation' => 'nullable|required_with:password|string|min:8',
         'updated_at' => now(),

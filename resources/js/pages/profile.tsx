@@ -301,7 +301,7 @@ export default function Profile() {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-muted-foreground">Role</Label>
-                  <p className="text-sm capitalize">{String(auth.user.role)}</p>
+                  <p className="text-sm capitalize">{String(auth.user.role ?? "Unassigned")}</p>
                 </div>
               </div>
             )}

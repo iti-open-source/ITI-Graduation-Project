@@ -12,7 +12,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 
 export default function Home() {
-  const { auth } = usePage().props as { auth: { user?: { role: string } } };
+  const { auth } = usePage().props as { auth?: { user?: { role: string } } };
   const userRole = auth?.user?.role;
   let getStartedLink: string | null = null;
 

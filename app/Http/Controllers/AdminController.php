@@ -41,6 +41,43 @@ class AdminController extends Controller
         ]);
     }
 
+    public function editUser(User $user)
+{
+    return Inertia::render('admin/edit-user', [
+        'user' => $user,
+        'roles' => ['admin', 'user', 'instructor', 'student'], 
+    ]);
+}
+
+public function updateUserRole(Request $request, User $user)
+{
+    $request->validate([
+        'role' => ['required', Rule::in(['user', 'admin', 'instructor', 'student'])],
+    ]);
+
+    $user->update(['role' => $request->role]);
+
+    return redirect()->back()->with('success', 'User role updated successfully.');
+}
+
+
+public function updateUser(Request $request, User $user)
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+        'role' => ['required', Rule::in(['admin', 'user', 'instructor', 'student'])],
+        // 'password' => 'nullable|string|min:8|confirmed',
+        // 'password_confirmation' => 'nullable|required_with:password|string|min:8',
+        'updated_at' => now(),
+    ]);
+
+    $user->update($validated);
+
+    return redirect()->route('admin.users')->with('success', 'User updated successfully.');
+}
+
+
 
 
     public function deleteUser(User $user)
@@ -62,4 +99,10 @@ class AdminController extends Controller
 
         return redirect()->back()->with('success', $message);
     }
+
+
+
+
+
+
 }

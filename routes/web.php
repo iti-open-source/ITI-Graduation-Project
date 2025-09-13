@@ -24,6 +24,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [AdminController::class, 'index'])->name('dashboard');
         Route::get('/users', [AdminController::class, 'users'])->name('users');
         Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('users.show');
+        Route::patch('/users/{user}', [AdminController::class, 'updateUserRole'])
+    ->name('users.updateRole');
+
+        // Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
+        // Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
+        
+
         Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.delete');
         Route::patch('/users/{user}/toggle-status', [AdminController::class, 'toggleUserStatus'])->name('users.toggle-status');
     });

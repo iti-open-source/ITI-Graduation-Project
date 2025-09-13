@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, router } from "@inertiajs/react";
 import {
   Activity,
   Calendar,
-  Edit,
+  // Edit,
   Eye,
   Settings,
   Shield,
@@ -35,6 +35,7 @@ interface User {
   email_verified_at: string | null;
   created_at: string;
   updated_at: string;
+  role: string;
 }
 
 interface AdminDashboardProps {
@@ -192,11 +193,27 @@ export default function AdminDashboard({ users, stats }: AdminDashboardProps) {
                           <Eye className="h-4 w-4" />
                         </Link>
                       </Button>
-                      <Button variant="outline" size="sm" asChild>
+                      {/* <Button variant="outline" size="sm" asChild>
                         <Link href={`/admin/users/${user.id}/edit`}>
                           <Edit className="h-4 w-4" />
                         </Link>
-                      </Button>
+                      </Button> */}
+
+                      {/* Role dropdown */}
+                      <select
+                        value={user.role}
+                        onChange={(e) =>
+                          router.patch(`/admin/users/${user.id}`, {
+                            role: e.target.value,
+                          })
+                        }
+                        className="rounded border p-1 text-sm"
+                      >
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                        <option value="instructor">Instructor</option>
+                        <option value="student">Student</option>
+                      </select>
                     </div>
                   </div>
                 ))}

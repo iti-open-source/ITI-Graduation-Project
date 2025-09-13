@@ -38,6 +38,7 @@ interface User {
   email_verified_at: string | null;
   created_at: string;
   updated_at: string;
+  role: string;
 }
 
 interface UsersPageProps {
@@ -53,10 +54,13 @@ interface UsersPageProps {
       active: boolean;
     }>;
   };
+ 
 }
 
 export default function UsersPage({ users }: UsersPageProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { csrf_token } = usePage().props as any;
 
@@ -97,11 +101,16 @@ export default function UsersPage({ users }: UsersPageProps) {
     }
   };
 
-  const filteredUsers = users.data.filter(
-    (user) =>
+  const filteredUsers = users.data.filter((user) => {
+    const matchesSearch =
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesRole = roleFilter ? user.role === roleFilter : true;
+
+    return matchesSearch && matchesRole;
+  });
+
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -198,6 +207,20 @@ export default function UsersPage({ users }: UsersPageProps) {
                 <Filter className="mr-2 h-4 w-4" />
                 Filter
               </Button>
+              {/* Role filter */}
+              <select
+                name="role"
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+                className="rounded border p-2 text-sm capitalize"
+              >
+                <option value="">All Roles</option>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+                <option value="instructor">Instructor</option>
+                <option value="student">Student</option>
+              </select>
+
               <Button variant="outline">
                 <Download className="mr-2 h-4 w-4" />
                 Export
@@ -254,6 +277,20 @@ export default function UsersPage({ users }: UsersPageProps) {
                         <Eye className="h-4 w-4" />
                       </Link>
                     </Button>
+                    <select
+                      defaultValue={user.role}
+                      onChange={(e) =>
+                        router.patch(`/admin/users/${user.id}`, {
+                          role: e.target.value,
+                        })
+                      }
+                      className="rounded border p-1 text-sm capitalize"
+                    >
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                      <option value="instructor">Instructor</option>
+                      <option value="student">Student</option>
+                    </select>
                     <Form
                       method="patch"
                       action={`/admin/users/${user.id}/toggle-status`}
@@ -272,6 +309,7 @@ export default function UsersPage({ users }: UsersPageProps) {
                         )}
                       </Button>
                     </Form>
+
                     <Button
                       variant="outline"
                       size="sm"

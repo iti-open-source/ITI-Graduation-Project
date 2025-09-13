@@ -33,7 +33,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             {/* Continue with Google & LinkedIn */}
             <Button
               type="button"
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-100 transition dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
               onClick={() => {
                 window.location.href = "/auth/google";
               }}
@@ -43,7 +43,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
             <Button
               type="button"
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#0077B5] bg-[#0077B5] text-sm font-medium text-white shadow-md hover:bg-[#005f91] transition"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#0077B5] bg-[#0077B5] text-sm font-medium text-white shadow-md transition hover:bg-[#005f91]"
               onClick={() => {
                 window.location.href = "/auth/linkedin";
               }}
@@ -111,7 +111,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 id="remember"
                 name="remember"
                 tabIndex={3}
-                className="border-gray-300 dark:border-gray-600 data-[state=checked]:bg-blue-600"
+                className="border-gray-300 data-[state=checked]:bg-blue-600 dark:border-gray-600"
               />
               <Label htmlFor="remember" className="text-gray-600 dark:text-gray-400">
                 Remember me

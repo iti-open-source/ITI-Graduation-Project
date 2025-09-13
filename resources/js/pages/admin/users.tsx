@@ -54,7 +54,6 @@ interface UsersPageProps {
       active: boolean;
     }>;
   };
- 
 }
 
 export default function UsersPage({ users }: UsersPageProps) {
@@ -110,7 +109,6 @@ export default function UsersPage({ users }: UsersPageProps) {
 
     return matchesSearch && matchesRole;
   });
-
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>

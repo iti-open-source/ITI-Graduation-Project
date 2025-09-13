@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { BookOpen, Bot, Brain, ChartBar, MessageCircle, UserCheck } from "lucide-react";
+import { Bot, Brain, ChartBar } from "lucide-react";
 import { useState } from "react";
 const services = [
   {
@@ -19,24 +19,24 @@ const services = [
     description: "Visualize growth with timelines, score breakdowns and personalized milestones.",
     icon: ChartBar,
   },
-  {
-    title: "Question Bank & Scenarios",
-    description:
-      "Explore a curated library of role-based questions, puzzles and real-world scenarios.",
-    icon: BookOpen,
-  },
-  {
-    title: "Personalized Coaching",
-    description:
-      "AI-guided learning paths that focus your practice on highest-impact improvements.",
-    icon: UserCheck,
-  },
-  {
-    title: "Peer & Mentor Sessions",
-    description:
-      "Book mentor reviews or join peer practice rooms for human feedback and collaboration.",
-    icon: MessageCircle,
-  },
+  // {
+  //   title: "Question Bank & Scenarios",
+  //   description:
+  //     "Explore a curated library of role-based questions, puzzles and real-world scenarios.",
+  //   icon: BookOpen,
+  // },
+  // {
+  //   title: "Personalized Coaching",
+  //   description:
+  //     "AI-guided learning paths that focus your practice on highest-impact improvements.",
+  //   icon: UserCheck,
+  // },
+  // {
+  //   title: "Peer & Mentor Sessions",
+  //   description:
+  //     "Book mentor reviews or join peer practice rooms for human feedback and collaboration.",
+  //   icon: MessageCircle,
+  // },
 ];
 export default function Services() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);

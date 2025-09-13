@@ -4,9 +4,20 @@ import { motion } from "framer-motion";
 import "swiper/css";
 import "swiper/css/navigation";
 export default function Hero() {
-  const { auth } = usePage().props as {
-    auth: { user?: { role: string } };
-  };
+  // const { auth } = usePage().props as {
+  //   auth: { user?: { role: string } };
+  // };
+
+const { auth, assignedRooms } = usePage().props as {
+  auth: { user?: { role: string } };
+  assignedRooms?: number[];
+};
+
+console.log("Assigned Rooms in Hero:", assignedRooms); 
+
+
+
+
 
   const userRole = auth?.user?.role;
 
@@ -88,29 +99,33 @@ export default function Hero() {
           )} 
 
           {/* Student → Join Room + Join Random Room */}
-          {userRole === "student" && (
-            <>
-              <motion.div variants={fadeIn}>
-                <Button
-                  asChild
-                  size="lg"
-                  className="py-6 text-xl shadow-lg transition hover:scale-105"
-                >
-                  <Link href="/lobby">📚 Join Room</Link>
-                </Button>
-              </motion.div>
-              {/* <motion.div variants={fadeIn}>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  asChild
-                  className="border-border text-foreground backdrop-blur-md transition hover:scale-105"
-                >
-                  <Link href="/lobby">🎯 Join Random Room</Link>
-                </Button>
-              </motion.div> */}
-            </>
-          )}
+         {userRole === "student" && (
+  assignedRooms && assignedRooms.length > 0 ? (
+    <>
+      <motion.div variants={fadeIn}>
+        <Button
+          asChild
+          size="lg"
+          className="py-6 text-xl shadow-lg transition hover:scale-105"
+        >
+          <Link href="/lobby">📚 Join Room</Link>
+        </Button>
+      </motion.div>
+    </>
+  ) : (
+    <motion.div variants={fadeIn}>
+      <Button
+        variant="outline"
+        size="lg"
+        asChild
+        className="border-border text-foreground backdrop-blur-md transition hover:scale-105"
+      >
+        <Link href="/">🎯 Welcom To MockMate</Link>
+      </Button>
+    </motion.div>
+  )
+)}
+
         </motion.div>
       </div>
 

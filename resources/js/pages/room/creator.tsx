@@ -43,13 +43,15 @@ interface Room {
   current_participant: User | null;
   queue: QueueUser[];
   queue_count: number;
+  assignedStudents?: User[];
+
 }
 
 interface CreatorProps {
   room: Room;
 }
 
-export default function Creator({ room: initialRoom }: CreatorProps) {
+export default function Creator({ room: initialRoom, assignedStudents }: CreatorProps & { assignedStudents: User[] }) {
   const [copied, setCopied] = useState(false);
   const { auth } = usePage<SharedData>().props;
   const { room, isConnected } = useRoomUpdates(initialRoom.room_code, initialRoom);
@@ -369,6 +371,63 @@ export default function Creator({ room: initialRoom }: CreatorProps) {
                 </CardContent>
               </Card>
             </motion.div>
+
+            <motion.div
+  variants={fadeIn}
+  initial="hidden"
+  animate="visible"
+  className="space-y-6"
+>
+  <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+    <CardHeader>
+      <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500 text-white">
+          <Users className="h-5 w-5" />
+        </div>
+        <div>
+          Assigned Students
+          {(assignedStudents ?? []).length > 0 && (
+            <span className="ml-2 text-sm text-purple-600 dark:text-purple-400">
+              ({(assignedStudents ?? []).length})
+            </span>
+          )}
+        </div>
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      {(assignedStudents ?? []).length > 0 ? (
+        <div className="space-y-2">
+          {(assignedStudents ?? []).map((student: any) => (
+            <div
+              key={student.id}
+              className="flex items-center gap-3 rounded-lg bg-[var(--color-muted)] p-3"
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                  {student.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <h4 className="truncate font-medium text-[var(--color-text)]">
+                  {student.name}
+                </h4>
+                <p className="truncate text-sm text-[var(--color-text-secondary)]">
+                  {student.email}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-[var(--color-text-secondary)]">
+          No students assigned yet.
+        </p>
+      )}
+    </CardContent>
+  </Card>
+</motion.div>
+
+
           </div>
 
           {/* Room Link Card */}

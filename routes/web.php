@@ -10,8 +10,10 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
-    return Inertia::render('home', ["isLoggedIn" => Auth::check()]);
+    return Inertia::render('home', ["isLoggedIn" => Auth::check() , ]);
 })->name('home');
+
+
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -36,7 +38,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Room routes
-    Route::get('lobby', [RoomController::class, 'lobby'])->name('lobby')->middleware('check.role')
+    Route::get('lobby', [RoomController::class, 'lobby'])->name('lobby')
     ;
     Route::post('rooms', [RoomController::class, 'create'])->name('room.create')->middleware('check.role')
     ;

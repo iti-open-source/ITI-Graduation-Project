@@ -6,9 +6,17 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+
+/**
+ * App\Models\User
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Room> $assignedRooms
+ * @property-read int|null $assigned_rooms_count
+ */
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -63,4 +71,10 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(RoomQueue::class);
     }
+
+public function assignedRooms(): BelongsToMany
+{
+    return $this->belongsToMany(Room::class, 'room_user', 'user_id', 'room_id');
+}
+
 }

@@ -13,24 +13,63 @@ use Inertia\Inertia;
 
 class RoomController extends Controller
 {
+    // public function lobby()
+    // {
+    //     $user = Auth::user();
+    //     $userRooms = $user->createdRooms()
+    //         ->where('is_active', true)
+    //         ->with(['currentParticipant', 'queue.user', 'assignedStudents'])
+    //         ->orderBy('last_activity', 'desc')
+    //         ->get();
+
+    //     // Fetch all students to assign
+    //     $userStudents = \App\Models\User::where('role', 'student')->get();
+
+    //     return Inertia::render('lobby', [
+    //         'userRooms' => $userRooms,
+    //         'students' => $userStudents,
+    //     ]);
+    // }
+
     public function lobby()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
+
+    $userRooms = [];
+    $students = [];
+
+    if ($user->role === 'student') {
+        // Show rooms assigned to this student
+        $userRooms = $user->assignedRooms()
+            ->where('is_active', true)
+            ->with(['currentParticipant', 'queue.user', 'creator'])
+            ->orderBy('last_activity', 'desc')
+            ->get();
+    } elseif (in_array($user->role, ['instructor', 'admin'])) {
+        // Show rooms this instructor/admin created
         $userRooms = $user->createdRooms()
             ->where('is_active', true)
-            ->with(['currentParticipant', 'queue.user'])
+            ->with(['currentParticipant', 'queue.user', 'assignedStudents'])
             ->orderBy('last_activity', 'desc')
             ->get();
 
-        return Inertia::render('lobby', [
-            'userRooms' => $userRooms,
-        ]);
+        // Only instructors/admins need the list of students
+        $students = \App\Models\User::where('role', 'student')->get();
     }
+
+    return Inertia::render('lobby', [
+        'userRooms' => $userRooms,
+        'students'  => $students,
+    ]);
+}
+
 
     public function create(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'students' => 'nullable|array',
+            'students.*' => 'exists:users,id',
         ]);
 
         $room = Room::create([
@@ -38,13 +77,19 @@ class RoomController extends Controller
             'created_by' => Auth::id(),
         ]);
 
+        if ($request->filled('students')) {
+            $room->assignedStudents()->sync($request->students);
+        }
+
+
+
         return redirect()->route('room.show', $room->room_code);
     }
 
     public function show($roomCode)
     {
         $room = Room::where('room_code', $roomCode)
-            ->with(['creator', 'currentParticipant', 'queue.user', 'sessions' => function ($q) {
+            ->with(['creator', 'currentParticipant', 'queue.user', 'assignedStudents', 'sessions' => function ($q) {
                 $q->where('status', 'active')->latest('id');
             }])
             ->firstOrFail();
@@ -68,6 +113,7 @@ class RoomController extends Controller
         if ($room->isCreator($user)) {
             return Inertia::render('room/creator', [
                 'room' => $room,
+                'assignedStudents' => $room->assignedStudents,
             ]);
         }
 
@@ -221,4 +267,27 @@ class RoomController extends Controller
     }
 
     // Legacy WebRTC signaling removed in favor of simple RTC flow
+
+
+
+    // public function assignStudents(Request $request, Room $room)
+    // {
+    //     $user = $request->user();
+
+    //     // Only creator (instructor) can assign students
+    //     if (!$room->isCreator($user)) {
+    //         abort(403, 'Unauthorized');
+    //     }
+
+    //     $request->validate([
+    //         'students' => 'required|array',
+    //         'students.*' => 'exists:users,id',
+    //     ]);
+
+    //     $room->assignedStudents()->sync($request->students);
+
+    //     return redirect()->back()->with('success', 'Students assigned successfully.');
+    // }
+
+
 }

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import CustomLayout from "@/layouts/custom-layout";
-import { Head, Link, router } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import { Copy, Eye, Plus, Trash2, Users, Wind } from "lucide-react";
 import { useState } from "react";
@@ -13,6 +13,7 @@ interface User {
   id: number;
   name: string;
   email: string;
+  role?: string;
 }
 
 interface Room {
@@ -26,11 +27,16 @@ interface Room {
 
 interface LobbyProps {
   userRooms: Room[];
+  students: User[];
 }
 
-export default function Lobby({ userRooms }: LobbyProps) {
+export default function Lobby({ userRooms ,students }: LobbyProps) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  
+const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
+ const { auth } = usePage().props as { auth: { user: User } };
+  const role = auth?.user?.role;
 
   const handleCreateRoom = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,7 +47,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
     setIsCreating(true);
     router.post(
       "/rooms",
-      { name: roomName },
+      { name: roomName , students: selectedStudents  },
       {
         onSuccess: () => {
           setShowCreateForm(false);
@@ -88,17 +94,21 @@ export default function Lobby({ userRooms }: LobbyProps) {
               <div>
                 <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Interview Rooms</h1>
                 <p className="mt-2 text-muted-foreground">
-                  Create, manage, and join your interview rooms.
+                  {role === "student"
+                    ? "Here are the rooms assigned to you."
+                    : "Create, manage, and join your interview rooms."}
                 </p>
               </div>
-              <Button onClick={() => setShowCreateForm(!showCreateForm)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Room
-              </Button>
+              {role !== "student" && (
+                <Button onClick={() => setShowCreateForm(!showCreateForm)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Room
+                </Button>
+              )}
             </div>
 
             {/* Create Room Form */}
-            {showCreateForm && (
+            {role !== "student" && showCreateForm && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
@@ -126,6 +136,32 @@ export default function Lobby({ userRooms }: LobbyProps) {
                           required
                         />
                       </div>
+                       {/* Student Assignment */}
+
+                       {role !== "student" && (
+<div className="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto rounded-md border p-2">
+  {students.map((student) => (
+    <label key={student.id} className="flex items-center gap-2">
+      <input
+        type="checkbox"
+        value={student.id}
+        checked={selectedStudents.includes(student.id)}
+        onChange={(e) => {
+          const id = Number(e.target.value);
+          setSelectedStudents((prev) =>
+            prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+          );
+        }}
+        className="h-4 w-4"
+      />
+      <span>{student.name} ({student.email})</span>
+    </label>
+  ))}
+</div>
+                      )}
+
+
+
                       <div className="flex items-center gap-2">
                         <Button type="submit" disabled={isCreating}>
                           {isCreating ? "Creating..." : "Confirm & Create"}
@@ -204,6 +240,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
                           >
                             <Copy className="h-4 w-4" />
                           </Button>
+                          {role !== "student" && (
                           <Button
                             size="icon"
                             variant="outline"
@@ -211,6 +248,7 @@ export default function Lobby({ userRooms }: LobbyProps) {
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -224,13 +262,18 @@ export default function Lobby({ userRooms }: LobbyProps) {
                     <Wind className="h-8 w-8 text-muted-foreground" />
                   </div>
                   <h3 className="mb-2 text-xl font-semibold">It's quiet in here...</h3>
-                  <p className="mb-6 text-muted-foreground">
-                    Create your first interview room to get started.
+                   <p className="mb-6 text-muted-foreground">
+                    {role === "student"
+                      ? "No rooms have been assigned to you yet."
+                      : "Create your first interview room to get started."}
                   </p>
-                  <Button onClick={() => setShowCreateForm(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create Your First Room
-                  </Button>
+                   {/* ✅ Students can’t create rooms */}
+                  {role !== "student" && (
+                    <Button onClick={() => setShowCreateForm(true)}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Your First Room
+                    </Button>
+                  )}
                 </div>
               </motion.div>
             )}

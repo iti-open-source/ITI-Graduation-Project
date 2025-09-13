@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Room;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
 
@@ -25,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
         Inertia::share([
         'auth.user' => fn () => auth()->user(),
         'roomsCount' => Room::count(),
+        'assignedRooms' => fn () => Auth::user() && Auth::user()->role === 'student'
+        ? Auth::user()->assignedRooms()->pluck('rooms.id')
+        : [],
     ]);
     }
 }

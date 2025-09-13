@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -120,4 +121,21 @@ class Room extends Model
             $item->update(['position' => $index + 1]);
         }
     }
+
+
+
+public function assignedStudents()
+{
+    return $this->belongsToMany(User::class, 'room_user', 'room_id', 'user_id');
+}
+
+protected $with = ['assignedStudents']; 
+
+protected $appends = ['assigned_students_count']; 
+
+public function getAssignedStudentsCountAttribute()
+{
+    return $this->assignedStudents()->count();
+}
+
 }

@@ -17,6 +17,8 @@ import {
   UserCheck,
   UserX,
 } from "lucide-react";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -46,8 +48,22 @@ interface User {
 interface UserDetailProps {
   user: User;
 }
+interface Props {
+  flash?: {
+    success?: string;
+    error?: string;
+  };
+}
 
-export default function UserDetail({ user }: UserDetailProps) {
+export default function UserDetail({ user, flash }: UserDetailProps & Props) {
+  useEffect(() => {
+        if (flash?.success) {
+          toast.success(flash.success);
+        }
+        if (flash?.error) {
+          toast.error(flash.error);
+        }
+      }, [flash]);
   const getStatusBadge = () => {
     if (user.email_verified_at) {
       return (

@@ -18,7 +18,8 @@ import {
   Users,
   UserX,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -55,10 +56,25 @@ interface UsersPageProps {
     }>;
   };
 }
+interface Props {
+  flash?: {
+    success?: string;
+    error?: string;
+  };
+}
 
-export default function UsersPage({ users }: UsersPageProps) {
+export default function UsersPage({ users ,flash }: UsersPageProps & Props) {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
+
+  useEffect(() => {
+      if (flash?.success) {
+        toast.success(flash.success);
+      }
+      if (flash?.error) {
+        toast.error(flash.error);
+      }
+    }, [flash]);
 
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { csrf_token } = usePage().props as any;

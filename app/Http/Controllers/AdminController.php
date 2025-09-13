@@ -57,7 +57,7 @@ public function updateUserRole(Request $request, User $user)
 
     $user->update(['role' => $request->role]);
 
-    return redirect()->back()->with('success', 'User role updated successfully.');
+    return redirect()->back()->with('success', "{$user->name} role updated successfully.");
 }
 
 

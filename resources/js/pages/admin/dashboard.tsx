@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
 import { Head, Link, router } from "@inertiajs/react";
+
 import {
   Activity,
   Calendar,
@@ -16,6 +17,8 @@ import {
   Users,
   UserX,
 } from "lucide-react";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -54,7 +57,22 @@ interface AdminDashboardProps {
   };
 }
 
-export default function AdminDashboard({ users, stats }: AdminDashboardProps) {
+interface Props {
+  flash?: {
+    success?: string;
+    error?: string;
+  };
+}
+export default function AdminDashboard({ users, stats , flash}: AdminDashboardProps & Props) {
+useEffect(() => {
+    if (flash?.success) {
+      toast.success(flash.success);
+    }
+    if (flash?.error) {
+      toast.error(flash.error);
+    }
+  }, [flash]);
+
   const recentUsers = users.data.slice(0, 5);
 
   const getStatusBadge = (user: User) => {
@@ -69,6 +87,7 @@ export default function AdminDashboard({ users, stats }: AdminDashboardProps) {
         </Badge>
       );
     }
+
     return (
       <Badge
         variant="secondary"

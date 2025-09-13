@@ -16,7 +16,7 @@ class CheckRole
      */
      public function handle($request, Closure $next): Response
     {
-         if (auth()->check() && (auth()->user()->role === 'instructor' || auth()->user()->role === 'admin')) {
+         if (auth()->check() && (auth()->user()->role === 'instructor' || auth()->user()->role === 'admin' || auth()->user()->role === 'student')) {
             return $next($request);
         }
 

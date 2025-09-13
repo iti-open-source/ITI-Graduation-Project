@@ -140,6 +140,7 @@ const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
 
                        {role !== "student" && (
 <div className="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto rounded-md border p-2">
+  <Label className="mb-2 block font-medium">Assign Students:</Label>
   {students.map((student) => (
     <label key={student.id} className="flex items-center gap-2">
       <input

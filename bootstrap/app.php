@@ -18,9 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
-    $middleware->alias(['instructor.only' => InstructorOnly::class]);
-        $middleware->alias(['check.role' => CheckRole::class]);
-        $middleware->alias(['admin.only' => AdminOnly::class]);
+    $middleware->alias([
+    'check.role'   => CheckRole::class,
+    'admin.only'   => AdminOnly::class,
+    'instructor.only' => InstructorOnly::class,
+]);
         
 
         $middleware->web(append: [

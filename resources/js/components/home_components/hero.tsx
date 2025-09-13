@@ -42,10 +42,9 @@ export default function Hero() {
           variants={fadeIn}
           initial="hidden"
           animate="visible"
-          className="mb-10 max-w-2xl text-lg text-muted-foreground md:text-xl"
+          className="mb-10 max-w-3xl text-lg text-muted-foreground md:text-xl"
         >
-          Host structured interviews, practice coding challenges, or join a discussion room tailored
-          to your interests — all in one seamless platform.
+          A seamless platform for scheduling structured interviews, hosting live coding sessions and delivering instant AI-powered feedback — all in one seamless platform.
         </motion.p>
         <motion.div
           variants={staggerContainer}

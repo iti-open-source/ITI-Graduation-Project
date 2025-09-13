@@ -1,7 +1,9 @@
+import { usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import { Code2, MessageSquare, MicVocal } from "lucide-react";
 
 export default function Features() {
+   const { roomsCount } = usePage().props as { roomsCount: number };
   const features = [
     {
       icon: Code2,
@@ -55,7 +57,7 @@ export default function Features() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9 }}
             >
-              <h3 className="text-4xl font-bold">8,000+</h3>
+              <h3 className="text-4xl font-bold">{roomsCount}+</h3>
               <p className="mt-1 text-center text-sm">
                 Live mock interviews
                 <br />

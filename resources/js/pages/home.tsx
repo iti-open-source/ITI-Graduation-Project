@@ -179,11 +179,14 @@ const userRole = auth?.user?.role;
             </p>
 
             <a
-              href="mailto:support@mockmate.com"
-              className="animate-float inline-block rounded-2xl bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 px-10 py-4 font-semibold text-white shadow-xl transition hover:from-blue-700 hover:to-sky-600 hover:shadow-blue-400/40"
-            >
-              📩 support@mockmate.com
-            </a>
+  href="https://mail.google.com/mail/?view=cm&fs=1&to=rha772201@gmail.com"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="animate-float inline-block rounded-2xl bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 px-10 py-4 font-semibold text-white shadow-xl transition hover:from-blue-700 hover:to-sky-600 hover:shadow-blue-400/40"
+>
+  📩 support@mockmate.com
+</a>
+
           </motion.div>
 
           <style>{`

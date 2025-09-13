@@ -36,8 +36,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Room routes
-    Route::get('lobby', [RoomController::class, 'lobby'])->name('lobby');
-    Route::post('rooms', [RoomController::class, 'create'])->name('room.create');
+    Route::get('lobby', [RoomController::class, 'lobby'])->name('lobby')
+    ;
+    Route::post('rooms', [RoomController::class, 'create'])->name('room.create')
+    ;
     Route::get('room/{roomCode}', [RoomController::class, 'show'])->name('room.show');
     Route::post('room/{roomCode}/join', [RoomController::class, 'join'])->name('room.join');
     Route::post('room/{roomCode}/disconnect', [RoomController::class, 'disconnect'])->name('room.disconnect');

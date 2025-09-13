@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import Footer from "@/components/home_components/footer";
 import CustomLayout from "@/layouts/custom-layout";
@@ -13,6 +13,19 @@ import Works from "@/components/home_components/works";
 import Pricing from "@/components/home_components/pricing";
 
 export default function Home() {
+
+    const { auth } = usePage().props as { auth: { user?: { role: string } } };
+  const userRole = auth?.user?.role ?? "guest"; // fallback to guest if no user
+
+  // Decide Get Started link based on role
+  const getStartedLink =
+    userRole === "guest"
+      ? "/login"
+      :  userRole === "admin"
+      ? "/dashboard"
+      : userRole === "instructor"
+      ? "/dashboard"
+      : "/dashboard";
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
@@ -134,7 +147,7 @@ export default function Home() {
             </p>
             <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
               <Button asChild size="lg" className="shadow-lg hover:scale-105 transition">
-                <Link href="/dashboard">Get Started</Link>
+                <Link href={getStartedLink}>Get Started</Link>
               </Button>
               <Button
                 asChild

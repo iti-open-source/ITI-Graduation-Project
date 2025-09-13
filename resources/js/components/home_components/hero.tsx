@@ -1,10 +1,16 @@
 
 import { Button } from "@/components/ui/button";
-import { Link } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import "swiper/css";
 import "swiper/css/navigation";
 export default function Hero() {
+
+  const { auth } = usePage().props as {
+    auth: { user?: { role: string } };
+  };
+
+  const userRole = auth?.user?.role ?? "guest";
 
 
   // Animation variants
@@ -48,14 +54,48 @@ export default function Hero() {
               tailored to your interests — all in one seamless platform.
             </motion.p>
             <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
-              className="flex flex-col justify-center gap-4 sm:flex-row"
-            >
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col justify-center gap-4 sm:flex-row"
+        >
+           {/* Guest → Get Started */}
+          {userRole === "guest" && (
+            <motion.div variants={fadeIn}>
+              <Button asChild size="lg" className="shadow-lg hover:scale-105 transition">
+                <Link href="/login">✨ Get Started</Link>
+              </Button>
+            </motion.div>
+          )}
+          {/* Instructor or Admin → Create Room */}
+          {(userRole === "instructor" || userRole === "admin") && (
+            <motion.div variants={fadeIn}>
+              <Button asChild size="lg" className="shadow-lg hover:scale-105 transition">
+                <Link href="/lobby">🚀 Create a Room</Link>
+              </Button>
+            </motion.div>
+          )}
+
+          {/* User → Join Random Room */}
+          {userRole === "user" && (
+            <motion.div variants={fadeIn}>
+              <Button
+                variant="outline"
+                size="lg"
+                asChild
+                className="backdrop-blur-md border-border text-foreground hover:scale-105 transition"
+              >
+                <Link href="/lobby">🎯 Join Random Room</Link>
+              </Button>
+            </motion.div>
+          )}
+
+          {/* Student → Join Room + Join Random Room */}
+          {userRole === "student" && (
+            <>
               <motion.div variants={fadeIn}>
                 <Button asChild size="lg" className="shadow-lg hover:scale-105 transition">
-                  <Link href="/lobby">🚀 Create a Room</Link>
+                  <Link href="/lobby">📚 Join Room</Link>
                 </Button>
               </motion.div>
               <motion.div variants={fadeIn}>
@@ -68,7 +108,9 @@ export default function Hero() {
                   <Link href="/lobby">🎯 Join Random Room</Link>
                 </Button>
               </motion.div>
-            </motion.div>
+            </>
+          )}
+        </motion.div>
           </div>
 
           {/* Scroll indicator */}

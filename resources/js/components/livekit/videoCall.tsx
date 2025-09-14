@@ -50,8 +50,8 @@ function GalleryView() {
               <ParticipantTile />
             </GridLayout>
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gray-900">
-              <div className="text-center text-gray-400">
+            <div className="flex h-full w-full items-center justify-center bg-[var(--color-bg)]">
+              <div className="text-center text-[var(--color-text-secondary)]">
                 <svg className="mx-auto mb-4 h-16 w-16" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
@@ -59,7 +59,7 @@ function GalleryView() {
                     clipRule="evenodd"
                   />
                 </svg>
-                <p className="text-lg">Waiting for guest to join...</p>
+                <p className="text-lg text-[var(--color-text)]">Waiting for guest to join...</p>
                 <p className="mt-2 text-sm">Share your session code to invite someone</p>
               </div>
             </div>
@@ -73,8 +73,8 @@ function GalleryView() {
               <ParticipantTile />
             </GridLayout>
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gray-800">
-              <div className="text-center text-gray-400">
+            <div className="flex h-full w-full items-center justify-center bg-[var(--color-section-bg)]">
+              <div className="text-center text-[var(--color-text-secondary)]">
                 <svg className="mx-auto mb-2 h-12 w-12" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
@@ -82,7 +82,7 @@ function GalleryView() {
                     clipRule="evenodd"
                   />
                 </svg>
-                <p className="text-sm">Your camera is off</p>
+                <p className="text-sm text-[var(--color-text)]">Your camera is off</p>
               </div>
             </div>
           )}
@@ -90,14 +90,14 @@ function GalleryView() {
       </div>
 
       {/* Controls */}
-      <div className="flex-shrink-0 border-t bg-gray-50 px-4 py-3 dark:bg-gray-800">
+      <div className="flex-shrink-0 border-t border-[var(--color-border)] bg-blue-50 px-4 py-3 dark:bg-[var(--color-muted)]">
         <div className="flex items-center justify-center gap-4">
           {/* Mute/Unmute Button */}
           <button
             className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
               localParticipant?.isMicrophoneEnabled
-                ? "bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-                : "bg-red-500 text-white hover:bg-red-600"
+                ? "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-[var(--color-button-secondary-border)] dark:bg-[var(--color-button-secondary-bg)] dark:text-[var(--color-button-secondary-text)] dark:hover:bg-[var(--color-button-secondary-hover-bg)]"
+                : "border border-red-300 bg-red-50 text-red-600 hover:bg-red-100 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
             }`}
             onClick={() => {
               if (localParticipant) {
@@ -106,12 +106,9 @@ function GalleryView() {
             }}
             title={localParticipant?.isMicrophoneEnabled ? "Mute microphone" : "Unmute microphone"}
           >
-            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
-                clipRule="evenodd"
-              />
+            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+              <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
             </svg>
           </button>
 
@@ -119,8 +116,8 @@ function GalleryView() {
           <button
             className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
               localParticipant?.isCameraEnabled
-                ? "bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-                : "bg-red-500 text-white hover:bg-red-600"
+                ? "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-[var(--color-button-secondary-border)] dark:bg-[var(--color-button-secondary-bg)] dark:text-[var(--color-button-secondary-text)] dark:hover:bg-[var(--color-button-secondary-hover-bg)]"
+                : "border border-red-300 bg-red-50 text-red-600 hover:bg-red-100 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
             }`}
             onClick={() => {
               if (localParticipant) {
@@ -138,8 +135,8 @@ function GalleryView() {
           <button
             className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
               localParticipant?.isScreenShareEnabled
-                ? "bg-blue-500 text-white hover:bg-blue-600"
-                : "bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+                ? "border border-blue-300 bg-blue-500 text-white hover:bg-blue-600 dark:bg-[var(--color-accent)] dark:hover:bg-[var(--color-button-primary-hover)]"
+                : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-[var(--color-button-secondary-border)] dark:bg-[var(--color-button-secondary-bg)] dark:text-[var(--color-button-secondary-text)] dark:hover:bg-[var(--color-button-secondary-hover-bg)]"
             }`}
             onClick={() => {
               if (localParticipant) {
@@ -149,17 +146,13 @@ function GalleryView() {
             title={localParticipant?.isScreenShareEnabled ? "Stop sharing screen" : "Share screen"}
           >
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm8 0a1 1 0 00-1 1v6a1 1 0 001 1h6a1 1 0 001-1V8a1 1 0 00-1-1h-6z"
-                clipRule="evenodd"
-              />
+              <path d="M2 4a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V4zm2 0v8h12V4H4zm2 10h8v2H6v-2z" />
             </svg>
           </button>
 
           {/* Device Settings Button */}
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition-colors hover:bg-gray-50 dark:border-[var(--color-button-secondary-border)] dark:bg-[var(--color-button-secondary-bg)] dark:text-[var(--color-button-secondary-text)] dark:hover:bg-[var(--color-button-secondary-hover-bg)]"
             onClick={() => setShowDeviceSettings(!showDeviceSettings)}
             title="Device settings"
           >
@@ -175,14 +168,14 @@ function GalleryView() {
 
         {/* Device Settings Panel */}
         {showDeviceSettings && (
-          <div className="mt-4 space-y-3 border-t pt-3">
+          <div className="mt-4 space-y-3 border-t border-[var(--color-border)] pt-3">
             {/* Microphone Selection */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+              <label className="text-xs font-medium text-gray-600 dark:text-[var(--color-text-secondary)]">
                 Microphone
               </label>
               <select
-                className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                className="w-full rounded border border-[var(--color-border)] bg-[var(--color-card-bg)] px-2 py-1 text-sm text-[var(--color-text)]"
                 onChange={(e) => {
                   if (localParticipant) {
                     localParticipant.setMicrophoneEnabled(true, { deviceId: e.target.value });
@@ -199,9 +192,11 @@ function GalleryView() {
 
             {/* Camera Selection */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Camera</label>
+              <label className="text-xs font-medium text-gray-600 dark:text-[var(--color-text-secondary)]">
+                Camera
+              </label>
               <select
-                className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                className="w-full rounded border border-[var(--color-border)] bg-[var(--color-card-bg)] px-2 py-1 text-sm text-[var(--color-text)]"
                 onChange={(e) => {
                   if (localParticipant) {
                     localParticipant.setCameraEnabled(true, { deviceId: e.target.value });
@@ -218,11 +213,11 @@ function GalleryView() {
 
             {/* Speaker Selection */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+              <label className="text-xs font-medium text-gray-600 dark:text-[var(--color-text-secondary)]">
                 Speaker
               </label>
               <select
-                className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                className="w-full rounded border border-[var(--color-border)] bg-[var(--color-card-bg)] px-2 py-1 text-sm text-[var(--color-text)]"
                 onChange={(e) => {
                   // Note: Speaker selection would need to be handled by the room's audio output
                   console.log("Speaker selected:", e.target.value);
@@ -304,9 +299,9 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
     return (
       <div className="flex h-full w-full items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-accent)]/10">
             <svg
-              className="h-6 w-6 text-blue-600"
+              className="h-6 w-6 text-[var(--color-accent)]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -319,8 +314,10 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
               />
             </svg>
           </div>
-          <p className="text-sm text-gray-600">Generating video call token...</p>
-          <p className="text-xs text-gray-500">Please wait while we set up your video call</p>
+          <p className="text-sm text-[var(--color-text)]">Generating video call token...</p>
+          <p className="text-xs text-[var(--color-text-secondary)]">
+            Please wait while we set up your video call
+          </p>
         </div>
       </div>
     );
@@ -347,7 +344,7 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
       >
         <div className="flex h-full flex-col">
           {/* Connection Status */}
-          <div className="border-b bg-gray-50 px-4 py-3 dark:bg-gray-800">
+          <div className="border-b border-[var(--color-border)] bg-blue-50 px-4 py-3 dark:bg-[var(--color-muted)]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
@@ -360,12 +357,12 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
                     {isConnected ? "Live" : "Connecting..."}
                   </span>
                 </div>
-                <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="h-4 w-px bg-[var(--color-border)]"></div>
+                <span className="text-sm text-gray-600 dark:text-[var(--color-text-secondary)]">
                   Session: {sessionCode || roomName.replace("session-", "")}
                 </span>
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-500">
+              <div className="text-xs text-gray-600 dark:text-[var(--color-text-secondary)]">
                 {new Date().toLocaleTimeString()}
               </div>
             </div>

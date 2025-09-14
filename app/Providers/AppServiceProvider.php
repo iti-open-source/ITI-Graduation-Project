@@ -24,10 +24,10 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         Inertia::share([
-        'auth.user' => fn () => auth()->user(),
-        'roomsCount' => fn () => $this->getRoomsCount(),
-        'assignedRooms' => fn () => $this->getAssignedRooms(),
-    ]);
+            'auth.user' => fn() => Auth::user(),
+            'roomsCount' => fn() => $this->getRoomsCount(),
+            'assignedRooms' => fn() => $this->getAssignedRooms(),
+        ]);
     }
 
     private function getRoomsCount(): int

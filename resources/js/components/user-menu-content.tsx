@@ -45,19 +45,20 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
         {/* Conditional first menu item */}
-        <DropdownMenuItem asChild>
-          <Link
-            className="block w-full"
-            href={firstMenuItem.href}
-            as="button"
-            prefetch
-            onClick={cleanup}
-          >
-            <firstMenuItem.icon className="mr-2" />
-            {firstMenuItem.title}
-          </Link>
-        </DropdownMenuItem>
-
+        {user.role != null && (
+          <DropdownMenuItem asChild>
+            <Link
+              className="block w-full"
+              href={firstMenuItem.href}
+              as="button"
+              prefetch
+              onClick={cleanup}
+            >
+              <firstMenuItem.icon className="mr-2" />
+              {firstMenuItem.title}
+            </Link>
+          </DropdownMenuItem>
+        )}
         {user.role != null && (
           <DropdownMenuItem asChild>
             <Link

@@ -61,8 +61,7 @@
 }
 
 /* Base Tailwind imports if not already present */
-@tailwind base;
-@tailwind components;
+
 @tailwind utilities;
 
 /* Light theme (default) */

@@ -40,7 +40,7 @@ export default function SessionRoom(props: PageProps) {
         <div className="flex min-h-0 flex-1 flex-col gap-6 lg:flex-row">
           {/* Left Side - Video Call (50% on desktop, full width on mobile) */}
           <div className="flex w-full flex-col lg:w-1/2">
-            <div className="flex min-h-0 flex-1 flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+            <div className="flex min-h-96 flex-1 flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm lg:min-h-0">
               {/* Video Header */}
               <div className="flex-shrink-0 border-b border-[var(--color-border)] px-4 py-3">
                 <div className="flex items-center justify-between">
@@ -60,7 +60,7 @@ export default function SessionRoom(props: PageProps) {
               </div>
 
               {/* Video Content - Full Height */}
-              <div className="min-h-0 flex-1">
+              <div className="min-h-80 flex-1 lg:min-h-0">
                 <VideoCall
                   roomName={`session-${roomCode}`}
                   sessionCode={roomCode}

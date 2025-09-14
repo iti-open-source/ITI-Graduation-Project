@@ -70,7 +70,7 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
   // Show loading state while generating token
   if (isGeneratingToken || !token) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full w-full items-center justify-center">
         <div className="text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
             <svg
@@ -95,7 +95,7 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
   }
 
   return (
-    <div className="h-full w-full">
+    <div className="flex h-full min-h-0 w-full flex-col">
       <LiveKitRoom
         video={true}
         audio={true}
@@ -105,7 +105,7 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
         onConnected={handleConnected}
         onDisconnected={handleDisconnected}
         onError={handleError}
-        style={{ height: "100%" }}
+        style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: "320px" }}
       >
         <div className="flex h-full flex-col">
           {/* Connection Status */}
@@ -134,7 +134,7 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
           </div>
 
           {/* Full-featured Video Conference Component */}
-          <div className="flex-1">
+          <div className="min-h-0 flex-1">
             <VideoConference />
           </div>
 

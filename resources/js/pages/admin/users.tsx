@@ -63,18 +63,18 @@ interface Props {
   };
 }
 
-export default function UsersPage({ users ,flash }: UsersPageProps & Props) {
+export default function UsersPage({ users, flash }: UsersPageProps & Props) {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
 
   useEffect(() => {
-      if (flash?.success) {
-        toast.success(flash.success);
-      }
-      if (flash?.error) {
-        toast.error(flash.error);
-      }
-    }, [flash]);
+    if (flash?.success) {
+      toast.success(flash.success);
+    }
+    if (flash?.error) {
+      toast.error(flash.error);
+    }
+  }, [flash]);
 
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { csrf_token } = usePage().props as any;
@@ -122,9 +122,10 @@ export default function UsersPage({ users ,flash }: UsersPageProps & Props) {
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesRole = roleFilter
-  ? (roleFilter === "null" ? user.role === null : user.role === roleFilter)
-  : true;
-
+      ? roleFilter === "null"
+        ? user.role === null
+        : user.role === roleFilter
+      : true;
 
     return matchesSearch && matchesRole;
   });
@@ -226,18 +227,27 @@ export default function UsersPage({ users ,flash }: UsersPageProps & Props) {
               </Button>
               {/* Role filter */}
               <select
-  name="role"
-  value={roleFilter}
-  onChange={(e) => setRoleFilter(e.target.value)}
-  className="rounded border p-2 text-sm capitalize"
->
-  <option value="">All Roles</option>
-  <option value="null">Unassigned</option>
-  <option value="admin">Admin</option>
-  <option value="instructor">Instructor</option>
-  <option value="student">Student</option>
-</select>
-
+                name="role"
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+                className="rounded border p-2 text-sm capitalize"
+              >
+                <option value="" className="text-gray-800">
+                  All Roles
+                </option>
+                <option value="null" className="text-gray-800">
+                  Unassigned
+                </option>
+                <option value="admin" className="text-gray-800">
+                  Admin
+                </option>
+                <option value="instructor" className="text-gray-800">
+                  Instructor
+                </option>
+                <option value="student" className="text-gray-800">
+                  Student
+                </option>
+              </select>
 
               <Button variant="outline">
                 <Download className="mr-2 h-4 w-4" />
@@ -296,19 +306,27 @@ export default function UsersPage({ users ,flash }: UsersPageProps & Props) {
                       </Link>
                     </Button>
                     <select
-  defaultValue={user.role ?? "null"}
-  onChange={(e) =>
-    router.patch(`/admin/users/${user.id}`, {
-      role: e.target.value === "null" ? null : e.target.value,
-    })
-  }
-  className="rounded border p-1 text-sm capitalize"
->
-  <option value="null">Unassigned</option>
-  <option value="admin">Admin</option>
-  <option value="instructor">Instructor</option>
-  <option value="student">Student</option>
-</select>
+                      defaultValue={user.role ?? "null"}
+                      onChange={(e) =>
+                        router.patch(`/admin/users/${user.id}`, {
+                          role: e.target.value === "null" ? null : e.target.value,
+                        })
+                      }
+                      className="rounded border p-1 text-sm capitalize"
+                    >
+                      <option value="null" className="text-gray-800">
+                        Unassigned
+                      </option>
+                      <option value="admin" className="text-gray-800">
+                        Admin
+                      </option>
+                      <option value="instructor" className="text-gray-800">
+                        Instructor
+                      </option>
+                      <option value="student" className="text-gray-800">
+                        Student
+                      </option>
+                    </select>
 
                     <Form
                       method="patch"

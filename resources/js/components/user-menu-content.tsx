@@ -45,7 +45,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
         {/* Conditional first menu item */}
-        {user.role != null && (
+        {user.role != null && user.role != "admin" && (
           <DropdownMenuItem asChild>
             <Link
               className="block w-full"

@@ -57,13 +57,13 @@ interface Props {
 
 export default function UserDetail({ user, flash }: UserDetailProps & Props) {
   useEffect(() => {
-        if (flash?.success) {
-          toast.success(flash.success);
-        }
-        if (flash?.error) {
-          toast.error(flash.error);
-        }
-      }, [flash]);
+    if (flash?.success) {
+      toast.success(flash.success);
+    }
+    if (flash?.error) {
+      toast.error(flash.error);
+    }
+  }, [flash]);
   const getStatusBadge = () => {
     if (user.email_verified_at) {
       return (
@@ -207,11 +207,11 @@ export default function UserDetail({ user, flash }: UserDetailProps & Props) {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-  <span className="text-sm font-medium">Role</span>
-  <Badge variant="outline" className="capitalize">
-    {user.role ? user.role : "Unassigned"}
-  </Badge>
-</div>
+                  <span className="text-sm font-medium">Role</span>
+                  <Badge variant="outline" className="capitalize">
+                    {user.role ? user.role : "Unassigned"}
+                  </Badge>
+                </div>
 
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Email Verified</span>
@@ -303,24 +303,31 @@ export default function UserDetail({ user, flash }: UserDetailProps & Props) {
               <CardDescription>Common administrative tasks</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2 mb-3">
-        <Label className="text-sm font-medium">Change Role</Label>
-        <select
-  defaultValue={user.role ?? "null"}
-  onChange={(e) =>
-    router.patch(`/admin/users/${user.id}`, {
-      role: e.target.value === "null" ? null : e.target.value,
-    })
-  }
-  className="w-full rounded-md border p-2 capitalize"
->
-  <option value="null">Unassigned</option>
-  <option value="admin">Admin</option>
-  <option value="student">Student</option>
-  <option value="instructor">Instructor</option>
-</select>
-
-      </div>
+              <div className="mb-3 space-y-2">
+                <Label className="text-sm font-medium">Change Role</Label>
+                <select
+                  defaultValue={user.role ?? "null"}
+                  onChange={(e) =>
+                    router.patch(`/admin/users/${user.id}`, {
+                      role: e.target.value === "null" ? null : e.target.value,
+                    })
+                  }
+                  className="w-full rounded-md border p-2 capitalize"
+                >
+                  <option value="null" className="text-gray-800">
+                    Unassigned
+                  </option>
+                  <option value="admin" className="text-gray-800">
+                    Admin
+                  </option>
+                  <option value="student" className="text-gray-800">
+                    Student
+                  </option>
+                  <option value="instructor" className="text-gray-800">
+                    Instructor
+                  </option>
+                </select>
+              </div>
               <div className="space-y-3">
                 <Button
                   variant="outline"

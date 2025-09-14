@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { useRoomUpdates } from "@/hooks/use-room-updates";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem, type SharedData } from "@/types";
@@ -10,9 +11,6 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Copy, Trash2, User, UserPlus, Users } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-
-
-
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -49,7 +47,6 @@ interface Room {
   queue_count: number;
   assignedStudents?: AssignedStudent[];
   unassignedStudents: User[];
-
 }
 
 interface CreatorProps {
@@ -60,7 +57,12 @@ interface AssignedStudent extends User {
   interview_time?: string;
 }
 
-export default function Creator({ room: initialRoom, assignedStudents, assignedStudents: initialAssigned = [], unassignedStudents: initialUnassigned = [] }: CreatorProps & { assignedStudents: User[] } & { unassignedStudents: User[] }) {
+export default function Creator({
+  room: initialRoom,
+  assignedStudents,
+  assignedStudents: initialAssigned = [],
+  unassignedStudents: initialUnassigned = [],
+}: CreatorProps & { assignedStudents: User[] } & { unassignedStudents: User[] }) {
   const [copied, setCopied] = useState(false);
   const { auth } = usePage<SharedData>().props;
   const { room, isConnected } = useRoomUpdates(initialRoom.room_code, initialRoom);
@@ -73,7 +75,8 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
   const [selectedStudent, setSelectedStudent] = useState<number | "">("");
   const [assigning, setAssigning] = useState(false);
   const [removingIds, setRemovingIds] = useState<number[]>([]);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [studentToRemove, setStudentToRemove] = useState<User | null>(null);
 
   const [interviewDate, setInterviewDate] = useState<string>("");
@@ -82,10 +85,11 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
   const [assigned, setAssigned] = useState<AssignedStudent[]>(initialAssigned as AssignedStudent[]);
 
   const [updatingStudent, setUpdatingStudent] = useState(false);
-const [studentToUpdate, setStudentToUpdate] = useState<AssignedStudent | null>(null);
+  const [studentToUpdate, setStudentToUpdate] = useState<AssignedStudent | null>(null);
 
   // helper to read csrf token meta
-  const getCsrf = () => (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || "";
+  const getCsrf = () =>
+    (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || "";
 
   // assign handler
   const handleAssign = async () => {
@@ -126,7 +130,7 @@ const [studentToUpdate, setStudentToUpdate] = useState<AssignedStudent | null>(n
       toast.success(
         assignedStudent
           ? `Student "${assignedStudent.name}" assigned successfully!`
-          : "Student assigned successfully!"
+          : "Student assigned successfully!",
       );
     } catch (err) {
       console.error("Assign error:", err);
@@ -135,8 +139,6 @@ const [studentToUpdate, setStudentToUpdate] = useState<AssignedStudent | null>(n
       setAssigning(false);
     }
   };
-
-
 
   // remove handler
   const handleRemove = async (roomId: number, studentId: number) => {
@@ -147,7 +149,7 @@ const [studentToUpdate, setStudentToUpdate] = useState<AssignedStudent | null>(n
         method: "DELETE",
         headers: {
           "X-CSRF-TOKEN": getCsrf(),
-          "Accept": "application/json",
+          Accept: "application/json",
         },
       });
 
@@ -181,35 +183,34 @@ const [studentToUpdate, setStudentToUpdate] = useState<AssignedStudent | null>(n
   };
 
   // update interview handler
-const updateStudentInterview = async (studentId: number, date: string, time: string) => {
-  setUpdatingStudent(true);
-    const cleanTime = time.length > 5 ? time.slice(0,5) : time;
+  const updateStudentInterview = async (studentId: number, date: string, time: string) => {
+    setUpdatingStudent(true);
+    const cleanTime = time.length > 5 ? time.slice(0, 5) : time;
 
-  try {
-    const res = await fetch(`/rooms/${room.id}/update-student/${studentId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        'Accept': 'application/json', 
-        "X-CSRF-TOKEN": getCsrf(),
-      },
-      body: JSON.stringify({ interview_date: date, interview_time: cleanTime }),
-    });
+    try {
+      const res = await fetch(`/rooms/${room.id}/update-student/${studentId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-CSRF-TOKEN": getCsrf(),
+        },
+        body: JSON.stringify({ interview_date: date, interview_time: cleanTime }),
+      });
 
-    const json = await res.json();
-    if (json.success) {
-     setSelectedStudent("");
-      setAssigned(json.assignedStudents);
-      toast.success(json.message || "Student interview updated successfully");
-
-    } else {
-      console.error(json.message);
-      toast.error(json.message || "Failed to update student interview");
+      const json = await res.json();
+      if (json.success) {
+        setSelectedStudent("");
+        setAssigned(json.assignedStudents);
+        toast.success(json.message || "Student interview updated successfully");
+      } else {
+        console.error(json.message);
+        toast.error(json.message || "Failed to update student interview");
+      }
+    } finally {
+      setUpdatingStudent(false);
     }
-  } finally {
-    setUpdatingStudent(false);
-  }
-};
+  };
   console.log(
     `[Creator] Initializing creator component for room ${room.room_code}, user ${auth.user.id}`,
   );
@@ -266,9 +267,16 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
   // };
 
   const deleteRoom = () => {
-    // if (confirm("Are you sure you want to delete this room?")) {
-    router.delete(`/room/${room.room_code}`);
-    // }
+    setIsDeleting(true);
+    router.delete(`/room/${room.room_code}`, {
+      onSuccess: () => {
+        setIsDeleting(false);
+        setShowDeleteDialog(false);
+      },
+      onError: () => {
+        setIsDeleting(false);
+      },
+    });
   };
 
   const fadeIn = {
@@ -342,7 +350,7 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
                 </Button>
 
                 <Button
-                  onClick={() => setShowDeleteModal(true)}
+                  onClick={() => setShowDeleteDialog(true)}
                   variant="outline"
                   className="border-red-300 bg-[var(--color-card-bg)] text-red-600 hover:bg-red-600 hover:text-white dark:border-red-700 dark:text-red-400 dark:hover:bg-red-700 dark:hover:text-white"
                 >
@@ -351,37 +359,17 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
                 </Button>
               </div>
 
-              {showDeleteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                  <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-gray-800">
-                    <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
-                      Confirm Delete
-                    </h2>
-                    <p className="mb-6 text-sm text-gray-700 dark:text-gray-300">
-                      Are you sure you want to delete this room? This action cannot be undone.
-                    </p>
-                    <div className="flex justify-end gap-3">
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowDeleteModal(false)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        className="bg-red-600 text-white hover:bg-red-700"
-                        onClick={() => {
-                          deleteRoom();
-                          setShowDeleteModal(false);
-                        }}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-
+              <ConfirmationDialog
+                open={showDeleteDialog}
+                onOpenChange={setShowDeleteDialog}
+                onConfirm={deleteRoom}
+                title="Delete Room"
+                description={`Are you sure you want to delete "${room.name}"? This action cannot be undone and all data will be permanently lost.`}
+                confirmText="Delete Room"
+                cancelText="Cancel"
+                variant="destructive"
+                isLoading={isDeleting}
+              />
             </div>
           </motion.div>
 
@@ -558,12 +546,7 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
               </Card>
             </motion.div>
             {/* Assigned Students */}
-            <motion.div
-              variants={fadeIn}
-              initial="hidden"
-              animate="visible"
-              className="space-y-6"
-            >
+            <motion.div variants={fadeIn} initial="hidden" animate="visible" className="space-y-6">
               <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
@@ -584,7 +567,7 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
                   {/* Assigned Students List */}
 
                   {assigned.length > 0 ? (
-                    <div className="max-h-74 overflow-y-auto space-y-2">
+                    <div className="max-h-74 space-y-2 overflow-y-auto">
                       {assigned.map((student) => (
                         <div
                           key={student.id}
@@ -606,23 +589,29 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
                               {student.interview_date && student.interview_time && (
                                 <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
                                   <span className="flex items-center gap-1">
-                                    📅 {new Date(student.interview_date).toLocaleDateString(undefined, {
-                                      weekday: "short",
-                                      year: "numeric",
-                                      month: "short",
-                                      day: "numeric"
-                                    })}
+                                    📅{" "}
+                                    {new Date(student.interview_date).toLocaleDateString(
+                                      undefined,
+                                      {
+                                        weekday: "short",
+                                        year: "numeric",
+                                        month: "short",
+                                        day: "numeric",
+                                      },
+                                    )}
                                   </span>
                                   <span className="flex items-center gap-1">
-                                    ⏰ {new Date(`${student.interview_date}T${student.interview_time}`).toLocaleTimeString(undefined, {
+                                    ⏰{" "}
+                                    {new Date(
+                                      `${student.interview_date}T${student.interview_time}`,
+                                    ).toLocaleTimeString(undefined, {
                                       hour: "2-digit",
                                       minute: "2-digit",
-                                      hour12: true
+                                      hour12: true,
                                     })}
                                   </span>
                                 </div>
                               )}
-
                             </div>
                           </div>
 
@@ -648,13 +637,11 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
                           Confirm Remove
                         </h2>
                         <p className="mb-6 text-sm text-gray-700 dark:text-gray-300">
-                          Are you sure you want to remove "{studentToRemove.name}"? This action cannot be undone.
+                          Are you sure you want to remove "{studentToRemove.name}"? This action
+                          cannot be undone.
                         </p>
                         <div className="flex justify-end gap-3">
-                          <Button
-                            variant="outline"
-                            onClick={() => setStudentToRemove(null)}
-                          >
+                          <Button variant="outline" onClick={() => setStudentToRemove(null)}>
                             Cancel
                           </Button>
                           <Button
@@ -670,10 +657,6 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
                       </div>
                     </div>
                   )}
-
-
-
-
                 </CardContent>
               </Card>
             </motion.div>
@@ -691,18 +674,15 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-500 text-white">
                         <UserPlus className="h-5 w-5" />
                       </div>
-                      <div className="flex items-center gap-2">
-                        Assigne New Students
-
-                      </div>
+                      <div className="flex items-center gap-2">Assigne New Students</div>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-
-
                     {/* Add New Student */}
                     <div className="space-y-2">
-                      <h4 className="text-sm font-medium text-[var(--color-text)]">Assign new students</h4>
+                      <h4 className="text-sm font-medium text-[var(--color-text)]">
+                        Assign new students
+                      </h4>
 
                       <div className="flex gap-2">
                         <select
@@ -720,26 +700,22 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
 
                         <input
                           type="date"
-                          className="border rounded-md p-2 text-sm"
+                          className="rounded-md border p-2 text-sm"
                           value={interviewDate}
                           onChange={(e) => setInterviewDate(e.target.value)}
                         />
 
                         <input
                           type="time"
-                          className="border rounded-md p-2 text-sm"
+                          className="rounded-md border p-2 text-sm"
                           value={interviewTime}
                           onChange={(e) => setInterviewTime(e.target.value)}
                         />
-
-
                       </div>
                       <Button onClick={handleAssign} disabled={!selectedStudent || assigning}>
                         {assigning ? "Assigning..." : "Assign"}
                       </Button>
-
                     </div>
-
                   </CardContent>
                 </Card>
               </motion.div>
@@ -762,9 +738,11 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
                     </CardTitle>
                   </CardHeader>
 
-                  <CardContent className="space-y-4 max-h-96 overflow-y-auto">
+                  <CardContent className="max-h-96 space-y-4 overflow-y-auto">
                     <div className="space-y-2">
-                      <h4 className="text-sm font-medium text-[var(--color-text)]">Select a student</h4>
+                      <h4 className="text-sm font-medium text-[var(--color-text)]">
+                        Select a student
+                      </h4>
 
                       <select
                         className="w-full rounded-md border p-2 text-sm"
@@ -791,7 +769,7 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
                               <div className="flex gap-2">
                                 <input
                                   type="date"
-                                  className="border rounded-md p-2 text-sm flex-1"
+                                  className="flex-1 rounded-md border p-2 text-sm"
                                   value={student.interview_date || ""}
                                   onChange={(e) => {
                                     const updated = [...assigned];
@@ -802,7 +780,7 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
                                 />
                                 <input
                                   type="time"
-                                  className="border rounded-md p-2 text-sm flex-1"
+                                  className="flex-1 rounded-md border p-2 text-sm"
                                   value={student.interview_time || ""}
                                   onChange={(e) => {
                                     const updated = [...assigned];
@@ -812,19 +790,14 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
                                   }}
                                 />
                               </div>
-                             <Button
-  onClick={() => {
-    const s = assigned.find(a => a.id === selectedStudent);
-    if (s) setStudentToUpdate(s); 
-  }}
->
-  Update
-</Button>
-
-
-
-
-
+                              <Button
+                                onClick={() => {
+                                  const s = assigned.find((a) => a.id === selectedStudent);
+                                  if (s) setStudentToUpdate(s);
+                                }}
+                              >
+                                Update
+                              </Button>
                             </div>
                           );
                         })()}
@@ -832,46 +805,39 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
                     )}
                   </CardContent>
 
-
                   {studentToUpdate && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-    <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-gray-800">
-      <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
-        Confirm Update
-      </h2>
-      <p className="mb-6 text-sm text-gray-700 dark:text-gray-300">
-        Are you sure you want to update the interview date and time for "
-        {studentToUpdate.name}"?
-      </p>
-      <div className="flex justify-end gap-3">
-        <Button
-          variant="outline"
-          onClick={() => setStudentToUpdate(null)}
-        >
-          Cancel
-        </Button>
-        <Button
-          className="bg-blue-600 text-white hover:bg-blue-700"
-          onClick={() => {
-            updateStudentInterview(
-              studentToUpdate.id,
-              studentToUpdate.interview_date ?? "",
-              studentToUpdate.interview_time ?? ""
-            );
-            setStudentToUpdate(null);
-          }}
-        >
-          Confirm
-        </Button>
-      </div>
-    </div>
-  </div>
-)}
-
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                      <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-gray-800">
+                        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
+                          Confirm Update
+                        </h2>
+                        <p className="mb-6 text-sm text-gray-700 dark:text-gray-300">
+                          Are you sure you want to update the interview date and time for "
+                          {studentToUpdate.name}"?
+                        </p>
+                        <div className="flex justify-end gap-3">
+                          <Button variant="outline" onClick={() => setStudentToUpdate(null)}>
+                            Cancel
+                          </Button>
+                          <Button
+                            className="bg-blue-600 text-white hover:bg-blue-700"
+                            onClick={() => {
+                              updateStudentInterview(
+                                studentToUpdate.id,
+                                studentToUpdate.interview_date ?? "",
+                                studentToUpdate.interview_time ?? "",
+                              );
+                              setStudentToUpdate(null);
+                            }}
+                          >
+                            Confirm
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </Card>
               </motion.div>
-
-
             </div>
           </div>
 

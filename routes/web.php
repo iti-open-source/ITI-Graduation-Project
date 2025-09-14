@@ -74,7 +74,9 @@ Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallb
 Route::get('/auth/linkedin', [LinkedInController::class, 'redirectToLinkedIn'])->name('linkedin.login');
 Route::get('/auth/linkedin/callback', [LinkedInController::class, 'handleLinkedInCallback']);
 
-
+Route::get('{any}', function () {
+    return Inertia::render('not-found/not-found', ["user" => Auth::user()]);
+})->where('any', '.*')->name('not-found');
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

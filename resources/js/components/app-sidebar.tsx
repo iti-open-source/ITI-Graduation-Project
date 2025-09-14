@@ -16,24 +16,22 @@ import { Link, usePage } from "@inertiajs/react";
 import { LayoutGrid, Settings, Shield, User } from "lucide-react";
 import AppLogo from "./app-logo";
 
-
-
 export function AppSidebar() {
   const { auth } = usePage<SharedData>().props;
   const mainNavItems: NavItem[] = [
-  // {
-  //   title: "Dashboard",
-  //   href: dashboard(),
-  //   icon: LayoutGrid,
-  // },
-//   {
-//     title: "Admin",
-//     href: "/admin",
-//     icon: Shield,
-//   },
-// ];
+    // {
+    //   title: "Dashboard",
+    //   href: dashboard(),
+    //   icon: LayoutGrid,
+    // },
+    //   {
+    //     title: "Admin",
+    //     href: "/admin",
+    //     icon: Shield,
+    //   },
+    // ];
 
- ...(auth.user?.role === "admin" || auth.user?.role === "instructor"
+    ...(auth.user?.role === "instructor"
       ? [
           {
             title: "Dashboard",
@@ -47,7 +45,7 @@ export function AppSidebar() {
           },
         ]
       : []),
-...(auth.user?.role === "admin"
+    ...(auth.user?.role === "admin"
       ? [
           {
             title: "Admin",
@@ -62,7 +60,7 @@ export function AppSidebar() {
         ]
       : []),
 
-       ...(auth.user?.role === "student"
+    ...(auth.user?.role === "student"
       ? [
           {
             title: "Profile",
@@ -76,16 +74,7 @@ export function AppSidebar() {
           },
         ]
       : []),
-
-
-
-
-
-
-     
   ];
-
-
 
   return (
     <Sidebar collapsible="icon" variant="inset">

@@ -11,6 +11,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InterviewScheduled;
+use App\Mail\InterviewCancelled;
+use App\Mail\InterviewRescheduled;
 
 class RoomController extends Controller
 {
@@ -40,25 +44,24 @@ class RoomController extends Controller
         $students = [];
 
         if ($user->role === 'student') {
-    // Show rooms assigned to this student, add pivot interview date/time
-    $userRooms = $user->assignedRooms()
-        ->where('is_active', true)
-        ->with(['currentParticipant', 'queue.user', 'creator'])
-        ->orderBy('last_activity', 'desc')
-        ->get()
-        ->map(function ($room) use ($user) {
-            // grab this student's pivot data for this room
-            $studentPivot = $room->assignedStudents()
-                ->where('users.id', $user->id)
-                ->first();
+            // Show rooms assigned to this student, add pivot interview date/time
+            $userRooms = $user->assignedRooms()
+                ->where('is_active', true)
+                ->with(['currentParticipant', 'queue.user', 'creator'])
+                ->orderBy('last_activity', 'desc')
+                ->get()
+                ->map(function ($room) use ($user) {
+                    // grab this student's pivot data for this room
+                    $studentPivot = $room->assignedStudents()
+                        ->where('users.id', $user->id)
+                        ->first();
 
-            $room->student_interview_date = $studentPivot?->pivot?->interview_date;
-            $room->student_interview_time = $studentPivot?->pivot?->interview_time;
+                    $room->student_interview_date = $studentPivot?->pivot?->interview_date;
+                    $room->student_interview_time = $studentPivot?->pivot?->interview_time;
 
-            return $room;
-        });
-}
- elseif (in_array($user->role, ['instructor', 'admin'])) {
+                    return $room;
+                });
+        } elseif (in_array($user->role, ['instructor', 'admin'])) {
             // Show rooms this instructor/admin created
             $userRooms = $user->createdRooms()
                 ->where('is_active', true)
@@ -98,9 +101,20 @@ class RoomController extends Controller
                     'interview_date' => $student['interview_date'],
                     'interview_time' => $student['interview_time'],
                 ]);
+
+                $studentUser = User::find($student['id']);
+
+
+                $sessionDetails = $room->assignedStudents()
+                    ->where('users.id', $studentUser->id)
+                    ->withPivot('interview_date', 'interview_time')
+                    ->first();
+
+
+
+                Mail::to($studentUser->email)->send(new InterviewScheduled($room, $studentUser, $sessionDetails));
             }
         }
-
 
 
         return redirect()->route('room.show', $room->room_code);
@@ -313,6 +327,16 @@ class RoomController extends Controller
 
         $room->update(['is_active' => false]);
 
+        $assignedStudents = $room->assignedStudents;
+
+        foreach ($assignedStudents as $student) {
+            $sessionDetails = $room->assignedStudents()
+                ->where('users.id', $student->id)
+                ->withPivot('interview_date', 'interview_time')
+                ->first();
+            Mail::to($student->email)->send(new InterviewCancelled($room, $student, $sessionDetails));
+        }
+
         return redirect()->route('lobby');
     }
 
@@ -352,6 +376,15 @@ class RoomController extends Controller
             'interview_time' => $request->interview_time,
         ]);
 
+        $sessionDetails = $room->assignedStudents()
+            ->where('users.id', $request->student_id)
+            ->withPivot('interview_date', 'interview_time')
+            ->first();
+
+        $student = User::find($request->student_id);
+
+        Mail::to($student->email)->send(new InterviewScheduled($room, $student, $sessionDetails));
+
         $assigned = $room->assignedStudents()->get()->map(function ($student) {
             return [
                 'id' => $student->id,
@@ -361,6 +394,8 @@ class RoomController extends Controller
                 'interview_time' => $student->pivot->interview_time,
             ];
         });
+
+
 
         $unassigned = User::where('role', 'student')
             ->whereNotIn('id', $assigned->pluck('id'))
@@ -375,7 +410,15 @@ class RoomController extends Controller
 
     public function removeStudent(Room $room, User $student)
     {
+
+        $sessionDetails = $room->assignedStudents()
+            ->where('users.id', $student->id)
+            ->withPivot('interview_date', 'interview_time')
+            ->first();
+
         $room->assignedStudents()->detach([$student->id]);
+
+        Mail::to($student->email)->send(new InterviewCancelled($room, $student, $sessionDetails));
 
         $assigned = $room->assignedStudents()->get()->map(function ($s) {
             return [
@@ -399,47 +442,59 @@ class RoomController extends Controller
     }
 
     public function updateStudentInterview(Request $request, Room $room, User $student)
-{
-    $request->validate([
-        'interview_date' => 'required|date',
-        'interview_time' => 'required|date_format:H:i',
-    ]);
+    {
+        $request->validate([
+            'interview_date' => 'required|date',
+            'interview_time' => 'required|date_format:H:i',
+        ]);
 
-    // Only update if the student is assigned to this room
-    if (!$room->assignedStudents()->where('user_id', $student->id)->exists()) {
+        // Only update if the student is assigned to this room
+        if (!$room->assignedStudents()->where('user_id', $student->id)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Student is not assigned to this room',
+            ], 404);
+        }
+
+        $oldSessionDetails = $room->assignedStudents()
+            ->where('users.id', $student->id)
+            ->withPivot('interview_date', 'interview_time')
+            ->first();
+
+        // Update pivot data
+        $room->assignedStudents()->updateExistingPivot($student->id, [
+            'interview_date' => $request->interview_date,
+            'interview_time' => $request->interview_time,
+        ]);
+
+        $newSessionDetails = $room->assignedStudents()
+            ->where('users.id', $student->id)
+            ->withPivot('interview_date', 'interview_time')
+            ->first();
+
+        // Send reschedule email
+        Mail::to($student->email)->send(new InterviewRescheduled($room, $student, $oldSessionDetails, $newSessionDetails));
+
+        // Return updated assigned and unassigned lists
+        $assigned = $room->assignedStudents()->get()->map(function ($s) {
+            return [
+                'id' => $s->id,
+                'name' => $s->name,
+                'email' => $s->email,
+                'interview_date' => $s->pivot->interview_date,
+                'interview_time' => $s->pivot->interview_time,
+            ];
+        });
+
+        $unassigned = User::where('role', 'student')
+            ->whereNotIn('id', $assigned->pluck('id'))
+            ->get();
+
         return response()->json([
-            'success' => false,
-            'message' => 'Student is not assigned to this room',
-        ], 404);
+            'success' => true,
+            'assignedStudents' => $assigned,
+            'unassignedStudents' => $unassigned,
+            'message' => 'Student interview updated successfully',
+        ]);
     }
-
-    // Update pivot data
-    $room->assignedStudents()->updateExistingPivot($student->id, [
-        'interview_date' => $request->interview_date,
-        'interview_time' => $request->interview_time,
-    ]);
-
-    // Return updated assigned and unassigned lists
-    $assigned = $room->assignedStudents()->get()->map(function ($s) {
-        return [
-            'id' => $s->id,
-            'name' => $s->name,
-            'email' => $s->email,
-            'interview_date' => $s->pivot->interview_date,
-            'interview_time' => $s->pivot->interview_time,
-        ];
-    });
-
-    $unassigned = User::where('role', 'student')
-        ->whereNotIn('id', $assigned->pluck('id'))
-        ->get();
-
-    return response()->json([
-        'success' => true,
-        'assignedStudents' => $assigned,
-        'unassignedStudents' => $unassigned,
-        'message' => 'Student interview updated successfully',
-    ]);
-}
-
 }

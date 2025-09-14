@@ -406,7 +406,7 @@ export default function Creator({
                           key={queueItem.id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          className="flex items-center gap-4 rounded-lg bg-[var(--color-muted)] p-4 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                          className="flex items-center gap-4 rounded-lg border border-gray-500/30 bg-blue-200/20 p-4 transition-colors hover:bg-blue-300/30 dark:bg-blue-200/10 dark:hover:bg-blue-900/20"
                         >
                           <div className="flex flex-1 items-center gap-3">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-sm font-semibold text-white">
@@ -567,19 +567,21 @@ export default function Creator({
                   {/* Assigned Students List */}
 
                   {assigned.length > 0 ? (
-                    <div className="max-h-74 space-y-2 overflow-y-auto">
+                    <div className="space-y-3">
                       {assigned.map((student) => (
-                        <div
+                        <motion.div
                           key={student.id}
-                          className="flex items-center justify-between gap-3 rounded-lg bg-[var(--color-muted)] p-3"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="flex items-center gap-4 rounded-lg border border-purple-900/40 bg-purple-200/20 p-4 transition-colors hover:bg-purple-300/30 dark:bg-purple-200/10 dark:hover:bg-purple-900/20"
                         >
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarFallback className="bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                          <div className="flex flex-1 items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarFallback className="bg-purple-50 font-semibold text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
                                 {student.name.charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <h4 className="truncate font-medium text-[var(--color-text)]">
                                 {student.name}
                               </h4>
@@ -620,43 +622,37 @@ export default function Creator({
                             variant="outline"
                             onClick={() => setStudentToRemove(student)}
                             disabled={removingIds.includes(student.id)}
+                            className="border-red-300 text-red-600 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:border-red-500 dark:text-red-400 dark:hover:bg-red-900/20"
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
-                        </div>
+                        </motion.div>
                       ))}
                     </div>
                   ) : (
                     <p className="text-[var(--color-text-secondary)]">No students assigned yet.</p>
                   )}
 
-                  {studentToRemove && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                      <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-gray-800">
-                        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
-                          Confirm Remove
-                        </h2>
-                        <p className="mb-6 text-sm text-gray-700 dark:text-gray-300">
-                          Are you sure you want to remove "{studentToRemove.name}"? This action
-                          cannot be undone.
-                        </p>
-                        <div className="flex justify-end gap-3">
-                          <Button variant="outline" onClick={() => setStudentToRemove(null)}>
-                            Cancel
-                          </Button>
-                          <Button
-                            className="bg-red-600 text-white hover:bg-red-700"
-                            onClick={() => {
-                              handleRemove(room.id, studentToRemove.id);
-                              setStudentToRemove(null);
-                            }}
-                          >
-                            Remove
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  <ConfirmationDialog
+                    open={!!studentToRemove}
+                    onOpenChange={(open) => !open && setStudentToRemove(null)}
+                    onConfirm={() => {
+                      if (studentToRemove) {
+                        handleRemove(room.id, studentToRemove.id);
+                        setStudentToRemove(null);
+                      }
+                    }}
+                    title="Remove Student"
+                    description={
+                      studentToRemove
+                        ? `Are you sure you want to remove "${studentToRemove.name}" from this room? This action cannot be undone.`
+                        : "Are you sure you want to remove this student? This action cannot be undone."
+                    }
+                    confirmText="Remove Student"
+                    cancelText="Cancel"
+                    variant="destructive"
+                    isLoading={studentToRemove ? removingIds.includes(studentToRemove.id) : false}
+                  />
                 </CardContent>
               </Card>
             </motion.div>
@@ -690,7 +686,9 @@ export default function Creator({
                           value={selectedStudent}
                           onChange={(e) => setSelectedStudent(Number(e.target.value) || "")}
                         >
-                          <option value="">Select a student</option>
+                          <option value="" className="text-gray-800">
+                            Select a student
+                          </option>
                           {unassigned.map((s) => (
                             <option key={s.id} value={s.id}>
                               {s.name} ({s.email})
@@ -749,9 +747,9 @@ export default function Creator({
                         value={selectedStudent}
                         onChange={(e) => setSelectedStudent(Number(e.target.value) || "")}
                       >
-                        <option value="">-- Select student --</option>
+                        <option value=""> Select a student </option>
                         {assigned.map((student) => (
-                          <option key={student.id} value={student.id}>
+                          <option key={student.id} value={student.id} className="text-gray-800">
                             {student.name} ({student.email})
                           </option>
                         ))}
@@ -805,37 +803,30 @@ export default function Creator({
                     )}
                   </CardContent>
 
-                  {studentToUpdate && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                      <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-gray-800">
-                        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
-                          Confirm Update
-                        </h2>
-                        <p className="mb-6 text-sm text-gray-700 dark:text-gray-300">
-                          Are you sure you want to update the interview date and time for "
-                          {studentToUpdate.name}"?
-                        </p>
-                        <div className="flex justify-end gap-3">
-                          <Button variant="outline" onClick={() => setStudentToUpdate(null)}>
-                            Cancel
-                          </Button>
-                          <Button
-                            className="bg-blue-600 text-white hover:bg-blue-700"
-                            onClick={() => {
-                              updateStudentInterview(
-                                studentToUpdate.id,
-                                studentToUpdate.interview_date ?? "",
-                                studentToUpdate.interview_time ?? "",
-                              );
-                              setStudentToUpdate(null);
-                            }}
-                          >
-                            Confirm
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  <ConfirmationDialog
+                    open={!!studentToUpdate}
+                    onOpenChange={(open) => !open && setStudentToUpdate(null)}
+                    onConfirm={() => {
+                      if (studentToUpdate) {
+                        updateStudentInterview(
+                          studentToUpdate.id,
+                          studentToUpdate.interview_date ?? "",
+                          studentToUpdate.interview_time ?? "",
+                        );
+                        setStudentToUpdate(null);
+                      }
+                    }}
+                    title="Update Interview Schedule"
+                    description={
+                      studentToUpdate
+                        ? `Are you sure you want to update the interview date and time for "${studentToUpdate.name}"?`
+                        : "Are you sure you want to update the interview schedule?"
+                    }
+                    confirmText="Update Schedule"
+                    cancelText="Cancel"
+                    variant="default"
+                    isLoading={updatingStudent}
+                  />
                 </Card>
               </motion.div>
             </div>
@@ -858,7 +849,7 @@ export default function Creator({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-3 rounded-lg bg-[var(--color-muted)] p-4">
+                <div className="flex items-center gap-3 rounded-lg border border-gray-500/30 bg-[var(--background)] p-4">
                   <code className="flex-1 font-mono text-sm text-[var(--color-text)]">
                     {window.location.origin}/room/{room.room_code}
                   </code>

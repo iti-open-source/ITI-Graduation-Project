@@ -47,13 +47,17 @@ interface Room {
   current_participant: User | null;
   queue: QueueUser[];
   queue_count: number;
-  assignedStudents?: User[];
+  assignedStudents?: AssignedStudent[];
   unassignedStudents: User[];
 
 }
 
 interface CreatorProps {
   room: Room;
+}
+interface AssignedStudent extends User {
+  interview_date?: string;
+  interview_time?: string;
 }
 
 export default function Creator({ room: initialRoom, assignedStudents, assignedStudents: initialAssigned = [], unassignedStudents: initialUnassigned = [] }: CreatorProps & { assignedStudents: User[] } & { unassignedStudents: User[] }) {
@@ -63,7 +67,7 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
 
   // const [selectedStudent, setSelectedStudent] = useState<number | null>(null);
 
-  const [assigned, setAssigned] = useState<User[]>(initialAssigned);
+  // const [assigned, setAssigned] = useState<User[]>(initialAssigned);
   const [unassigned, setUnassigned] = useState<User[]>(initialUnassigned);
 
   const [selectedStudent, setSelectedStudent] = useState<number | "">("");
@@ -71,6 +75,13 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
   const [removingIds, setRemovingIds] = useState<number[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [studentToRemove, setStudentToRemove] = useState<User | null>(null);
+
+  const [interviewDate, setInterviewDate] = useState<string>("");
+  const [interviewTime, setInterviewTime] = useState<string>("");
+
+  const [assigned, setAssigned] = useState<AssignedStudent[]>(initialAssigned as AssignedStudent[]);
+
+
 
 
 
@@ -91,7 +102,11 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
           "X-Requested-With": "XMLHttpRequest",
         },
         credentials: "same-origin",
-        body: JSON.stringify({ student_id: selectedStudent }),
+        body: JSON.stringify({
+          student_id: selectedStudent,
+          interview_date: interviewDate,
+          interview_time: interviewTime,
+        }),
       });
 
       if (!res.ok) {
@@ -103,16 +118,17 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
       const json = await res.json();
       setAssigned(json.assignedStudents ?? []);
       setUnassigned(json.unassignedStudents ?? []);
+      setSelectedStudent("");
+      setInterviewDate("");
+      setInterviewTime("");
 
       const assignedStudent = json.assignedStudents.find((s: any) => s.id === selectedStudent);
 
-      setSelectedStudent("");
-
-      if (assignedStudent) {
-        toast.success(`Student "${assignedStudent.name}" assigned successfully!`);
-      } else {
-        toast.success("Student assigned successfully!");
-      }
+      toast.success(
+        assignedStudent
+          ? `Student "${assignedStudent.name}" assigned successfully!`
+          : "Student assigned successfully!"
+      );
     } catch (err) {
       console.error("Assign error:", err);
       toast.error("An error occurred while assigning the student.");
@@ -120,6 +136,7 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
       setAssigning(false);
     }
   };
+
 
 
   // remove handler
@@ -223,7 +240,7 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
 
   const deleteRoom = () => {
     // if (confirm("Are you sure you want to delete this room?")) {
-      router.delete(`/room/${room.room_code}`);
+    router.delete(`/room/${room.room_code}`);
     // }
   };
 
@@ -538,8 +555,9 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Assigned Students List */}
+                  
                   {assigned.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="max-h-64 overflow-y-auto space-y-2">
                       {assigned.map((student) => (
                         <div
                           key={student.id}
@@ -558,6 +576,26 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
                               <p className="truncate text-sm text-[var(--color-text-secondary)]">
                                 {student.email}
                               </p>
+                              {student.interview_date && student.interview_time && (
+  <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+    <span className="flex items-center gap-1">
+      📅 {new Date(student.interview_date).toLocaleDateString(undefined, { 
+        weekday: "short", 
+        year: "numeric", 
+        month: "short", 
+        day: "numeric" 
+      })}
+    </span>
+    <span className="flex items-center gap-1">
+      ⏰ {new Date(`${student.interview_date}T${student.interview_time}`).toLocaleTimeString(undefined, { 
+        hour: "2-digit", 
+        minute: "2-digit", 
+        hour12: true 
+      })}
+    </span>
+  </div>
+)}
+
                             </div>
                           </div>
 
@@ -652,14 +690,26 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
                         ))}
                       </select>
 
+                      <input
+                        type="date"
+                        className="border rounded-md p-2 text-sm"
+                        value={interviewDate}
+                        onChange={(e) => setInterviewDate(e.target.value)}
+                      />
 
-                      <Button onClick={handleAssign} disabled={!selectedStudent || assigning}>
-                        {assigning ? "Assigning..." : "Assign"}
-                      </Button>
-
+                      <input
+                        type="time"
+                        className="border rounded-md p-2 text-sm"
+                        value={interviewTime}
+                        onChange={(e) => setInterviewTime(e.target.value)}
+                      />
 
 
                     </div>
+                    <Button onClick={handleAssign} disabled={!selectedStudent || assigning}>
+                      {assigning ? "Assigning..." : "Assign"}
+                    </Button>
+
                   </div>
 
                 </CardContent>

@@ -38,19 +38,32 @@ const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
  const { auth } = usePage().props as { auth: { user: User } };
   const role = auth?.user?.role;
 
+  const [interviewDates, setInterviewDates] = useState<{ [key: number]: string }>({});
+const [interviewTimes, setInterviewTimes] = useState<{ [key: number]: string }>({});
+
+
   const handleCreateRoom = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const roomName = formData.get("name") as string;
     if (!roomName) return;
+const studentsWithSchedule = selectedStudents.map((id) => ({
+    id,
+    interview_date: interviewDates[id] || null,
+    interview_time: interviewTimes[id] || null,
+  }));
+    
 
     setIsCreating(true);
     router.post(
       "/rooms",
-      { name: roomName , students: selectedStudents  },
+      { name: roomName , students: studentsWithSchedule  },
       {
         onSuccess: () => {
           setShowCreateForm(false);
+          setSelectedStudents([]);
+        setInterviewDates({});
+        setInterviewTimes({});
         },
         onFinish: () => {
           setIsCreating(false);
@@ -138,27 +151,51 @@ const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
                       </div>
                        {/* Student Assignment */}
 
-                       {role !== "student" && (
+                       {role !== "student" && role !== null && (
 <div className="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto rounded-md border p-2">
   <Label className="mb-2 block font-medium">Assign Students:</Label>
   {students.map((student) => (
-    <label key={student.id} className="flex items-center gap-2">
-      <input
-        type="checkbox"
-        value={student.id}
-        checked={selectedStudents.includes(student.id)}
-        onChange={(e) => {
-          const id = Number(e.target.value);
-          setSelectedStudents((prev) =>
-            prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-          );
-        }}
-        className="h-4 w-4"
-      />
-      <span>{student.name} ({student.email})</span>
-    </label>
+    <div key={student.id} className="flex flex-col gap-1 border-b pb-1">
+      <label className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          value={student.id}
+          checked={selectedStudents.includes(student.id)}
+          onChange={(e) => {
+            const id = Number(e.target.value);
+            setSelectedStudents((prev) =>
+              prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+            );
+          }}
+          className="h-4 w-4"
+        />
+        <span>{student.name} ({student.email})</span>
+      </label>
+
+      {selectedStudents.includes(student.id) && (
+        <div className="flex gap-2">
+          <input
+            type="date"
+            className="border rounded-md p-1 text-sm flex-1"
+            value={interviewDates[student.id] || ""}
+            onChange={(e) =>
+              setInterviewDates((prev) => ({ ...prev, [student.id]: e.target.value }))
+            }
+          />
+          <input
+            type="time"
+            className="border rounded-md p-1 text-sm flex-1"
+            value={interviewTimes[student.id] || ""}
+            onChange={(e) =>
+              setInterviewTimes((prev) => ({ ...prev, [student.id]: e.target.value }))
+            }
+          />
+        </div>
+      )}
+    </div>
   ))}
 </div>
+
                       )}
 
 

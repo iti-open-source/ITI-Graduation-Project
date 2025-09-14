@@ -25,7 +25,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
   };
  const firstMenuItem = user.role === "student" ? {
     title: "My Rooms",
-    href: "/my-rooms",
+    href: "/lobby",
     icon: Rocket
   } : {
     title: "Lobby",

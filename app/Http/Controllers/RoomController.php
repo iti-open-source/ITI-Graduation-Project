@@ -33,36 +33,36 @@ class RoomController extends Controller
     // }
 
     public function lobby()
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    $userRooms = [];
-    $students = [];
+        $userRooms = [];
+        $students = [];
 
-    if ($user->role === 'student') {
-        // Show rooms assigned to this student
-        $userRooms = $user->assignedRooms()
-            ->where('is_active', true)
-            ->with(['currentParticipant', 'queue.user', 'creator'])
-            ->orderBy('last_activity', 'desc')
-            ->get();
-    } elseif (in_array($user->role, ['instructor', 'admin'])) {
-        // Show rooms this instructor/admin created
-        $userRooms = $user->createdRooms()
-            ->where('is_active', true)
-            ->with(['currentParticipant', 'queue.user', 'assignedStudents'])
-            ->orderBy('last_activity', 'desc')
-            ->get();
+        if ($user->role === 'student') {
+            // Show rooms assigned to this student
+            $userRooms = $user->assignedRooms()
+                ->where('is_active', true)
+                ->with(['currentParticipant', 'queue.user', 'creator'])
+                ->orderBy('last_activity', 'desc')
+                ->get();
+        } elseif (in_array($user->role, ['instructor', 'admin'])) {
+            // Show rooms this instructor/admin created
+            $userRooms = $user->createdRooms()
+                ->where('is_active', true)
+                ->with(['currentParticipant', 'queue.user', 'assignedStudents'])
+                ->orderBy('last_activity', 'desc')
+                ->get();
 
-        // Only instructors/admins need the list of students
-        $students = \App\Models\User::where('role', 'student')->get();
+            // Only instructors/admins need the list of students
+            $students = \App\Models\User::where('role', 'student')->get();
+        }
+
+        return Inertia::render('lobby', [
+            'userRooms' => $userRooms,
+            'students'  => $students,
+        ]);
     }
-
-    return Inertia::render('lobby', [
-        'userRooms' => $userRooms,
-        'students'  => $students,
-    ]);
-}
 
 
     public function create(Request $request)
@@ -70,7 +70,9 @@ class RoomController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'students' => 'nullable|array',
-            'students.*' => 'exists:users,id',
+            'students.*.id' => 'required|exists:users,id',
+            'students.*.interview_date' => 'nullable|date',
+            'students.*.interview_time' => 'nullable|date_format:H:i',
         ]);
 
         $room = Room::create([
@@ -79,7 +81,12 @@ class RoomController extends Controller
         ]);
 
         if ($request->filled('students')) {
-            $room->assignedStudents()->sync($request->students);
+            foreach ($request->students as $student) {
+                $room->assignedStudents()->attach($student['id'], [
+                    'interview_date' => $student['interview_date'],
+                    'interview_time' => $student['interview_time'],
+                ]);
+            }
         }
 
 
@@ -119,22 +126,33 @@ class RoomController extends Controller
         // }
 
 
-    if ($room->isCreator($user)) {
-    // Load assigned students relation
-    $room->load('assignedStudents');
+        if ($room->isCreator($user)) {
+            // Load assigned students relation
+            $room->load('assignedStudents');
 
-    // All students
-    $allStudents = \App\Models\User::where('role', 'student')->get();
+            // Map assigned students with pivot data
+            $assignedStudents = $room->assignedStudents->map(function ($student) {
+                return [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'email' => $student->email,
+                    'interview_date' => $student->pivot->interview_date,
+                    'interview_time' => $student->pivot->interview_time,
+                ];
+            });
 
-    // Students NOT assigned to this room
-    $unassignedStudents = $allStudents->whereNotIn('id', $room->assignedStudents->pluck('id'));
+            // All students
+            $allStudents = \App\Models\User::where('role', 'student')->get();
 
-    return Inertia::render('room/creator', [
-        'room' => $room,
-        'assignedStudents' => $room->assignedStudents,
-        'unassignedStudents' => $unassignedStudents->values(), 
-    ]);
-}
+            // Students NOT assigned to this room
+            $unassignedStudents = $allStudents->whereNotIn('id', $room->assignedStudents->pluck('id'));
+
+            return Inertia::render('room/creator', [
+                'room' => $room,
+                'assignedStudents' => $assignedStudents,
+                'unassignedStudents' => $unassignedStudents->values(),
+            ]);
+        }
 
 
         // Do not redirect solely based on current_participant; rely on active session check only
@@ -309,43 +327,62 @@ class RoomController extends Controller
     //     return redirect()->back()->with('success', 'Students assigned successfully.');
     // }
 
-public function assignStudent(Request $request, Room $room)
-{
-    $request->validate(['student_id' => 'required|exists:users,id']);
-    $room->assignedStudents()->attach($request->student_id);
+    public function assignStudent(Request $request, Room $room)
+    {
+        $request->validate([
+            'student_id' => 'required|exists:users,id',
+            'interview_date' => 'required|date',
+            'interview_time' => 'required|date_format:H:i',
+        ]);
 
-    $assigned = $room->assignedStudents()->get();
-    $unassigned = User::where('role', 'student')
-        ->whereNotIn('id', $assigned->pluck('id'))
-        ->get();
+        $room->assignedStudents()->attach($request->student_id, [
+            'interview_date' => $request->interview_date,
+            'interview_time' => $request->interview_time,
+        ]);
 
-    return response()->json([
-        'success' => true,
-        'assignedStudents' => $assigned,
-        'unassignedStudents' => $unassigned,
-    ]);
-}
+        $assigned = $room->assignedStudents()->get()->map(function ($student) {
+            return [
+                'id' => $student->id,
+                'name' => $student->name,
+                'email' => $student->email,
+                'interview_date' => $student->pivot->interview_date,
+                'interview_time' => $student->pivot->interview_time,
+            ];
+        });
 
+        $unassigned = User::where('role', 'student')
+            ->whereNotIn('id', $assigned->pluck('id'))
+            ->get();
 
-public function removeStudent(Room $room, User $student)
-{
-    // Detach only that specific student
-    $room->assignedStudents()->detach([$student->id]);
+        return response()->json([
+            'success' => true,
+            'assignedStudents' => $assigned,
+            'unassignedStudents' => $unassigned,
+        ]);
+    }
 
-    $assigned = $room->assignedStudents()->get();
-    $unassigned = User::where('role', 'student')
-        ->whereNotIn('id', $assigned->pluck('id'))
-        ->get();
+    public function removeStudent(Room $room, User $student)
+    {
+        $room->assignedStudents()->detach([$student->id]);
 
-    return response()->json([
-        'success' => true,
-        'assignedStudents' => $assigned,
-        'unassignedStudents' => $unassigned,
-    ]);
-}
+        $assigned = $room->assignedStudents()->get()->map(function ($s) {
+            return [
+                'id' => $s->id,
+                'name' => $s->name,
+                'email' => $s->email,
+                'interview_date' => $s->pivot->interview_date,
+                'interview_time' => $s->pivot->interview_time,
+            ];
+        });
 
+        $unassigned = User::where('role', 'student')
+            ->whereNotIn('id', $assigned->pluck('id'))
+            ->get();
 
-
-
-
+        return response()->json([
+            'success' => true,
+            'assignedStudents' => $assigned,
+            'unassignedStudents' => $unassigned,
+        ]);
+    }
 }

@@ -54,11 +54,11 @@ export default function SessionRoom(props: PageProps) {
             </div>
           </div>
 
-          {/* Main Content - Omegle Style Layout */}
+          {/* Main Content - Side by Side Layout (50/50) */}
           <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-            {/* Left Side - Video Call (60% on desktop, full width on mobile) */}
-            <div className="flex w-full flex-col border-b border-[var(--color-border)] lg:w-3/5 lg:border-r lg:border-b-0">
-              <div className="flex flex-1 flex-col bg-[var(--color-card-bg)]">
+            {/* Left Side - Video Call (50% on desktop, full width on mobile) */}
+            <div className="flex w-full flex-col border-b border-[var(--color-border)] lg:w-1/2 lg:border-r lg:border-b-0">
+              <div className="flex min-h-0 flex-1 flex-col bg-[var(--color-card-bg)]">
                 {/* Video Header */}
                 <div className="flex-shrink-0 border-b border-[var(--color-border)] px-4 py-3">
                   <div className="flex items-center justify-between">
@@ -78,7 +78,7 @@ export default function SessionRoom(props: PageProps) {
                 </div>
 
                 {/* Video Content - Full Height */}
-                <div className="flex-1">
+                <div className="min-h-0 flex-1">
                   <VideoCall
                     roomName={`session-${roomCode}`}
                     sessionCode={roomCode}
@@ -89,9 +89,9 @@ export default function SessionRoom(props: PageProps) {
               </div>
             </div>
 
-            {/* Right Side - Collaborative Tools (40% on desktop, full width on mobile) */}
-            <div className="flex w-full flex-col lg:w-2/5">
-              <div className="flex flex-1 flex-col bg-[var(--color-card-bg)]">
+            {/* Right Side - Collaborative Tools (50% on desktop, full width on mobile) */}
+            <div className="flex w-full flex-col lg:w-1/2">
+              <div className="flex min-h-0 flex-1 flex-col bg-[var(--color-card-bg)]">
                 {/* Tabs Header */}
                 <div className="flex-shrink-0 border-b border-[var(--color-border)] px-4 py-3">
                   <div className="flex flex-col gap-3">
@@ -136,7 +136,7 @@ export default function SessionRoom(props: PageProps) {
                 </div>
 
                 {/* Tab Content */}
-                <div className="flex-1">
+                <div className="min-h-0 flex-1 overflow-hidden">
                   <div className={activeTab === "editor" ? "block h-full" : "hidden h-full"}>
                     <CollaborativeEditor id={`session-${roomCode}`} />
                   </div>

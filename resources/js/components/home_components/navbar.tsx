@@ -60,13 +60,17 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
   }, []);
 
   const navLinks = [
-    { href: "#home", label: "Home" },
-    { href: "#about", label: "About" },
-    { href: "#services", label: "Services" },
-    { href: "#features", label: "Features" },
-    // { href: "#pricing", label: "Pricing" },
-    { href: "#contact", label: "Contact" },
-    ...(isAuthenticated && user?.role === "admin" || user?.role === "instructor" ? [{ href: "/dashboard", label: "Dashboard" }] : user?.role === "student" ? [{ href: "/dashboard", label: "Profile" }] : []),
+    { href: "/", label: "Home" },
+    { href: "/#about", label: "About" },
+    { href: "/#services", label: "Services" },
+    { href: "/#features", label: "Features" },
+    // { href: "/#pricing", label: "Pricing" },
+    { href: "/#contact", label: "Contact" },
+    ...((isAuthenticated && user?.role === "admin") || user?.role === "instructor"
+      ? [{ href: "/dashboard", label: "Dashboard" }]
+      : user?.role === "student"
+        ? [{ href: "/dashboard", label: "Profile" }]
+        : []),
   ];
 
   return (

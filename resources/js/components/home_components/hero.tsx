@@ -8,19 +8,14 @@ export default function Hero() {
   //   auth: { user?: { role: string } };
   // };
 
-const { auth, assignedRooms } = usePage().props as {
-  auth: { user?: { role: string } };
-  assignedRooms?: number[];
-};
+  const { auth, assignedRooms } = usePage().props as {
+    auth: { user?: { role: string } };
+    assignedRooms?: number[];
+  };
 
-console.log("Assigned Rooms in Hero:", assignedRooms); 
-
-
-
-
+  console.log("Assigned Rooms in Hero:", assignedRooms);
 
   const userRole = auth?.user?.role;
-
 
   // Animation variants
   const fadeIn = {
@@ -55,7 +50,8 @@ console.log("Assigned Rooms in Hero:", assignedRooms);
           animate="visible"
           className="mb-10 max-w-3xl text-lg text-muted-foreground md:text-xl"
         >
-          A seamless platform for scheduling structured interviews, hosting live coding sessions and delivering instant AI-powered feedback — all in one seamless platform.
+          A seamless platform for scheduling structured interviews, hosting live coding sessions and
+          delivering instant AI-powered feedback — all in one seamless platform.
         </motion.p>
         <motion.div
           variants={staggerContainer}
@@ -63,7 +59,7 @@ console.log("Assigned Rooms in Hero:", assignedRooms);
           animate="visible"
           className="flex flex-col justify-center gap-4 sm:flex-row"
         >
-           {/* Guest → Get Started */}
+          {/* Guest → Get Started */}
           {!auth?.user && (
             <motion.div variants={fadeIn}>
               <Button
@@ -85,7 +81,7 @@ console.log("Assigned Rooms in Hero:", assignedRooms);
           )}
 
           {/* Unassigned → Join Random Room */}
-          {userRole === null && (
+          {/* {userRole === null && (
             <motion.div variants={fadeIn}>
               <Button
                 variant="outline"
@@ -96,36 +92,34 @@ console.log("Assigned Rooms in Hero:", assignedRooms);
                 <Link href="/lobby">🎯 Join Random Room</Link>
               </Button>
             </motion.div>
-          )} 
+          )}  */}
 
           {/* Student → Join Room + Join Random Room */}
-         {userRole === "student" && (
-  assignedRooms && assignedRooms.length > 0 ? (
-    <>
-      <motion.div variants={fadeIn}>
-        <Button
-          asChild
-          size="lg"
-          className="py-6 text-xl shadow-lg transition hover:scale-105"
-        >
-          <Link href="/lobby">📚 Join Room</Link>
-        </Button>
-      </motion.div>
-    </>
-  ) : (
-    <motion.div variants={fadeIn}>
-      <Button
-        variant="outline"
-        size="lg"
-        asChild
-        className="border-border text-foreground backdrop-blur-md transition hover:scale-105"
-      >
-        <Link href="/">🎯 Welcom To MockMate</Link>
-      </Button>
-    </motion.div>
-  )
-)}
-
+          {userRole === "student" &&
+            (assignedRooms && assignedRooms.length > 0 ? (
+              <>
+                <motion.div variants={fadeIn}>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="py-6 text-xl shadow-lg transition hover:scale-105"
+                  >
+                    <Link href="/lobby">📚 Join Room</Link>
+                  </Button>
+                </motion.div>
+              </>
+            ) : (
+              <motion.div variants={fadeIn}>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  asChild
+                  className="border-border text-foreground backdrop-blur-md transition hover:scale-105"
+                >
+                  <Link href="/">🎯 Welcom To MockMate</Link>
+                </Button>
+              </motion.div>
+            ))}
         </motion.div>
       </div>
 

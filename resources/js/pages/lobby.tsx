@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import CustomLayout from "@/layouts/custom-layout";
@@ -35,14 +36,16 @@ interface LobbyProps {
 export default function Lobby({ userRooms, students }: LobbyProps) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [roomToDelete, setRoomToDelete] = useState<{ code: string; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
-  const { auth } = usePage().props as { auth: { user: User } };
+  const { auth } = usePage().props as any;
   const role = auth?.user?.role;
 
   const [interviewDates, setInterviewDates] = useState<{ [key: number]: string }>({});
   const [interviewTimes, setInterviewTimes] = useState<{ [key: number]: string }>({});
-
 
   const handleCreateRoom = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -54,7 +57,6 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
       interview_date: interviewDates[id] || null,
       interview_time: interviewTimes[id] || null,
     }));
-
 
     setIsCreating(true);
     router.post(
@@ -77,13 +79,14 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
   function canStudentEnter(room: Room) {
     if (!room.student_interview_date || !room.student_interview_time) return false;
 
-    const interviewDateTime = new Date(`${room.student_interview_date}T${room.student_interview_time}`);
+    const interviewDateTime = new Date(
+      `${room.student_interview_date}T${room.student_interview_time}`,
+    );
     const now = new Date();
-    const endWindow = new Date(interviewDateTime.getTime() + 10 * 60 * 1000);
+    // const endWindow = new Date(interviewDateTime.getTime() + 10 * 60 * 1000);
 
-    return now >= interviewDateTime && now <= endWindow;
+    return now >= interviewDateTime;
   }
-
 
   const copyRoomLink = (roomCode: string) => {
     const roomUrl = `${window.location.origin}/room/${roomCode}`;
@@ -91,17 +94,30 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
     // Consider adding a toast notification here for better UX
   };
 
-  const deleteRoom = (roomCode: string) => {
-    if (confirm("Are you sure you want to delete this room? This action cannot be undone.")) {
-      router.delete(`/room/${roomCode}`, {
-        preserveScroll: true,
-      });
-    }
+  const deleteRoom = (roomCode: string, roomName: string) => {
+    setRoomToDelete({ code: roomCode, name: roomName });
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!roomToDelete) return;
+
+    setIsDeleting(true);
+    router.delete(`/room/${roomToDelete.code}`, {
+      preserveScroll: true,
+      onSuccess: () => {
+        setShowDeleteDialog(false);
+      },
+      onFinish: () => {
+        setIsDeleting(false);
+        setRoomToDelete(null);
+      },
+    });
   };
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeInOut" } },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   };
 
   return (
@@ -177,30 +193,40 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                                   onChange={(e) => {
                                     const id = Number(e.target.value);
                                     setSelectedStudents((prev) =>
-                                      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+                                      prev.includes(id)
+                                        ? prev.filter((s) => s !== id)
+                                        : [...prev, id],
                                     );
                                   }}
                                   className="h-4 w-4"
                                 />
-                                <span>{student.name} ({student.email})</span>
+                                <span>
+                                  {student.name} ({student.email})
+                                </span>
                               </label>
 
                               {selectedStudents.includes(student.id) && (
                                 <div className="flex gap-2">
                                   <input
                                     type="date"
-                                    className="border rounded-md p-1 text-sm flex-1"
+                                    className="flex-1 rounded-md border p-1 text-sm"
                                     value={interviewDates[student.id] || ""}
                                     onChange={(e) =>
-                                      setInterviewDates((prev) => ({ ...prev, [student.id]: e.target.value }))
+                                      setInterviewDates((prev) => ({
+                                        ...prev,
+                                        [student.id]: e.target.value,
+                                      }))
                                     }
                                   />
                                   <input
                                     type="time"
-                                    className="border rounded-md p-1 text-sm flex-1"
+                                    className="flex-1 rounded-md border p-1 text-sm"
                                     value={interviewTimes[student.id] || ""}
                                     onChange={(e) =>
-                                      setInterviewTimes((prev) => ({ ...prev, [student.id]: e.target.value }))
+                                      setInterviewTimes((prev) => ({
+                                        ...prev,
+                                        [student.id]: e.target.value,
+                                      }))
                                     }
                                   />
                                 </div>
@@ -208,10 +234,7 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                             </div>
                           ))}
                         </div>
-
                       )}
-
-
 
                       <div className="flex items-center gap-2">
                         <Button type="submit" disabled={isCreating}>
@@ -276,30 +299,35 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                             </span>
                           </div>
                           {/* Show interview schedule if student */}
-                          {role === "student" && room.student_interview_date && room.student_interview_time && (
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <span className="font-medium">Your interview:</span>
-                              <span className="flex items-center gap-1">
-                                📅{" "}
-                                {new Date(room.student_interview_date).toLocaleDateString(undefined, {
-                                  weekday: "short",
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                })}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                ⏰{" "}
-                                {new Date(
-                                  `${room.student_interview_date}T${room.student_interview_time}`
-                                ).toLocaleTimeString(undefined, {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  hour12: true,
-                                })}
-                              </span>
-                            </div>
-                          )}
+                          {role === "student" &&
+                            room.student_interview_date &&
+                            room.student_interview_time && (
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <span className="font-medium">Your interview:</span>
+                                <span className="flex items-center gap-1">
+                                  📅{" "}
+                                  {new Date(room.student_interview_date).toLocaleDateString(
+                                    undefined,
+                                    {
+                                      weekday: "short",
+                                      year: "numeric",
+                                      month: "short",
+                                      day: "numeric",
+                                    },
+                                  )}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  ⏰{" "}
+                                  {new Date(
+                                    `${room.student_interview_date}T${room.student_interview_time}`,
+                                  ).toLocaleTimeString(undefined, {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  })}
+                                </span>
+                              </div>
+                            )}
                         </div>
 
                         {/* Actions */}
@@ -309,8 +337,6 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                               <Eye className="mr-2 h-4 w-4" /> Enter Room
                             </Link>
                           </Button> */}
-
-
 
                           {role === "student" ? (
                             canStudentEnter(room) ? (
@@ -346,7 +372,7 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                             <Button
                               size="icon"
                               variant="outline"
-                              onClick={() => deleteRoom(room.room_code)}
+                              onClick={() => deleteRoom(room.room_code, room.name)}
                             >
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
@@ -381,6 +407,23 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
             )}
           </motion.div>
         </div>
+
+        {/* Confirmation Dialog */}
+        <ConfirmationDialog
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          onConfirm={handleConfirmDelete}
+          title="Delete Room"
+          description={
+            roomToDelete
+              ? `Are you sure you want to delete "${roomToDelete.name}"? This action cannot be undone and all participants will be removed.`
+              : "Are you sure you want to delete this room? This action cannot be undone and all participants will be removed."
+          }
+          confirmText="Delete Room"
+          cancelText="Cancel"
+          variant="destructive"
+          isLoading={isDeleting}
+        />
       </div>
     </CustomLayout>
   );

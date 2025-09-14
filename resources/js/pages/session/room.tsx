@@ -1,5 +1,6 @@
 import CollaborativeEditor from "@/components/editor/collaborative-editor";
 import Whiteboard from "@/components/whiteboard/collaborative-whiteboard";
+import AIChatbot from "@/components/ai-chatbot/ai-chatbot";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
 import { Head, usePage } from "@inertiajs/react";
@@ -538,6 +539,18 @@ export default function SessionRoom(props: PageProps) {
                   >
                     Whiteboard
                   </button>
+                  {isCreator && (
+                    <button
+                      onClick={() => setActiveTab("ai-chat")}
+                      className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                        activeTab === "ai-chat"
+                          ? "bg-blue-500 text-white"
+                          : "bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200"
+                      }`}
+                    >
+                      AI Assistant
+                    </button>
+                  )}
                 </div>
 
                 {/* Content */}
@@ -548,6 +561,11 @@ export default function SessionRoom(props: PageProps) {
                   <div className={activeTab === "whiteboard" ? "block h-full" : "hidden h-full"}>
                     <Whiteboard roomCode={roomCode} />
                   </div>
+                  {isCreator && (
+                    <div className={activeTab === "ai-chat" ? "block h-full" : "hidden h-full"}>
+                      <AIChatbot roomCode={roomCode} isCreator={isCreator} />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

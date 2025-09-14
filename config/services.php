@@ -45,5 +45,8 @@ return [
     'redirect' => env('LINKEDIN_REDIRECT_URL'),
 ],
 
+'gemini' => [
+    'api_key' => env('GEMINI_API_KEY'),
+],
 
 ];

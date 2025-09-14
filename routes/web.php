@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AIChatController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\LinkedInController;
 use App\Http\Controllers\RoomController;
@@ -62,11 +63,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('session/{sessionCode}/signal', [SessionController::class, 'signal'])->name('session.signal');
     Route::post('session/{sessionCode}/terminate', [SessionController::class, 'terminate'])->name('session.terminate');
 
-
-
-   
-
-    
+    // AI Chat routes
+    Route::post('api/ai-chat/{roomCode}', [AIChatController::class, 'chat'])->name('ai.chat');
+    Route::get('api/ai-chat/{roomCode}/history', [AIChatController::class, 'getHistory'])->name('ai.chat.history');
+    Route::get('api/ai-chat/provider', [AIChatController::class, 'getProviderInfo'])->name('ai.chat.provider');
 });
 
 

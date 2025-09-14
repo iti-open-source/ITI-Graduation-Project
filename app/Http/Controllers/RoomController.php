@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InterviewScheduled;
+use App\Mail\InterviewCancelled;
 
 class RoomController extends Controller
 {
@@ -324,6 +325,16 @@ class RoomController extends Controller
         }
 
         $room->update(['is_active' => false]);
+
+        $assignedStudents = $room->assignedStudents;
+
+        foreach ($assignedStudents as $student) {
+            $sessionDetails = $room->assignedStudents()
+                ->where('users.id', $student->id)
+                ->withPivot('interview_date', 'interview_time')
+                ->first();
+            Mail::to($student->email)->send(new InterviewCancelled($room, $student, $sessionDetails));
+        }
 
         return redirect()->route('lobby');
     }

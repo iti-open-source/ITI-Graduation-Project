@@ -8,8 +8,17 @@ import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem, type SharedData } from "@/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Copy, Trash2, User, UserPlus, Users } from "lucide-react";
-import { useState } from "react";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Trash2,
+  User,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -59,7 +68,6 @@ interface AssignedStudent extends User {
 
 export default function Creator({
   room: initialRoom,
-  assignedStudents,
   assignedStudents: initialAssigned = [],
   unassignedStudents: initialUnassigned = [],
 }: CreatorProps & { assignedStudents: User[] } & { unassignedStudents: User[] }) {
@@ -86,6 +94,37 @@ export default function Creator({
 
   const [updatingStudent, setUpdatingStudent] = useState(false);
   const [studentToUpdate, setStudentToUpdate] = useState<AssignedStudent | null>(null);
+
+  // Pagination state
+  const [assignedCurrentPage, setAssignedCurrentPage] = useState(1);
+  const [queueCurrentPage, setQueueCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 3;
+
+  // Pagination helper functions
+  const getPaginatedItems = <T,>(items: T[], currentPage: number) => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return items.slice(startIndex, endIndex);
+  };
+
+  const getTotalPages = (totalItems: number) => {
+    return Math.ceil(totalItems / ITEMS_PER_PAGE);
+  };
+
+  // Reset pagination when data changes
+  useEffect(() => {
+    const totalAssignedPages = getTotalPages(assigned.length);
+    if (assignedCurrentPage > totalAssignedPages && totalAssignedPages > 0) {
+      setAssignedCurrentPage(1);
+    }
+  }, [assigned.length, assignedCurrentPage]);
+
+  useEffect(() => {
+    const totalQueuePages = getTotalPages(room.queue.length);
+    if (queueCurrentPage > totalQueuePages && totalQueuePages > 0) {
+      setQueueCurrentPage(1);
+    }
+  }, [room.queue.length, queueCurrentPage]);
 
   // helper to read csrf token meta
   const getCsrf = () =>
@@ -211,6 +250,58 @@ export default function Creator({
       setUpdatingStudent(false);
     }
   };
+
+  // Pagination component
+  const PaginationControls = ({
+    currentPage,
+    totalPages,
+    onPageChange,
+    totalItems,
+    itemsPerPage = ITEMS_PER_PAGE,
+  }: {
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+    totalItems: number;
+    itemsPerPage?: number;
+  }) => {
+    if (totalPages <= 1) return null;
+
+    const startItem = (currentPage - 1) * itemsPerPage + 1;
+    const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+    return (
+      <div className="flex items-center justify-between border-t border-[var(--color-border)] px-4 py-3">
+        <div className="text-sm text-[var(--color-text-secondary)]">
+          Showing {startItem}-{endItem} of {totalItems} items
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-[var(--color-text-secondary)]">
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] disabled:opacity-50"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] disabled:opacity-50"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   console.log(
     `[Creator] Initializing creator component for room ${room.room_code}, user ${auth.user.id}`,
   );
@@ -400,45 +491,53 @@ export default function Creator({
                 </CardHeader>
                 <CardContent>
                   {room.queue.length > 0 ? (
-                    <div className="space-y-3">
-                      {room.queue.map((queueItem) => (
-                        <motion.div
-                          key={queueItem.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          className="flex items-center gap-4 rounded-lg border border-gray-500/30 bg-blue-200/20 p-4 transition-colors hover:bg-blue-300/30 dark:bg-blue-200/10 dark:hover:bg-blue-900/20"
-                        >
-                          <div className="flex flex-1 items-center gap-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-sm font-semibold text-white">
-                              {queueItem.position}
-                            </div>
-                            <Avatar className="h-10 w-10">
-                              <AvatarFallback className="bg-blue-50 font-semibold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                                {queueItem.user.name.charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="min-w-0 flex-1">
-                              <h4 className="truncate font-medium text-[var(--color-text)]">
-                                {queueItem.user.name}
-                              </h4>
-                              <p className="truncate text-sm text-[var(--color-text-secondary)]">
-                                {queueItem.user.email}
-                              </p>
-                            </div>
-                          </div>
-
-                          <Button
-                            onClick={() => joinUser(queueItem.user.id)}
-                            size="sm"
-                            className="border-0 bg-blue-500 text-white hover:bg-blue-600"
-                            disabled={false}
+                    <>
+                      <div className="space-y-3">
+                        {getPaginatedItems(room.queue, queueCurrentPage).map((queueItem) => (
+                          <motion.div
+                            key={queueItem.id}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="flex items-center gap-4 rounded-lg border border-gray-500/30 bg-blue-200/20 p-4 transition-colors hover:bg-blue-300/30 dark:bg-blue-200/10 dark:hover:bg-blue-900/20"
                           >
-                            <UserPlus className="mr-2 h-4 w-4" />
-                            Accept
-                          </Button>
-                        </motion.div>
-                      ))}
-                    </div>
+                            <div className="flex flex-1 items-center gap-3">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-sm font-semibold text-white">
+                                {queueItem.position}
+                              </div>
+                              <Avatar className="h-10 w-10">
+                                <AvatarFallback className="bg-blue-50 font-semibold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                                  {queueItem.user.name.charAt(0).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0 flex-1">
+                                <h4 className="truncate font-medium text-[var(--color-text)]">
+                                  {queueItem.user.name}
+                                </h4>
+                                <p className="truncate text-sm text-[var(--color-text-secondary)]">
+                                  {queueItem.user.email}
+                                </p>
+                              </div>
+                            </div>
+
+                            <Button
+                              onClick={() => joinUser(queueItem.user.id)}
+                              size="sm"
+                              className="border-0 bg-blue-500 text-white hover:bg-blue-600"
+                              disabled={false}
+                            >
+                              <UserPlus className="mr-2 h-4 w-4" />
+                              Accept
+                            </Button>
+                          </motion.div>
+                        ))}
+                      </div>
+                      <PaginationControls
+                        currentPage={queueCurrentPage}
+                        totalPages={getTotalPages(room.queue.length)}
+                        onPageChange={setQueueCurrentPage}
+                        totalItems={room.queue.length}
+                      />
+                    </>
                   ) : (
                     <div className="py-12 text-center">
                       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-muted)]">
@@ -555,9 +654,9 @@ export default function Creator({
                     </div>
                     <div className="flex items-center gap-2">
                       Assigned Students
-                      {(assignedStudents ?? []).length > 0 && (
+                      {assigned.length > 0 && (
                         <span className="ml-2 text-sm text-purple-600 dark:text-purple-400">
-                          ({(assignedStudents ?? []).length})
+                          ({assigned.length})
                         </span>
                       )}
                     </div>
@@ -567,68 +666,76 @@ export default function Creator({
                   {/* Assigned Students List */}
 
                   {assigned.length > 0 ? (
-                    <div className="space-y-3">
-                      {assigned.map((student) => (
-                        <motion.div
-                          key={student.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          className="flex items-center gap-4 rounded-lg border border-purple-900/40 bg-purple-200/20 p-4 transition-colors hover:bg-purple-300/30 dark:bg-purple-200/10 dark:hover:bg-purple-900/20"
-                        >
-                          <div className="flex flex-1 items-center gap-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarFallback className="bg-purple-50 font-semibold text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
-                                {student.name.charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="min-w-0 flex-1">
-                              <h4 className="truncate font-medium text-[var(--color-text)]">
-                                {student.name}
-                              </h4>
-                              <p className="truncate text-sm text-[var(--color-text-secondary)]">
-                                {student.email}
-                              </p>
-                              {student.interview_date && student.interview_time && (
-                                <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
-                                  <span className="flex items-center gap-1">
-                                    📅{" "}
-                                    {new Date(student.interview_date).toLocaleDateString(
-                                      undefined,
-                                      {
-                                        weekday: "short",
-                                        year: "numeric",
-                                        month: "short",
-                                        day: "numeric",
-                                      },
-                                    )}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    ⏰{" "}
-                                    {new Date(
-                                      `${student.interview_date}T${student.interview_time}`,
-                                    ).toLocaleTimeString(undefined, {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                      hour12: true,
-                                    })}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => setStudentToRemove(student)}
-                            disabled={removingIds.includes(student.id)}
-                            className="border-red-300 text-red-600 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:border-red-500 dark:text-red-400 dark:hover:bg-red-900/20"
+                    <>
+                      <div className="space-y-3">
+                        {getPaginatedItems(assigned, assignedCurrentPage).map((student) => (
+                          <motion.div
+                            key={student.id}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="flex items-center gap-4 rounded-lg border border-purple-900/40 bg-purple-200/20 p-4 transition-colors hover:bg-purple-300/30 dark:bg-purple-200/10 dark:hover:bg-purple-900/20"
                           >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </motion.div>
-                      ))}
-                    </div>
+                            <div className="flex flex-1 items-center gap-3">
+                              <Avatar className="h-10 w-10">
+                                <AvatarFallback className="bg-purple-50 font-semibold text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                                  {student.name.charAt(0).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0 flex-1">
+                                <h4 className="truncate font-medium text-[var(--color-text)]">
+                                  {student.name}
+                                </h4>
+                                <p className="truncate text-sm text-[var(--color-text-secondary)]">
+                                  {student.email}
+                                </p>
+                                {student.interview_date && student.interview_time && (
+                                  <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+                                    <span className="flex items-center gap-1">
+                                      📅{" "}
+                                      {new Date(student.interview_date).toLocaleDateString(
+                                        undefined,
+                                        {
+                                          weekday: "short",
+                                          year: "numeric",
+                                          month: "short",
+                                          day: "numeric",
+                                        },
+                                      )}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      ⏰{" "}
+                                      {new Date(
+                                        `${student.interview_date}T${student.interview_time}`,
+                                      ).toLocaleTimeString(undefined, {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        hour12: true,
+                                      })}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => setStudentToRemove(student)}
+                              disabled={removingIds.includes(student.id)}
+                              className="border-red-300 text-red-600 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:border-red-500 dark:text-red-400 dark:hover:bg-red-900/20"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </motion.div>
+                        ))}
+                      </div>
+                      <PaginationControls
+                        currentPage={assignedCurrentPage}
+                        totalPages={getTotalPages(assigned.length)}
+                        onPageChange={setAssignedCurrentPage}
+                        totalItems={assigned.length}
+                      />
+                    </>
                   ) : (
                     <p className="text-[var(--color-text-secondary)]">No students assigned yet.</p>
                   )}
@@ -849,15 +956,15 @@ export default function Creator({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-3 rounded-lg border border-gray-500/30 bg-[var(--background)] p-4">
-                  <code className="flex-1 font-mono text-sm text-[var(--color-text)]">
+                <div className="flex flex-col gap-3 rounded-lg border border-gray-500/30 bg-[var(--background)] p-4 sm:flex-row sm:items-center">
+                  <code className="flex-1 font-mono text-sm break-all text-[var(--color-text)] sm:break-normal">
                     {window.location.origin}/room/{room.room_code}
                   </code>
                   <Button
                     onClick={copyRoomLink}
                     size="sm"
                     variant="outline"
-                    className="border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+                    className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:bg-slate-100 hover:text-slate-900 sm:w-auto dark:hover:bg-slate-700 dark:hover:text-slate-100"
                   >
                     <Copy className="mr-2 h-4 w-4" />
                     {copied ? "Copied!" : "Copy"}

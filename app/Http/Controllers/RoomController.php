@@ -14,6 +14,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InterviewScheduled;
 use App\Mail\InterviewCancelled;
+use App\Mail\InterviewRescheduled;
 
 class RoomController extends Controller
 {
@@ -375,6 +376,15 @@ class RoomController extends Controller
             'interview_time' => $request->interview_time,
         ]);
 
+        $sessionDetails = $room->assignedStudents()
+            ->where('users.id', $request->student_id)
+            ->withPivot('interview_date', 'interview_time')
+            ->first();
+
+        $student = User::find($request->student_id);
+
+        Mail::to($student->email)->send(new InterviewScheduled($room, $student, $sessionDetails));
+
         $assigned = $room->assignedStudents()->get()->map(function ($student) {
             return [
                 'id' => $student->id,
@@ -384,6 +394,8 @@ class RoomController extends Controller
                 'interview_time' => $student->pivot->interview_time,
             ];
         });
+
+
 
         $unassigned = User::where('role', 'student')
             ->whereNotIn('id', $assigned->pluck('id'))
@@ -398,7 +410,15 @@ class RoomController extends Controller
 
     public function removeStudent(Room $room, User $student)
     {
+
+        $sessionDetails = $room->assignedStudents()
+            ->where('users.id', $student->id)
+            ->withPivot('interview_date', 'interview_time')
+            ->first();
+
         $room->assignedStudents()->detach([$student->id]);
+
+        Mail::to($student->email)->send(new InterviewCancelled($room, $student, $sessionDetails));
 
         $assigned = $room->assignedStudents()->get()->map(function ($s) {
             return [
@@ -436,11 +456,24 @@ class RoomController extends Controller
             ], 404);
         }
 
+        $oldSessionDetails = $room->assignedStudents()
+            ->where('users.id', $student->id)
+            ->withPivot('interview_date', 'interview_time')
+            ->first();
+
         // Update pivot data
         $room->assignedStudents()->updateExistingPivot($student->id, [
             'interview_date' => $request->interview_date,
             'interview_time' => $request->interview_time,
         ]);
+
+        $newSessionDetails = $room->assignedStudents()
+            ->where('users.id', $student->id)
+            ->withPivot('interview_date', 'interview_time')
+            ->first();
+
+        // Send reschedule email
+        Mail::to($student->email)->send(new InterviewRescheduled($room, $student, $oldSessionDetails, $newSessionDetails));
 
         // Return updated assigned and unassigned lists
         $assigned = $room->assignedStudents()->get()->map(function ($s) {

@@ -35,120 +35,101 @@ export default function SessionRoom(props: PageProps) {
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={`Session - ${roomCode}`} />
 
-      <div className="h-full bg-[var(--background)]">
-        <div className="flex h-full flex-col">
-          {/* Header */}
-          <div className="flex-shrink-0 border-b border-[var(--color-border)] bg-[var(--color-card-bg)] px-6 py-4">
-            <div className="flex items-center justify-between">
-              <h1 className="text-xl font-semibold text-[var(--color-text)]">
-                Session: {roomCode}
-              </h1>
-              {isVideoConnected && (
-                <div className="flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 dark:bg-green-900/30">
-                  <span className="inline-block h-2 w-2 rounded-full bg-green-500"></span>
-                  <span className="text-sm text-green-600 dark:text-green-400">
-                    Video Connected
-                  </span>
+      <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-6">
+        {/* Main Content - Side by Side Layout (50/50) */}
+        <div className="flex min-h-0 flex-1 flex-col gap-6 lg:flex-row">
+          {/* Left Side - Video Call (50% on desktop, full width on mobile) */}
+          <div className="flex w-full flex-col lg:w-1/2">
+            <div className="flex min-h-0 flex-1 flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+              {/* Video Header */}
+              <div className="flex-shrink-0 border-b border-[var(--color-border)] px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-medium text-[var(--color-text)]">Video Call</h2>
+                  <div className="flex items-center gap-4">
+                    <div className="text-sm text-[var(--color-text)]">
+                      {isCreator ? "Interviewer" : "Interviewee"}
+                    </div>
+                    {isVideoConnected && (
+                      <div className="flex items-center gap-1">
+                        <span className="inline-block h-2 w-2 rounded-full bg-green-500"></span>
+                        <span className="text-xs text-green-600 dark:text-green-400">Live</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
+              </div>
+
+              {/* Video Content - Full Height */}
+              <div className="min-h-0 flex-1">
+                <VideoCall
+                  roomName={`session-${roomCode}`}
+                  sessionCode={roomCode}
+                  onConnected={handleVideoConnected}
+                  onDisconnected={handleVideoDisconnected}
+                />
+              </div>
             </div>
           </div>
 
-          {/* Main Content - Side by Side Layout (50/50) */}
-          <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-            {/* Left Side - Video Call (50% on desktop, full width on mobile) */}
-            <div className="flex w-full flex-col border-b border-[var(--color-border)] lg:w-1/2 lg:border-r lg:border-b-0">
-              <div className="flex min-h-0 flex-1 flex-col bg-[var(--color-card-bg)]">
-                {/* Video Header */}
-                <div className="flex-shrink-0 border-b border-[var(--color-border)] px-4 py-3">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-medium text-[var(--color-text)]">Video Call</h2>
-                    <div className="flex items-center gap-4">
-                      <div className="text-sm text-[var(--color-text)]">
-                        {isCreator ? "Interviewer" : "Interviewee"}
-                      </div>
-                      {isVideoConnected && (
-                        <div className="flex items-center gap-1">
-                          <span className="inline-block h-2 w-2 rounded-full bg-green-500"></span>
-                          <span className="text-xs text-green-600 dark:text-green-400">Live</span>
-                        </div>
-                      )}
-                    </div>
+          {/* Right Side - Collaborative Tools (50% on desktop, full width on mobile) */}
+          <div className="flex w-full flex-col lg:w-1/2">
+            <div className="flex min-h-0 flex-1 flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+              {/* Tabs Header */}
+              <div className="flex-shrink-0 border-b border-[var(--color-border)] px-4 py-3">
+                <div className="flex flex-col gap-3">
+                  <h3 className="text-base font-medium text-[var(--color-text)]">
+                    Collaborative Tools
+                  </h3>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setActiveTab("editor")}
+                      className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                        activeTab === "editor"
+                          ? "bg-blue-500 text-white shadow-sm"
+                          : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+                      }`}
+                    >
+                      Code Editor
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("whiteboard")}
+                      className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                        activeTab === "whiteboard"
+                          ? "bg-blue-500 text-white shadow-sm"
+                          : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+                      }`}
+                    >
+                      Whiteboard
+                    </button>
+                    {isCreator && (
+                      <button
+                        onClick={() => setActiveTab("ai-chat")}
+                        className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                          activeTab === "ai-chat"
+                            ? "bg-blue-500 text-white shadow-sm"
+                            : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+                        }`}
+                      >
+                        AI Assistant
+                      </button>
+                    )}
                   </div>
-                </div>
-
-                {/* Video Content - Full Height */}
-                <div className="min-h-0 flex-1">
-                  <VideoCall
-                    roomName={`session-${roomCode}`}
-                    sessionCode={roomCode}
-                    onConnected={handleVideoConnected}
-                    onDisconnected={handleVideoDisconnected}
-                  />
                 </div>
               </div>
-            </div>
 
-            {/* Right Side - Collaborative Tools (50% on desktop, full width on mobile) */}
-            <div className="flex w-full flex-col lg:w-1/2">
-              <div className="flex min-h-0 flex-1 flex-col bg-[var(--color-card-bg)]">
-                {/* Tabs Header */}
-                <div className="flex-shrink-0 border-b border-[var(--color-border)] px-4 py-3">
-                  <div className="flex flex-col gap-3">
-                    <h3 className="text-base font-medium text-[var(--color-text)]">
-                      Collaborative Tools
-                    </h3>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setActiveTab("editor")}
-                        className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                          activeTab === "editor"
-                            ? "bg-blue-500 text-white shadow-sm"
-                            : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
-                        }`}
-                      >
-                        Code Editor
-                      </button>
-                      <button
-                        onClick={() => setActiveTab("whiteboard")}
-                        className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                          activeTab === "whiteboard"
-                            ? "bg-blue-500 text-white shadow-sm"
-                            : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
-                        }`}
-                      >
-                        Whiteboard
-                      </button>
-                      {isCreator && (
-                        <button
-                          onClick={() => setActiveTab("ai-chat")}
-                          className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                            activeTab === "ai-chat"
-                              ? "bg-blue-500 text-white shadow-sm"
-                              : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
-                          }`}
-                        >
-                          AI Assistant
-                        </button>
-                      )}
-                    </div>
-                  </div>
+              {/* Tab Content */}
+              <div className="min-h-0 flex-1 overflow-hidden">
+                <div className={activeTab === "editor" ? "block h-full" : "hidden h-full"}>
+                  <CollaborativeEditor id={`session-${roomCode}`} />
                 </div>
-
-                {/* Tab Content */}
-                <div className="min-h-0 flex-1 overflow-hidden">
-                  <div className={activeTab === "editor" ? "block h-full" : "hidden h-full"}>
-                    <CollaborativeEditor id={`session-${roomCode}`} />
-                  </div>
-                  <div className={activeTab === "whiteboard" ? "block h-full" : "hidden h-full"}>
-                    <Whiteboard roomCode={roomCode} />
-                  </div>
-                  {isCreator && (
-                    <div className={activeTab === "ai-chat" ? "block h-full" : "hidden h-full"}>
-                      <AIChatbot roomCode={roomCode} isCreator={isCreator} />
-                    </div>
-                  )}
+                <div className={activeTab === "whiteboard" ? "block h-full" : "hidden h-full"}>
+                  <Whiteboard roomCode={roomCode} />
                 </div>
+                {isCreator && (
+                  <div className={activeTab === "ai-chat" ? "block h-full" : "hidden h-full"}>
+                    <AIChatbot roomCode={roomCode} isCreator={isCreator} />
+                  </div>
+                )}
               </div>
             </div>
           </div>

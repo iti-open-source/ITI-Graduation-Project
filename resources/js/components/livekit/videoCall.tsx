@@ -5,6 +5,7 @@ import {
   ParticipantTile,
   RoomAudioRenderer,
   useLocalParticipant,
+  useMediaDevices,
   useTracks,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
@@ -29,6 +30,10 @@ function GalleryView() {
   );
 
   const { localParticipant } = useLocalParticipant();
+  const audioInputDevices = useMediaDevices({ kind: "audioinput" });
+  const videoInputDevices = useMediaDevices({ kind: "videoinput" });
+  const audioOutputDevices = useMediaDevices({ kind: "audiooutput" });
+  const [showDeviceSettings, setShowDeviceSettings] = useState(false);
 
   // Separate tracks for guest and local participant
   const guestTracks = tracks.filter((t) => t.participant.identity !== localParticipant?.identity);
@@ -99,6 +104,7 @@ function GalleryView() {
                 localParticipant.setMicrophoneEnabled(!localParticipant.isMicrophoneEnabled);
               }
             }}
+            title={localParticipant?.isMicrophoneEnabled ? "Mute microphone" : "Unmute microphone"}
           >
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
               <path
@@ -121,6 +127,7 @@ function GalleryView() {
                 localParticipant.setCameraEnabled(!localParticipant.isCameraEnabled);
               }
             }}
+            title={localParticipant?.isCameraEnabled ? "Turn off camera" : "Turn on camera"}
           >
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
               <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
@@ -139,6 +146,7 @@ function GalleryView() {
                 localParticipant.setScreenShareEnabled(!localParticipant.isScreenShareEnabled);
               }
             }}
+            title={localParticipant?.isScreenShareEnabled ? "Stop sharing screen" : "Share screen"}
           >
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
               <path
@@ -148,7 +156,87 @@ function GalleryView() {
               />
             </svg>
           </button>
+
+          {/* Device Settings Button */}
+          <button
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+            onClick={() => setShowDeviceSettings(!showDeviceSettings)}
+            title="Device settings"
+          >
+            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
         </div>
+
+        {/* Device Settings Panel */}
+        {showDeviceSettings && (
+          <div className="mt-4 space-y-3 border-t pt-3">
+            {/* Microphone Selection */}
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                Microphone
+              </label>
+              <select
+                className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                onChange={(e) => {
+                  if (localParticipant) {
+                    localParticipant.setMicrophoneEnabled(true, { deviceId: e.target.value });
+                  }
+                }}
+              >
+                {audioInputDevices.map((device: MediaDeviceInfo) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label || `Microphone ${device.deviceId.slice(0, 8)}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Camera Selection */}
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Camera</label>
+              <select
+                className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                onChange={(e) => {
+                  if (localParticipant) {
+                    localParticipant.setCameraEnabled(true, { deviceId: e.target.value });
+                  }
+                }}
+              >
+                {videoInputDevices.map((device: MediaDeviceInfo) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label || `Camera ${device.deviceId.slice(0, 8)}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Speaker Selection */}
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                Speaker
+              </label>
+              <select
+                className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                onChange={(e) => {
+                  // Note: Speaker selection would need to be handled by the room's audio output
+                  console.log("Speaker selected:", e.target.value);
+                }}
+              >
+                {audioOutputDevices.map((device: MediaDeviceInfo) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label || `Speaker ${device.deviceId.slice(0, 8)}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

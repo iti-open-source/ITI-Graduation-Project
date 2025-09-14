@@ -75,11 +75,6 @@ Route::get('/auth/linkedin', [LinkedInController::class, 'redirectToLinkedIn'])-
 Route::get('/auth/linkedin/callback', [LinkedInController::class, 'handleLinkedInCallback']);
 
 
-Route::get('{any}', function () {
-    // dd(Auth::user()->role);
-    return Inertia::render('not-found/not-found', ["user" => Auth::user()]);
-})->where('any', '.*'); // 
-
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

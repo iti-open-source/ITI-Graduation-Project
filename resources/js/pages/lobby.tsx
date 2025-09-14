@@ -23,6 +23,8 @@ interface Room {
   is_active: boolean;
   current_participant: User | null;
   queue_count: number;
+  student_interview_date?: string | null;
+  student_interview_time?: string | null;
 }
 
 interface LobbyProps {
@@ -30,16 +32,16 @@ interface LobbyProps {
   students: User[];
 }
 
-export default function Lobby({ userRooms ,students }: LobbyProps) {
+export default function Lobby({ userRooms, students }: LobbyProps) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  
-const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
- const { auth } = usePage().props as { auth: { user: User } };
+
+  const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
+  const { auth } = usePage().props as { auth: { user: User } };
   const role = auth?.user?.role;
 
   const [interviewDates, setInterviewDates] = useState<{ [key: number]: string }>({});
-const [interviewTimes, setInterviewTimes] = useState<{ [key: number]: string }>({});
+  const [interviewTimes, setInterviewTimes] = useState<{ [key: number]: string }>({});
 
 
   const handleCreateRoom = (e: React.FormEvent<HTMLFormElement>) => {
@@ -47,23 +49,23 @@ const [interviewTimes, setInterviewTimes] = useState<{ [key: number]: string }>(
     const formData = new FormData(e.currentTarget);
     const roomName = formData.get("name") as string;
     if (!roomName) return;
-const studentsWithSchedule = selectedStudents.map((id) => ({
-    id,
-    interview_date: interviewDates[id] || null,
-    interview_time: interviewTimes[id] || null,
-  }));
-    
+    const studentsWithSchedule = selectedStudents.map((id) => ({
+      id,
+      interview_date: interviewDates[id] || null,
+      interview_time: interviewTimes[id] || null,
+    }));
+
 
     setIsCreating(true);
     router.post(
       "/rooms",
-      { name: roomName , students: studentsWithSchedule  },
+      { name: roomName, students: studentsWithSchedule },
       {
         onSuccess: () => {
           setShowCreateForm(false);
           setSelectedStudents([]);
-        setInterviewDates({});
-        setInterviewTimes({});
+          setInterviewDates({});
+          setInterviewTimes({});
         },
         onFinish: () => {
           setIsCreating(false);
@@ -71,6 +73,17 @@ const studentsWithSchedule = selectedStudents.map((id) => ({
       },
     );
   };
+
+  function canStudentEnter(room: Room) {
+    if (!room.student_interview_date || !room.student_interview_time) return false;
+
+    const interviewDateTime = new Date(`${room.student_interview_date}T${room.student_interview_time}`);
+    const now = new Date();
+    const endWindow = new Date(interviewDateTime.getTime() + 10 * 60 * 1000);
+
+    return now >= interviewDateTime && now <= endWindow;
+  }
+
 
   const copyRoomLink = (roomCode: string) => {
     const roomUrl = `${window.location.origin}/room/${roomCode}`;
@@ -149,52 +162,52 @@ const studentsWithSchedule = selectedStudents.map((id) => ({
                           required
                         />
                       </div>
-                       {/* Student Assignment */}
+                      {/* Student Assignment */}
 
-                       {role !== "student" && role !== null && (
-<div className="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto rounded-md border p-2">
-  <Label className="mb-2 block font-medium">Assign Students:</Label>
-  {students.map((student) => (
-    <div key={student.id} className="flex flex-col gap-1 border-b pb-1">
-      <label className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          value={student.id}
-          checked={selectedStudents.includes(student.id)}
-          onChange={(e) => {
-            const id = Number(e.target.value);
-            setSelectedStudents((prev) =>
-              prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-            );
-          }}
-          className="h-4 w-4"
-        />
-        <span>{student.name} ({student.email})</span>
-      </label>
+                      {role !== "student" && role !== null && (
+                        <div className="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto rounded-md border p-2">
+                          <Label className="mb-2 block font-medium">Assign Students:</Label>
+                          {students.map((student) => (
+                            <div key={student.id} className="flex flex-col gap-1 border-b pb-1">
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  value={student.id}
+                                  checked={selectedStudents.includes(student.id)}
+                                  onChange={(e) => {
+                                    const id = Number(e.target.value);
+                                    setSelectedStudents((prev) =>
+                                      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+                                    );
+                                  }}
+                                  className="h-4 w-4"
+                                />
+                                <span>{student.name} ({student.email})</span>
+                              </label>
 
-      {selectedStudents.includes(student.id) && (
-        <div className="flex gap-2">
-          <input
-            type="date"
-            className="border rounded-md p-1 text-sm flex-1"
-            value={interviewDates[student.id] || ""}
-            onChange={(e) =>
-              setInterviewDates((prev) => ({ ...prev, [student.id]: e.target.value }))
-            }
-          />
-          <input
-            type="time"
-            className="border rounded-md p-1 text-sm flex-1"
-            value={interviewTimes[student.id] || ""}
-            onChange={(e) =>
-              setInterviewTimes((prev) => ({ ...prev, [student.id]: e.target.value }))
-            }
-          />
-        </div>
-      )}
-    </div>
-  ))}
-</div>
+                              {selectedStudents.includes(student.id) && (
+                                <div className="flex gap-2">
+                                  <input
+                                    type="date"
+                                    className="border rounded-md p-1 text-sm flex-1"
+                                    value={interviewDates[student.id] || ""}
+                                    onChange={(e) =>
+                                      setInterviewDates((prev) => ({ ...prev, [student.id]: e.target.value }))
+                                    }
+                                  />
+                                  <input
+                                    type="time"
+                                    className="border rounded-md p-1 text-sm flex-1"
+                                    value={interviewTimes[student.id] || ""}
+                                    onChange={(e) =>
+                                      setInterviewTimes((prev) => ({ ...prev, [student.id]: e.target.value }))
+                                    }
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
 
                       )}
 
@@ -262,15 +275,66 @@ const studentsWithSchedule = selectedStudents.map((id) => ({
                               {room.queue_count} user{room.queue_count !== 1 ? "s" : ""} in queue
                             </span>
                           </div>
+                          {/* Show interview schedule if student */}
+                          {role === "student" && room.student_interview_date && room.student_interview_time && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <span className="font-medium">Your interview:</span>
+                              <span className="flex items-center gap-1">
+                                📅{" "}
+                                {new Date(room.student_interview_date).toLocaleDateString(undefined, {
+                                  weekday: "short",
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                })}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                ⏰{" "}
+                                {new Date(
+                                  `${room.student_interview_date}T${room.student_interview_time}`
+                                ).toLocaleTimeString(undefined, {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                })}
+                              </span>
+                            </div>
+                          )}
                         </div>
 
                         {/* Actions */}
                         <div className="mt-4 flex items-center gap-2">
-                          <Button asChild className="flex-1">
+                          {/* <Button asChild className="flex-1">
                             <Link href={`/room/${room.room_code}`}>
                               <Eye className="mr-2 h-4 w-4" /> Enter Room
                             </Link>
-                          </Button>
+                          </Button> */}
+
+
+
+                          {role === "student" ? (
+                            canStudentEnter(room) ? (
+                              //student can enter
+                              <Button asChild className="flex-1">
+                                <Link href={`/room/${room.room_code}`}>
+                                  <Eye className="mr-2 h-4 w-4" /> Enter Room
+                                </Link>
+                              </Button>
+                            ) : (
+                              // student cannot enter yet
+                              <Button disabled className="flex-1 opacity-50">
+                                <Eye className="mr-2 h-4 w-4" /> Not Available Yet
+                              </Button>
+                            )
+                          ) : (
+                            // instructors/admins always can enter
+                            <Button asChild className="flex-1">
+                              <Link href={`/room/${room.room_code}`}>
+                                <Eye className="mr-2 h-4 w-4" /> Enter Room
+                              </Link>
+                            </Button>
+                          )}
+
                           <Button
                             size="icon"
                             variant="outline"
@@ -279,13 +343,13 @@ const studentsWithSchedule = selectedStudents.map((id) => ({
                             <Copy className="h-4 w-4" />
                           </Button>
                           {role !== "student" && (
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => deleteRoom(room.room_code)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => deleteRoom(room.room_code)}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
                           )}
                         </div>
                       </CardContent>
@@ -300,12 +364,12 @@ const studentsWithSchedule = selectedStudents.map((id) => ({
                     <Wind className="h-8 w-8 text-muted-foreground" />
                   </div>
                   <h3 className="mb-2 text-xl font-semibold">It's quiet in here...</h3>
-                   <p className="mb-6 text-muted-foreground">
+                  <p className="mb-6 text-muted-foreground">
                     {role === "student"
                       ? "No rooms have been assigned to you yet."
                       : "Create your first interview room to get started."}
                   </p>
-                   {/* ✅ Students can’t create rooms */}
+                  {/* ✅ Students can’t create rooms */}
                   {role !== "student" && (
                     <Button onClick={() => setShowCreateForm(true)}>
                       <Plus className="mr-2 h-4 w-4" />

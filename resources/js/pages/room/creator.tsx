@@ -84,11 +84,6 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
   const [updatingStudent, setUpdatingStudent] = useState(false);
 const [studentToUpdate, setStudentToUpdate] = useState<AssignedStudent | null>(null);
 
-
-
-
-
-
   // helper to read csrf token meta
   const getCsrf = () => (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || "";
 
@@ -186,7 +181,6 @@ const [studentToUpdate, setStudentToUpdate] = useState<AssignedStudent | null>(n
   };
 
   // update interview handler
-
 const updateStudentInterview = async (studentId: number, date: string, time: string) => {
   setUpdatingStudent(true);
     const cleanTime = time.length > 5 ? time.slice(0,5) : time;
@@ -216,12 +210,6 @@ const updateStudentInterview = async (studentId: number, date: string, time: str
     setUpdatingStudent(false);
   }
 };
-
-
-
-
-
-
   console.log(
     `[Creator] Initializing creator component for room ${room.room_code}, user ${auth.user.id}`,
   );

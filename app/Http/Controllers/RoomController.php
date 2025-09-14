@@ -40,13 +40,25 @@ class RoomController extends Controller
         $students = [];
 
         if ($user->role === 'student') {
-            // Show rooms assigned to this student
-            $userRooms = $user->assignedRooms()
-                ->where('is_active', true)
-                ->with(['currentParticipant', 'queue.user', 'creator'])
-                ->orderBy('last_activity', 'desc')
-                ->get();
-        } elseif (in_array($user->role, ['instructor', 'admin'])) {
+    // Show rooms assigned to this student, add pivot interview date/time
+    $userRooms = $user->assignedRooms()
+        ->where('is_active', true)
+        ->with(['currentParticipant', 'queue.user', 'creator'])
+        ->orderBy('last_activity', 'desc')
+        ->get()
+        ->map(function ($room) use ($user) {
+            // grab this student's pivot data for this room
+            $studentPivot = $room->assignedStudents()
+                ->where('users.id', $user->id)
+                ->first();
+
+            $room->student_interview_date = $studentPivot?->pivot?->interview_date;
+            $room->student_interview_time = $studentPivot?->pivot?->interview_time;
+
+            return $room;
+        });
+}
+ elseif (in_array($user->role, ['instructor', 'admin'])) {
             // Show rooms this instructor/admin created
             $userRooms = $user->createdRooms()
                 ->where('is_active', true)

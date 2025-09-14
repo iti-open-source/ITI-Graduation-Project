@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Room;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
@@ -27,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
             'auth.user' => fn() => Auth::user(),
             'roomsCount' => fn() => $this->getRoomsCount(),
             'assignedRooms' => fn() => $this->getAssignedRooms(),
+            'webrtc' => [
+                'serverUrl' => config('webrtc.server_url'),
+            ],
         ]);
     }
 
@@ -43,8 +47,10 @@ class AppServiceProvider extends ServiceProvider
     private function getAssignedRooms(): array
     {
         try {
-            if (Auth::user() && Auth::user()->role === 'student') {
-                return Auth::user()->assignedRooms()->pluck('rooms.id')->toArray();
+            /** @var User|null $user */
+            $user = Auth::user();
+            if ($user && $user->role === 'student') {
+                return $user->assignedRooms()->pluck('rooms.id')->toArray();
             }
             return [];
         } catch (\Exception $e) {

@@ -417,6 +417,9 @@ class RoomController extends Controller
             ->first();
 
         $room->assignedStudents()->detach([$student->id]);
+        $room->removeFromQueue($student);
+
+        event(new QueueUpdated($room->fresh(), 'left', $student));
 
         Mail::to($student->email)->send(new InterviewCancelled($room, $student, $sessionDetails));
 

@@ -36,11 +36,11 @@ export default function SessionRoom(props: PageProps) {
       <Head title={`Session - ${roomCode}`} />
 
       <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-6">
-        {/* Main Content - Side by Side Layout (50/50) */}
+        {/* Main Content - Side by Side Layout (40/60) */}
         <div className="flex min-h-0 flex-1 flex-col gap-6 lg:flex-row">
-          {/* Left Side - Video Call (50% on desktop, full width on mobile) */}
-          <div className="flex w-full flex-col lg:w-1/2">
-            <div className="flex min-h-96 flex-1 flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm lg:min-h-0">
+          {/* Left Side - Video Call (40% width on desktop, full width on mobile) */}
+          <div className="flex w-full flex-col lg:w-2/5 lg:flex-shrink-0">
+            <div className="flex min-h-96 flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm lg:h-screen lg:max-h-[calc(100vh-8rem)]">
               {/* Video Header */}
               <div className="flex-shrink-0 border-b border-[var(--color-border)] px-4 py-3">
                 <div className="flex items-center justify-between">
@@ -59,8 +59,8 @@ export default function SessionRoom(props: PageProps) {
                 </div>
               </div>
 
-              {/* Video Content - Full Height */}
-              <div className="min-h-80 flex-1 lg:min-h-0">
+              {/* Video Content - Fixed Height */}
+              <div className="min-h-80 flex-1 lg:h-[calc(100vh-12rem)] lg:min-h-0">
                 <VideoCall
                   roomName={`session-${roomCode}`}
                   sessionCode={roomCode}
@@ -71,9 +71,9 @@ export default function SessionRoom(props: PageProps) {
             </div>
           </div>
 
-          {/* Right Side - Collaborative Tools (50% on desktop, full width on mobile) */}
-          <div className="flex w-full flex-col lg:w-1/2">
-            <div className="flex min-h-0 flex-1 flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+          {/* Right Side - Collaborative Tools (60% on desktop, full width on mobile) */}
+          <div className="flex w-full flex-col lg:min-w-0 lg:flex-1">
+            <div className="flex min-h-96 flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm lg:h-screen lg:max-h-[calc(100vh-8rem)]">
               {/* Tabs Header */}
               <div className="flex-shrink-0 border-b border-[var(--color-border)] px-4 py-3">
                 <div className="flex flex-col gap-3">
@@ -118,7 +118,7 @@ export default function SessionRoom(props: PageProps) {
               </div>
 
               {/* Tab Content */}
-              <div className="min-h-0 flex-1 overflow-hidden">
+              <div className="min-h-0 flex-1 overflow-hidden lg:h-[calc(100vh-12rem)]">
                 <div className={activeTab === "editor" ? "block h-full" : "hidden h-full"}>
                   <CollaborativeEditor id={`session-${roomCode}`} />
                 </div>

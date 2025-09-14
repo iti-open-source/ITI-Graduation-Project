@@ -95,7 +95,7 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
   }
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col">
+    <div className="flex h-full w-full flex-col">
       <LiveKitRoom
         video={true}
         audio={true}
@@ -105,7 +105,13 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
         onConnected={handleConnected}
         onDisconnected={handleDisconnected}
         onError={handleError}
-        style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: "320px" }}
+        style={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "320px",
+        }}
       >
         <div className="flex h-full flex-col">
           {/* Connection Status */}
@@ -134,7 +140,7 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
           </div>
 
           {/* Full-featured Video Conference Component */}
-          <div className="min-h-0 flex-1">
+          <div className="min-h-0 flex-1 overflow-hidden">
             <VideoConference />
           </div>
 

@@ -7,6 +7,7 @@ use App\Events\RoomStatusUpdated;
 use App\Models\Room;
 use App\Models\RoomQueue;
 use App\Models\LobbySession;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -110,12 +111,31 @@ class RoomController extends Controller
         }
 
         // If user is the creator, show the room management interface
-        if ($room->isCreator($user)) {
-            return Inertia::render('room/creator', [
-                'room' => $room,
-                'assignedStudents' => $room->assignedStudents,
-            ]);
-        }
+        // if ($room->isCreator($user)) {
+        //     return Inertia::render('room/creator', [
+        //         'room' => $room,
+        //         'assignedStudents' => $room->assignedStudents,
+        //     ]);
+        // }
+
+
+    if ($room->isCreator($user)) {
+    // Load assigned students relation
+    $room->load('assignedStudents');
+
+    // All students
+    $allStudents = \App\Models\User::where('role', 'student')->get();
+
+    // Students NOT assigned to this room
+    $unassignedStudents = $allStudents->whereNotIn('id', $room->assignedStudents->pluck('id'));
+
+    return Inertia::render('room/creator', [
+        'room' => $room,
+        'assignedStudents' => $room->assignedStudents,
+        'unassignedStudents' => $unassignedStudents->values(), 
+    ]);
+}
+
 
         // Do not redirect solely based on current_participant; rely on active session check only
 
@@ -288,6 +308,44 @@ class RoomController extends Controller
 
     //     return redirect()->back()->with('success', 'Students assigned successfully.');
     // }
+
+public function assignStudent(Request $request, Room $room)
+{
+    $request->validate(['student_id' => 'required|exists:users,id']);
+    $room->assignedStudents()->attach($request->student_id);
+
+    $assigned = $room->assignedStudents()->get();
+    $unassigned = User::where('role', 'student')
+        ->whereNotIn('id', $assigned->pluck('id'))
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'assignedStudents' => $assigned,
+        'unassignedStudents' => $unassigned,
+    ]);
+}
+
+
+public function removeStudent(Room $room, User $student)
+{
+    // Detach only that specific student
+    $room->assignedStudents()->detach([$student->id]);
+
+    $assigned = $room->assignedStudents()->get();
+    $unassigned = User::where('role', 'student')
+        ->whereNotIn('id', $assigned->pluck('id'))
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'assignedStudents' => $assigned,
+        'unassignedStudents' => $unassigned,
+    ]);
+}
+
+
+
 
 
 }

@@ -40,7 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Room routes
     Route::get('lobby', [RoomController::class, 'lobby'])->name('lobby')->middleware('check.role')
     ;
-    Route::post('rooms', [RoomController::class, 'create'])->name('room.create')->middleware(['admin.only','instructor.only'])
+    Route::post('rooms', [RoomController::class, 'create'])->name('room.create')->middleware(['instructor.only'])
     ;
     Route::get('room/{roomCode}', [RoomController::class, 'show'])->name('room.show');
     Route::post('room/{roomCode}/join', [RoomController::class, 'join'])->name('room.join');
@@ -48,11 +48,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('room/{roomCode}/leave', [RoomController::class, 'leave'])->name('room.leave');
     Route::delete('room/{roomCode}', [RoomController::class, 'destroy'])->name('room.destroy');
 
+    Route::post('/rooms/{room}/assign-student', [RoomController::class, 'assignStudent']);
+    Route::delete('/rooms/{room}/remove-student/{student}', [RoomController::class, 'removeStudent']);
+
+
     // Session (simple WebRTC) routes
     Route::get('session/create', [SessionController::class, 'create'])->name('session.create');
     Route::get('session/{sessionCode}', [SessionController::class, 'room'])->name('session.room');
     Route::post('session/{sessionCode}/signal', [SessionController::class, 'signal'])->name('session.signal');
     Route::post('session/{sessionCode}/terminate', [SessionController::class, 'terminate'])->name('session.terminate');
+
+
+
+   
+
+    
 });
 
 

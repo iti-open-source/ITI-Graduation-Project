@@ -11,25 +11,40 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { dashboard } from "@/routes";
-import { type NavItem } from "@/types";
-import { Link } from "@inertiajs/react";
+import { SharedData, type NavItem } from "@/types";
+import { Link, usePage } from "@inertiajs/react";
 import { LayoutGrid, Shield } from "lucide-react";
 import AppLogo from "./app-logo";
 
-const mainNavItems: NavItem[] = [
+
+
+export function AppSidebar() {
+  const { auth } = usePage<SharedData>().props;
+  const mainNavItems: NavItem[] = [
   {
     title: "Dashboard",
     href: dashboard(),
     icon: LayoutGrid,
   },
-  {
-    title: "Admin",
-    href: "/admin",
-    icon: Shield,
-  },
-];
+//   {
+//     title: "Admin",
+//     href: "/admin",
+//     icon: Shield,
+//   },
+// ];
+...(auth.user?.role === "admin"
+      ? [
+          {
+            title: "Admin",
+            href: "/admin",
+            icon: Shield,
+          },
+        ]
+      : []),
+  ];
 
-export function AppSidebar() {
+
+
   return (
     <Sidebar collapsible="icon" variant="inset">
       <SidebarHeader>

@@ -40,7 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Room routes
     Route::get('lobby', [RoomController::class, 'lobby'])->name('lobby')->middleware('check.role');
     Route::post('rooms', [RoomController::class, 'create'])->name('room.create')->middleware(['instructor.only']);
-    Route::get('room/{roomCode}', [RoomController::class, 'show'])->name('room.show')->middleware('assigned.only');
+    Route::get('room/{roomCode}', [RoomController::class, 'show'])->name('room.show')->middleware('room.access');
     Route::post('room/{roomCode}/join', [RoomController::class, 'join'])->name('room.join');
     Route::post('room/{roomCode}/disconnect', [RoomController::class, 'disconnect'])->name('room.disconnect');
     Route::post('room/{roomCode}/leave', [RoomController::class, 'leave'])->name('room.leave');

@@ -1,0 +1,61 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use App\Models\Room;
+use \Carbon\Carbon;
+
+class RoomAccessControl
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        $roomCode = $request->route('roomCode');
+        $user = $request->user();
+
+        if ($this->canAccessRoom($roomCode, $user) == false) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        return $next($request);
+    }
+    private function canAccessRoom($roomCode, $user): bool
+    {
+        $room = Room::where('room_code', $roomCode)->first();
+        $roomOwnerID = $room->created_by;
+        $userRooms = $user->assignedRooms()->where('room_code', $roomCode)->exists();
+
+        // first, check if the user is the room owner
+        if ($user->id == $roomOwnerID) {
+            return true;
+        }
+
+        // then, check if the user is assigned to this room
+        if (!$userRooms) {
+            return false;
+        }
+
+        // finally, check if the current date and time is after the interview date and time
+        $assignedStudent = $room->assignedStudents()->where('users.id', $user->id)->withPivot('interview_date', 'interview_time')->first();
+
+        $interviewDate = $assignedStudent->pivot->interview_date;
+        $interviewTime = $assignedStudent->pivot->interview_time;
+
+        $interviewDateTime = Carbon::parse($interviewDate . ' ' . $interviewTime, 'Africa/Cairo')->format('Y-m-d H:i:s');
+
+        $currentDateTime = Carbon::now('Africa/Cairo')->format('Y-m-d H:i:s');
+
+        if ($currentDateTime < $interviewDateTime) {
+            return false;
+        }
+
+        // all checks passed, allow access
+        return true;
+    }
+}

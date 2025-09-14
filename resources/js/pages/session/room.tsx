@@ -118,15 +118,15 @@ export default function SessionRoom(props: PageProps) {
               </div>
 
               {/* Tab Content */}
-              <div className="min-h-0 flex-1 overflow-hidden lg:h-[calc(100vh-12rem)]">
-                <div className={activeTab === "editor" ? "block h-full" : "hidden h-full"}>
+              <div className="min-h-0 flex-1 overflow-auto lg:h-[calc(100vh-12rem)]">
+                <div className={activeTab === "editor" ? "block min-h-full" : "hidden"}>
                   <CollaborativeEditor id={`session-${roomCode}`} />
                 </div>
-                <div className={activeTab === "whiteboard" ? "block h-full" : "hidden h-full"}>
+                <div className={activeTab === "whiteboard" ? "block min-h-full" : "hidden"}>
                   <Whiteboard roomCode={roomCode} />
                 </div>
                 {isCreator && (
-                  <div className={activeTab === "ai-chat" ? "block h-full" : "hidden h-full"}>
+                  <div className={activeTab === "ai-chat" ? "block min-h-full" : "hidden"}>
                     <AIChatbot roomCode={roomCode} isCreator={isCreator} />
                   </div>
                 )}

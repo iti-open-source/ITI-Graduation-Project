@@ -385,4 +385,49 @@ class RoomController extends Controller
             'unassignedStudents' => $unassigned,
         ]);
     }
+
+    public function updateStudentInterview(Request $request, Room $room, User $student)
+{
+    $request->validate([
+        'interview_date' => 'required|date',
+        'interview_time' => 'required|date_format:H:i',
+    ]);
+
+    // Only update if the student is assigned to this room
+    if (!$room->assignedStudents()->where('user_id', $student->id)->exists()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Student is not assigned to this room',
+        ], 404);
+    }
+
+    // Update pivot data
+    $room->assignedStudents()->updateExistingPivot($student->id, [
+        'interview_date' => $request->interview_date,
+        'interview_time' => $request->interview_time,
+    ]);
+
+    // Return updated assigned and unassigned lists
+    $assigned = $room->assignedStudents()->get()->map(function ($s) {
+        return [
+            'id' => $s->id,
+            'name' => $s->name,
+            'email' => $s->email,
+            'interview_date' => $s->pivot->interview_date,
+            'interview_time' => $s->pivot->interview_time,
+        ];
+    });
+
+    $unassigned = User::where('role', 'student')
+        ->whereNotIn('id', $assigned->pluck('id'))
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'assignedStudents' => $assigned,
+        'unassignedStudents' => $unassigned,
+        'message' => 'Student interview updated successfully',
+    ]);
+}
+
 }

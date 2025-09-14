@@ -81,6 +81,10 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
 
   const [assigned, setAssigned] = useState<AssignedStudent[]>(initialAssigned as AssignedStudent[]);
 
+  const [updatingStudent, setUpdatingStudent] = useState(false);
+const [studentToUpdate, setStudentToUpdate] = useState<AssignedStudent | null>(null);
+
+
 
 
 
@@ -180,6 +184,41 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
       setRemovingIds((prev) => prev.filter((id) => id !== studentId));
     }
   };
+
+  // update interview handler
+
+const updateStudentInterview = async (studentId: number, date: string, time: string) => {
+  setUpdatingStudent(true);
+    const cleanTime = time.length > 5 ? time.slice(0,5) : time;
+
+  try {
+    const res = await fetch(`/rooms/${room.id}/update-student/${studentId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        'Accept': 'application/json', 
+        "X-CSRF-TOKEN": getCsrf(),
+      },
+      body: JSON.stringify({ interview_date: date, interview_time: cleanTime }),
+    });
+
+    const json = await res.json();
+    if (json.success) {
+     setSelectedStudent("");
+      setAssigned(json.assignedStudents);
+      toast.success(json.message || "Student interview updated successfully");
+
+    } else {
+      console.error(json.message);
+      toast.error(json.message || "Failed to update student interview");
+    }
+  } finally {
+    setUpdatingStudent(false);
+  }
+};
+
+
+
 
 
 
@@ -530,7 +569,7 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
                 </CardContent>
               </Card>
             </motion.div>
-
+            {/* Assigned Students */}
             <motion.div
               variants={fadeIn}
               initial="hidden"
@@ -555,9 +594,9 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Assigned Students List */}
-                  
+
                   {assigned.length > 0 ? (
-                    <div className="max-h-64 overflow-y-auto space-y-2">
+                    <div className="max-h-74 overflow-y-auto space-y-2">
                       {assigned.map((student) => (
                         <div
                           key={student.id}
@@ -577,24 +616,24 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
                                 {student.email}
                               </p>
                               {student.interview_date && student.interview_time && (
-  <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
-    <span className="flex items-center gap-1">
-      📅 {new Date(student.interview_date).toLocaleDateString(undefined, { 
-        weekday: "short", 
-        year: "numeric", 
-        month: "short", 
-        day: "numeric" 
-      })}
-    </span>
-    <span className="flex items-center gap-1">
-      ⏰ {new Date(`${student.interview_date}T${student.interview_time}`).toLocaleTimeString(undefined, { 
-        hour: "2-digit", 
-        minute: "2-digit", 
-        hour12: true 
-      })}
-    </span>
-  </div>
-)}
+                                <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+                                  <span className="flex items-center gap-1">
+                                    📅 {new Date(student.interview_date).toLocaleDateString(undefined, {
+                                      weekday: "short",
+                                      year: "numeric",
+                                      month: "short",
+                                      day: "numeric"
+                                    })}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    ⏰ {new Date(`${student.interview_date}T${student.interview_time}`).toLocaleTimeString(undefined, {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      hour12: true
+                                    })}
+                                  </span>
+                                </div>
+                              )}
 
                             </div>
                           </div>
@@ -650,75 +689,202 @@ export default function Creator({ room: initialRoom, assignedStudents, assignedS
                 </CardContent>
               </Card>
             </motion.div>
+            <div className="space-y-6">
+              {/* Assign New Student */}
+              <motion.div
+                variants={fadeIn}
+                initial="hidden"
+                animate="visible"
+                className="space-y-6"
+              >
+                <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-500 text-white">
+                        <UserPlus className="h-5 w-5" />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        Assigne New Students
 
-            <motion.div
-              variants={fadeIn}
-              initial="hidden"
-              animate="visible"
-              className="space-y-6"
-            >
-              <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-500 text-white">
-                      <User className="h-5 w-5" />
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+
+
+                    {/* Add New Student */}
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium text-[var(--color-text)]">Assign new students</h4>
+
+                      <div className="flex gap-2">
+                        <select
+                          className="flex-1 rounded-md border p-2 text-sm"
+                          value={selectedStudent}
+                          onChange={(e) => setSelectedStudent(Number(e.target.value) || "")}
+                        >
+                          <option value="">Select a student</option>
+                          {unassigned.map((s) => (
+                            <option key={s.id} value={s.id}>
+                              {s.name} ({s.email})
+                            </option>
+                          ))}
+                        </select>
+
+                        <input
+                          type="date"
+                          className="border rounded-md p-2 text-sm"
+                          value={interviewDate}
+                          onChange={(e) => setInterviewDate(e.target.value)}
+                        />
+
+                        <input
+                          type="time"
+                          className="border rounded-md p-2 text-sm"
+                          value={interviewTime}
+                          onChange={(e) => setInterviewTime(e.target.value)}
+                        />
+
+
+                      </div>
+                      <Button onClick={handleAssign} disabled={!selectedStudent || assigning}>
+                        {assigning ? "Assigning..." : "Assign"}
+                      </Button>
+
                     </div>
-                    <div className="flex items-center gap-2">
-                      Assigne New Students
 
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                  </CardContent>
+                </Card>
+              </motion.div>
+              {/* Edit Student Interviews */}
+              <motion.div
+                variants={fadeIn}
+                initial="hidden"
+                animate="visible"
+                className="space-y-6"
+              >
+                <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-500 text-white">
+                        <User className="h-5 w-5" />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        Edit Assigned Students' Interview Dates and Times
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
 
+                  <CardContent className="space-y-4 max-h-96 overflow-y-auto">
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium text-[var(--color-text)]">Select a student</h4>
 
-                  {/* Add New Student */}
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-[var(--color-text)]">Assign new students</h4>
-
-                    <div className="flex gap-2">
                       <select
-                        className="flex-1 rounded-md border p-2 text-sm"
+                        className="w-full rounded-md border p-2 text-sm"
                         value={selectedStudent}
                         onChange={(e) => setSelectedStudent(Number(e.target.value) || "")}
                       >
-                        <option value="">Select a student</option>
-                        {unassigned.map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.name} ({s.email})
+                        <option value="">-- Select student --</option>
+                        {assigned.map((student) => (
+                          <option key={student.id} value={student.id}>
+                            {student.name} ({student.email})
                           </option>
                         ))}
                       </select>
-
-                      <input
-                        type="date"
-                        className="border rounded-md p-2 text-sm"
-                        value={interviewDate}
-                        onChange={(e) => setInterviewDate(e.target.value)}
-                      />
-
-                      <input
-                        type="time"
-                        className="border rounded-md p-2 text-sm"
-                        value={interviewTime}
-                        onChange={(e) => setInterviewTime(e.target.value)}
-                      />
-
-
                     </div>
-                    <Button onClick={handleAssign} disabled={!selectedStudent || assigning}>
-                      {assigning ? "Assigning..." : "Assign"}
-                    </Button>
 
-                  </div>
+                    {selectedStudent && (
+                      <div className="space-y-2 border-t pt-2">
+                        {(() => {
+                          const student = assigned.find((s) => s.id === selectedStudent);
+                          if (!student) return null;
 
-                </CardContent>
-              </Card>
-            </motion.div>
+                          return (
+                            <div className="flex flex-col gap-2">
+                              <div className="flex gap-2">
+                                <input
+                                  type="date"
+                                  className="border rounded-md p-2 text-sm flex-1"
+                                  value={student.interview_date || ""}
+                                  onChange={(e) => {
+                                    const updated = [...assigned];
+                                    const index = updated.findIndex((s) => s.id === student.id);
+                                    if (index > -1) updated[index].interview_date = e.target.value;
+                                    setAssigned(updated);
+                                  }}
+                                />
+                                <input
+                                  type="time"
+                                  className="border rounded-md p-2 text-sm flex-1"
+                                  value={student.interview_time || ""}
+                                  onChange={(e) => {
+                                    const updated = [...assigned];
+                                    const index = updated.findIndex((s) => s.id === student.id);
+                                    if (index > -1) updated[index].interview_time = e.target.value;
+                                    setAssigned(updated);
+                                  }}
+                                />
+                              </div>
+                             <Button
+  onClick={() => {
+    const s = assigned.find(a => a.id === selectedStudent);
+    if (s) setStudentToUpdate(s); 
+  }}
+>
+  Update
+</Button>
 
 
 
 
+
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    )}
+                  </CardContent>
+
+
+                  {studentToUpdate && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-gray-800">
+      <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
+        Confirm Update
+      </h2>
+      <p className="mb-6 text-sm text-gray-700 dark:text-gray-300">
+        Are you sure you want to update the interview date and time for "
+        {studentToUpdate.name}"?
+      </p>
+      <div className="flex justify-end gap-3">
+        <Button
+          variant="outline"
+          onClick={() => setStudentToUpdate(null)}
+        >
+          Cancel
+        </Button>
+        <Button
+          className="bg-blue-600 text-white hover:bg-blue-700"
+          onClick={() => {
+            updateStudentInterview(
+              studentToUpdate.id,
+              studentToUpdate.interview_date ?? "",
+              studentToUpdate.interview_time ?? ""
+            );
+            setStudentToUpdate(null);
+          }}
+        >
+          Confirm
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
+
+                </Card>
+              </motion.div>
+
+
+            </div>
           </div>
 
           {/* Room Link Card */}

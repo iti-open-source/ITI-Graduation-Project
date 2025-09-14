@@ -166,69 +166,105 @@ function GalleryView() {
           </button>
         </div>
 
-        {/* Device Settings Panel */}
+        {/* Device Settings Modal */}
         {showDeviceSettings && (
-          <div className="mt-4 space-y-3 border-t border-[var(--color-border)] pt-3">
-            {/* Microphone Selection */}
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-600 dark:text-[var(--color-text-secondary)]">
-                Microphone
-              </label>
-              <select
-                className="w-full rounded border border-[var(--color-border)] bg-[var(--color-card-bg)] px-2 py-1 text-sm text-[var(--color-text)]"
-                onChange={(e) => {
-                  if (localParticipant) {
-                    localParticipant.setMicrophoneEnabled(true, { deviceId: e.target.value });
-                  }
-                }}
-              >
-                {audioInputDevices.map((device: MediaDeviceInfo) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label || `Microphone ${device.deviceId.slice(0, 8)}`}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="w-96 max-w-[90vw] rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-600 dark:bg-gray-800">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-600">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Device Settings
+                </h3>
+                <button
+                  onClick={() => setShowDeviceSettings(false)}
+                  className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-white"
+                >
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
 
-            {/* Camera Selection */}
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-600 dark:text-[var(--color-text-secondary)]">
-                Camera
-              </label>
-              <select
-                className="w-full rounded border border-[var(--color-border)] bg-[var(--color-card-bg)] px-2 py-1 text-sm text-[var(--color-text)]"
-                onChange={(e) => {
-                  if (localParticipant) {
-                    localParticipant.setCameraEnabled(true, { deviceId: e.target.value });
-                  }
-                }}
-              >
-                {videoInputDevices.map((device: MediaDeviceInfo) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label || `Camera ${device.deviceId.slice(0, 8)}`}
-                  </option>
-                ))}
-              </select>
-            </div>
+              {/* Modal Content */}
+              <div className="p-6">
+                <div className="space-y-5">
+                  {/* Microphone Selection */}
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700">
+                    <label className="mb-3 block text-sm font-semibold text-gray-700 dark:text-white">
+                      Microphone
+                    </label>
+                    <select
+                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                      onChange={(e) => {
+                        if (localParticipant) {
+                          localParticipant.setMicrophoneEnabled(true, { deviceId: e.target.value });
+                        }
+                      }}
+                    >
+                      {audioInputDevices.map((device: MediaDeviceInfo) => (
+                        <option key={device.deviceId} value={device.deviceId}>
+                          {device.label || `Microphone ${device.deviceId.slice(0, 8)}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-            {/* Speaker Selection */}
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-600 dark:text-[var(--color-text-secondary)]">
-                Speaker
-              </label>
-              <select
-                className="w-full rounded border border-[var(--color-border)] bg-[var(--color-card-bg)] px-2 py-1 text-sm text-[var(--color-text)]"
-                onChange={(e) => {
-                  // Note: Speaker selection would need to be handled by the room's audio output
-                  console.log("Speaker selected:", e.target.value);
-                }}
-              >
-                {audioOutputDevices.map((device: MediaDeviceInfo) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label || `Speaker ${device.deviceId.slice(0, 8)}`}
-                  </option>
-                ))}
-              </select>
+                  {/* Camera Selection */}
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700">
+                    <label className="mb-3 block text-sm font-semibold text-gray-700 dark:text-white">
+                      Camera
+                    </label>
+                    <select
+                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                      onChange={(e) => {
+                        if (localParticipant) {
+                          localParticipant.setCameraEnabled(true, { deviceId: e.target.value });
+                        }
+                      }}
+                    >
+                      {videoInputDevices.map((device: MediaDeviceInfo) => (
+                        <option key={device.deviceId} value={device.deviceId}>
+                          {device.label || `Camera ${device.deviceId.slice(0, 8)}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Speaker Selection */}
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700">
+                    <label className="mb-3 block text-sm font-semibold text-gray-700 dark:text-white">
+                      Speaker
+                    </label>
+                    <select
+                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                      onChange={(e) => {
+                        // Note: Speaker selection would need to be handled by the room's audio output
+                        console.log("Speaker selected:", e.target.value);
+                      }}
+                    >
+                      {audioOutputDevices.map((device: MediaDeviceInfo) => (
+                        <option key={device.deviceId} value={device.deviceId}>
+                          {device.label || `Speaker ${device.deviceId.slice(0, 8)}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="border-t border-gray-200 px-6 py-4 dark:border-gray-600">
+                <button
+                  onClick={() => setShowDeviceSettings(false)}
+                  className="w-full rounded-md bg-blue-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-800"
+                >
+                  Done
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -357,7 +393,7 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
                     {isConnected ? "Live" : "Connecting..."}
                   </span>
                 </div>
-                <div className="h-4 w-px bg-[var(--color-border)]"></div>
+                <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
                 <span className="text-sm text-gray-600 dark:text-[var(--color-text-secondary)]">
                   Session: {sessionCode || roomName.replace("session-", "")}
                 </span>

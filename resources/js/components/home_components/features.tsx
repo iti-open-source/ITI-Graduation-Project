@@ -2,8 +2,13 @@ import { usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import { Brain, Code2, MessageSquare, MicVocal } from "lucide-react";
 
+interface PageProps {
+  roomsCount: number;
+  [key: string]: any;
+}
+
 export default function Features() {
-   const { roomsCount } = usePage().props as { roomsCount: number };
+  const { roomsCount } = usePage<PageProps>().props;
   const features = [
     {
       icon: Code2,

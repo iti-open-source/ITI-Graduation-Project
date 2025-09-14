@@ -23,15 +23,18 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
     cleanup();
     router.flushAll();
   };
- const firstMenuItem = user.role === "student" ? {
-    title: "My Rooms",
-    href: "/lobby",
-    icon: Rocket
-  } : {
-    title: "Lobby",
-    href: "/lobby",
-    icon: Users
-  };
+  const firstMenuItem =
+    user.role === "student"
+      ? {
+          title: "My Rooms",
+          href: "/lobby",
+          icon: Rocket,
+        }
+      : {
+          title: "Lobby",
+          href: "/lobby",
+          icon: Users,
+        };
   return (
     <>
       <DropdownMenuLabel className="p-0 font-normal">
@@ -54,12 +57,22 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             {firstMenuItem.title}
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link className="block w-full" href="/dashboard" as="button" prefetch onClick={cleanup}>
-            <UserIcon className="mr-2" />
-            Profile
-          </Link>
-        </DropdownMenuItem>
+
+        {user.role != null && (
+          <DropdownMenuItem asChild>
+            <Link
+              className="block w-full"
+              href={user.role === "admin" ? "/admin" : "/dashboard"}
+              as="button"
+              prefetch
+              onClick={cleanup}
+            >
+              <UserIcon className="mr-2" />
+              Dashboard
+            </Link>
+          </DropdownMenuItem>
+        )}
+
         <DropdownMenuItem asChild>
           <Link className="block w-full" href={edit()} as="button" prefetch onClick={cleanup}>
             <Settings className="mr-2" />

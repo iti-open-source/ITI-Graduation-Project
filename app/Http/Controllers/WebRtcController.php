@@ -17,14 +17,14 @@ class WebRtcController extends Controller
         $request->validate([
             'room' => 'required|string',
             'sessionCode' => 'nullable|string',
-            'apiKey' => 'required|string',
-            'apiSecret' => 'required|string',
         ]);
 
         $room = $request->input('room');
         $sessionCode = $request->input('sessionCode');
-        $apiKey = $request->input('apiKey');
-        $apiSecret = $request->input('apiSecret');
+        
+        // Get API credentials from config
+        $apiKey = config('webrtc.api_key');
+        $apiSecret = config('webrtc.api_secret');
 
         // Get the authenticated user
         $user = Auth::user();

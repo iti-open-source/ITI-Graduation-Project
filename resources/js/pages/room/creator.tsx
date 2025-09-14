@@ -680,9 +680,9 @@ export default function Creator({
                         Assign new students
                       </h4>
 
-                      <div className="flex gap-2">
+                      <div className="flex flex-col gap-2 sm:flex-row">
                         <select
-                          className="flex-1 rounded-md border p-2 text-sm"
+                          className="min-w-0 flex-1 rounded-md border p-2 text-sm"
                           value={selectedStudent}
                           onChange={(e) => setSelectedStudent(Number(e.target.value) || "")}
                         >
@@ -690,7 +690,7 @@ export default function Creator({
                             Select a student
                           </option>
                           {unassigned.map((s) => (
-                            <option key={s.id} value={s.id}>
+                            <option key={s.id} value={s.id} className="text-gray-800">
                               {s.name} ({s.email})
                             </option>
                           ))}
@@ -698,14 +698,14 @@ export default function Creator({
 
                         <input
                           type="date"
-                          className="rounded-md border p-2 text-sm"
+                          className="w-full rounded-md border p-2 text-sm sm:w-auto"
                           value={interviewDate}
                           onChange={(e) => setInterviewDate(e.target.value)}
                         />
 
                         <input
                           type="time"
-                          className="rounded-md border p-2 text-sm"
+                          className="w-full rounded-md border p-2 text-sm sm:w-auto"
                           value={interviewTime}
                           onChange={(e) => setInterviewTime(e.target.value)}
                         />

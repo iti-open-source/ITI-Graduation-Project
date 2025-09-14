@@ -10,10 +10,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { dashboard } from "@/routes";
+// import { dashboard } from "@/routes";
 import { SharedData, type NavItem } from "@/types";
 import { Link, usePage } from "@inertiajs/react";
-import { LayoutGrid, Shield } from "lucide-react";
+import { LayoutGrid, Settings, Shield, User } from "lucide-react";
 import AppLogo from "./app-logo";
 
 
@@ -21,17 +21,32 @@ import AppLogo from "./app-logo";
 export function AppSidebar() {
   const { auth } = usePage<SharedData>().props;
   const mainNavItems: NavItem[] = [
-  {
-    title: "Dashboard",
-    href: dashboard(),
-    icon: LayoutGrid,
-  },
+  // {
+  //   title: "Dashboard",
+  //   href: dashboard(),
+  //   icon: LayoutGrid,
+  // },
 //   {
 //     title: "Admin",
 //     href: "/admin",
 //     icon: Shield,
 //   },
 // ];
+
+ ...(auth.user?.role === "admin" || auth.user?.role === "instructor"
+      ? [
+          {
+            title: "Dashboard",
+            href: "/dashboard",
+            icon: LayoutGrid,
+          },
+          {
+            title: "Settings",
+            href: "/settings",
+            icon: Settings,
+          },
+        ]
+      : []),
 ...(auth.user?.role === "admin"
       ? [
           {
@@ -39,8 +54,35 @@ export function AppSidebar() {
             href: "/admin",
             icon: Shield,
           },
+          {
+            title: "Settings",
+            href: "/settings",
+            icon: Settings,
+          },
         ]
       : []),
+
+       ...(auth.user?.role === "student"
+      ? [
+          {
+            title: "Profile",
+            href: "/dashboard",
+            icon: User,
+          },
+          {
+            title: "Settings",
+            href: "/settings",
+            icon: Settings,
+          },
+        ]
+      : []),
+
+
+
+
+
+
+     
   ];
 
 

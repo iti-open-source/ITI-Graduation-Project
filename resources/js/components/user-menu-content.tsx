@@ -10,7 +10,7 @@ import { logout } from "@/routes";
 import { edit } from "@/routes/profile";
 import { type User } from "@/types";
 import { Link, router } from "@inertiajs/react";
-import { LogOut, Settings, User as UserIcon, Users } from "lucide-react";
+import { LogOut, Rocket, Settings, User as UserIcon, Users } from "lucide-react";
 
 interface UserMenuContentProps {
   user: User;
@@ -23,7 +23,15 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
     cleanup();
     router.flushAll();
   };
-
+ const firstMenuItem = user.role === "student" ? {
+    title: "My Rooms",
+    href: "/my-rooms",
+    icon: Rocket
+  } : {
+    title: "Lobby",
+    href: "/lobby",
+    icon: Users
+  };
   return (
     <>
       <DropdownMenuLabel className="p-0 font-normal">
@@ -33,10 +41,17 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
+        {/* Conditional first menu item */}
         <DropdownMenuItem asChild>
-          <Link className="block w-full" href="/lobby" as="button" prefetch onClick={cleanup}>
-            <Users className="mr-2" />
-            Lobby
+          <Link
+            className="block w-full"
+            href={firstMenuItem.href}
+            as="button"
+            prefetch
+            onClick={cleanup}
+          >
+            <firstMenuItem.icon className="mr-2" />
+            {firstMenuItem.title}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

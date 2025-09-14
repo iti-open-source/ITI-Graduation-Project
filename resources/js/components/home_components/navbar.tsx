@@ -66,7 +66,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
     { href: "#features", label: "Features" },
     // { href: "#pricing", label: "Pricing" },
     { href: "#contact", label: "Contact" },
-    ...(isAuthenticated && user?.role !== null ? [{ href: "/dashboard", label: "Dashboard" }] : []),
+    ...(isAuthenticated && user?.role === "admin" || user?.role === "instructor" ? [{ href: "/dashboard", label: "Dashboard" }] : user?.role === "student" ? [{ href: "/dashboard", label: "Profile" }] : []),
   ];
 
   return (

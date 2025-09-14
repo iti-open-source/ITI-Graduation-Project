@@ -109,11 +109,28 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
       >
         <div className="flex h-full flex-col">
           {/* Connection Status */}
-          <div className="border-b bg-gray-100 p-2">
-            <span className={`text-sm ${isConnected ? "text-green-600" : "text-red-600"}`}>
-              {isConnected ? "Connected" : "Connecting..."}
-            </span>
-            <span className="ml-2 text-gray-600">Room: {roomName}</span>
+          <div className="border-b bg-gray-50 px-4 py-3 dark:bg-gray-800">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`}
+                  ></div>
+                  <span
+                    className={`text-sm font-medium ${isConnected ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                  >
+                    {isConnected ? "Live" : "Connecting..."}
+                  </span>
+                </div>
+                <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Session: {sessionCode || roomName.replace("session-", "")}
+                </span>
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-500">
+                {new Date().toLocaleTimeString()}
+              </div>
+            </div>
           </div>
 
           {/* Full-featured Video Conference Component */}

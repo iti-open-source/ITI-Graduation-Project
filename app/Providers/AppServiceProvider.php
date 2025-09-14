@@ -25,10 +25,31 @@ class AppServiceProvider extends ServiceProvider
         //
         Inertia::share([
         'auth.user' => fn () => auth()->user(),
-        'roomsCount' => Room::count(),
-        'assignedRooms' => fn () => Auth::user() && Auth::user()->role === 'student'
-        ? Auth::user()->assignedRooms()->pluck('rooms.id')
-        : [],
+        'roomsCount' => fn () => $this->getRoomsCount(),
+        'assignedRooms' => fn () => $this->getAssignedRooms(),
     ]);
+    }
+
+    private function getRoomsCount(): int
+    {
+        try {
+            return Room::count();
+        } catch (\Exception $e) {
+            // Return 0 if database is not ready or tables don't exist
+            return 0;
+        }
+    }
+
+    private function getAssignedRooms(): array
+    {
+        try {
+            if (Auth::user() && Auth::user()->role === 'student') {
+                return Auth::user()->assignedRooms()->pluck('rooms.id')->toArray();
+            }
+            return [];
+        } catch (\Exception $e) {
+            // Return empty array if database is not ready or tables don't exist
+            return [];
+        }
     }
 }

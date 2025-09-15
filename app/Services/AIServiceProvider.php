@@ -21,6 +21,11 @@ class AIServiceProvider
         return $this->geminiChat($message, $history);
     }
 
+    public function chatStream(string $message, array $history = []): \Generator
+    {
+        return $this->geminiChatStream($message, $history);
+    }
+
 
     private function geminiChat(string $message, array $history = []): string
     {
@@ -37,6 +42,8 @@ class AIServiceProvider
 
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
+        ])->withOptions([
+            'verify' => false, // Disable SSL verification for development
         ])->timeout(30)->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
             'contents' => [
                 [
@@ -66,6 +73,56 @@ class AIServiceProvider
         return 'I apologize, but I couldn\'t generate a response.';
     }
 
+    private function geminiChatStream(string $message, array $history = []): \Generator
+    {
+        $apiKey = $this->config['api_key'];
+        
+        if (!$apiKey) {
+            throw new \Exception('Google Gemini API key not configured');
+        }
+
+        $model = $this->config['model'] ?? 'gemini-1.5-flash';
+        
+        // Build the conversation context for Gemini
+        $prompt = $this->buildGeminiPrompt($message, $history);
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->withOptions([
+            'verify' => false, // Disable SSL verification for development
+        ])->timeout(60)->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:streamGenerateContent?key={$apiKey}", [
+            'contents' => [
+                [
+                    'parts' => [
+                        ['text' => $prompt]
+                    ]
+                ]
+            ],
+            'generationConfig' => [
+                'temperature' => $this->config['temperature'] ?? 0.7,
+                'maxOutputTokens' => $this->config['max_tokens'] ?? 500,
+                'topP' => 0.8,
+                'topK' => 10,
+            ]
+        ]);
+
+        if (!$response->successful()) {
+            throw new \Exception('Google Gemini API request failed: ' . $response->body());
+        }
+
+        $body = $response->body();
+        
+        // Parse the JSON array response
+        $data = json_decode($body, true);
+        
+        if (is_array($data)) {
+            foreach ($data as $chunk) {
+                if (isset($chunk['candidates'][0]['content']['parts'][0]['text'])) {
+                    yield $chunk['candidates'][0]['content']['parts'][0]['text'];
+                }
+            }
+        }
+    }
 
     private function buildGeminiPrompt(string $message, array $history = []): string
     {

@@ -1,5 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Loader2, BookOpen, Code, HelpCircle, ChevronDown } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface Message {
   id: string;
@@ -27,6 +31,7 @@ interface QuestionRequest {
 }
 
 export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
+  
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -52,7 +57,7 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isLoading]);
 
   // Load chat history on mount
   useEffect(() => {
@@ -111,6 +116,9 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
   const generateQuestions = async () => {
     if (!questionRequest.topic.trim()) return;
 
+    console.log('AI Chatbot - Generate Questions - Room Code:', roomCode);
+    console.log('AI Chatbot - Question Request:', questionRequest);
+
     setIsLoading(true);
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -121,7 +129,25 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
 
     setMessages(prev => [...prev, userMessage]);
 
+    // Create a placeholder for the streaming response
+    const assistantMessageId = (Date.now() + 1).toString();
+    const assistantMessage: Message = {
+      id: assistantMessageId,
+      role: "assistant",
+      content: "",
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, assistantMessage]);
+
     try {
+      console.log('Sending question generation request to:', `/api/ai-chat/${roomCode}`);
+      console.log('Question request data:', {
+        message: userMessage.content,
+        history: messages.slice(-10),
+        stream: true,
+      });
+
       const response = await fetch(`/api/ai-chat/${roomCode}`, {
         method: "POST",
         headers: {
@@ -131,34 +157,87 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
         body: JSON.stringify({
           message: userMessage.content,
           history: messages.slice(-10),
+          stream: true, // Enable streaming
         }),
       });
+
+      console.log('Question response status:', response.status);
+      console.log('Question response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         throw new Error("Failed to get AI response");
       }
 
-      const data = await response.json();
-      
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: data.response,
-        timestamp: new Date(),
-      };
+      // Handle streaming response
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("No response body");
+      }
 
-      setMessages(prev => [...prev, assistantMessage]);
+      console.log('Starting to read streaming response...');
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) break;
+        
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              
+              if (data.type === 'chunk') {
+                // Break down the chunk into smaller pieces for better streaming effect
+                const words = data.content.split(' ');
+                
+                for (let i = 0; i < words.length; i++) {
+                  const word = words[i] + (i < words.length - 1 ? ' ' : '');
+                  
+                  // Update the message with the current word
+                  setMessages(prev => prev.map(msg => 
+                    msg.id === assistantMessageId 
+                      ? { ...msg, content: msg.content + word }
+                      : msg
+                  ));
+                  
+                  // Add delay between words for typing effect
+                  await new Promise(resolve => setTimeout(resolve, 50));
+                }
+              } else if (data.type === 'done') {
+                // Streaming is complete
+                break;
+              } else if (data.type === 'error') {
+                // Handle error
+                setMessages(prev => prev.map(msg => 
+                  msg.id === assistantMessageId 
+                    ? { ...msg, content: data.content }
+                    : msg
+                ));
+                break;
+              }
+            } catch (e) {
+              console.error('Error parsing SSE data:', e);
+            }
+          }
+        }
+      }
+
       setShowQuestionForm(false);
       setQuestionRequest({ type: 'interview', topic: '', difficulty: 'medium' });
     } catch (error) {
       console.error("Error generating questions:", error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Sorry, I encountered an error generating questions. Please try again.",
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => prev.map(msg => 
+        msg.id === assistantMessageId 
+          ? { ...msg, content: "Sorry, I encountered an error generating questions. Please try again." }
+          : msg
+      ));
     } finally {
       setIsLoading(false);
     }
@@ -166,6 +245,9 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
+
+    console.log('AI Chatbot - Room Code:', roomCode);
+    console.log('AI Chatbot - Input:', input.trim());
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -178,7 +260,25 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
     setInput("");
     setIsLoading(true);
 
+    // Create a placeholder for the streaming response
+    const assistantMessageId = (Date.now() + 1).toString();
+    const assistantMessage: Message = {
+      id: assistantMessageId,
+      role: "assistant",
+      content: "",
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, assistantMessage]);
+
     try {
+      console.log('Sending request to:', `/api/ai-chat/${roomCode}`);
+      console.log('Request data:', {
+        message: userMessage.content,
+        history: messages.slice(-10),
+        stream: true,
+      });
+
       const response = await fetch(`/api/ai-chat/${roomCode}`, {
         method: "POST",
         headers: {
@@ -188,32 +288,84 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
         body: JSON.stringify({
           message: userMessage.content,
           history: messages.slice(-10), // Send last 10 messages for context
+          stream: true, // Enable streaming
         }),
       });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         throw new Error("Failed to get AI response");
       }
 
-      const data = await response.json();
-      
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: data.response,
-        timestamp: new Date(),
-      };
+      // Handle streaming response
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("No response body");
+      }
 
-      setMessages(prev => [...prev, assistantMessage]);
+      console.log('Starting to read streaming response...');
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) break;
+        
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              
+              if (data.type === 'chunk') {
+                // Break down the chunk into smaller pieces for better streaming effect
+                const words = data.content.split(' ');
+                
+                for (let i = 0; i < words.length; i++) {
+                  const word = words[i] + (i < words.length - 1 ? ' ' : '');
+                  
+                  // Update the message with the current word
+                  setMessages(prev => prev.map(msg => 
+                    msg.id === assistantMessageId 
+                      ? { ...msg, content: msg.content + word }
+                      : msg
+                  ));
+                  
+                  // Add delay between words for typing effect
+                  await new Promise(resolve => setTimeout(resolve, 50));
+                }
+              } else if (data.type === 'done') {
+                // Streaming is complete
+                break;
+              } else if (data.type === 'error') {
+                // Handle error
+                setMessages(prev => prev.map(msg => 
+                  msg.id === assistantMessageId 
+                    ? { ...msg, content: data.content }
+                    : msg
+                ));
+                break;
+              }
+            } catch (e) {
+              console.error('Error parsing SSE data:', e);
+            }
+          }
+        }
+      }
     } catch (error) {
       console.error("Error sending message:", error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Sorry, I encountered an error. Please try again.",
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => prev.map(msg => 
+        msg.id === assistantMessageId 
+          ? { ...msg, content: "Sorry, I encountered an error. Please try again." }
+          : msg
+      ));
     } finally {
       setIsLoading(false);
     }
@@ -316,37 +468,135 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
           </div>
         ) : null}
         
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-          >
+        {messages.map((message) => {
+          console.log('Rendering message:', message.id, message.role, message.content.substring(0, 50) + '...');
+          return (
             <div
-              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+              key={message.id}
+              className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+            >
+            <div
+              className={`max-w-xs lg:max-w-2xl px-4 py-2 rounded-lg ${
                 message.role === "user"
                   ? "bg-blue-500 text-white"
                   : "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
               }`}
             >
-              <div className="flex items-start space-x-2">
-                {message.role === "assistant" && (
-                  <Bot className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                )}
-                {message.role === "user" && (
-                  <User className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                )}
-                <div className="flex-1">
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                  <p className="text-xs opacity-70 mt-1">
-                    {message.timestamp.toLocaleTimeString()}
-                  </p>
+                <div className="flex items-start space-x-2">
+                  {message.role === "assistant" && (
+                    <Bot className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  )}
+                  {message.role === "user" && (
+                    <User className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  )}
+                  <div className="flex-1">
+                    {message.role === "assistant" ? (
+                      <div className="text-sm prose prose-sm max-w-none dark:prose-invert break-words">
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            // Custom styling for code blocks
+                            code: ({ node, inline, className, children, ...props }) => {
+                              const match = /language-(\w+)/.exec(className || '');
+                              const language = match ? match[1] : '';
+                              
+                              if (inline) {
+                                return (
+                                  <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm" {...props}>
+                                    {children}
+                                  </code>
+                                );
+                              }
+                              
+                              return (
+                                <SyntaxHighlighter
+                                  style={oneDark}
+                                  language={language}
+                                  PreTag="div"
+                                  className="rounded-lg"
+                                  customStyle={{
+                                    margin: 0,
+                                    background: 'var(--color-card-bg)',
+                                    whiteSpace: 'pre-wrap',
+                                    wordWrap: 'break-word',
+                                    overflowWrap: 'break-word',
+                                  }}
+                                  wrapLines={true}
+                                  wrapLongLines={true}
+                                >
+                                  {String(children).replace(/\n$/, '')}
+                                </SyntaxHighlighter>
+                              );
+                            },
+                            // Custom styling for lists
+                            ul: ({ children }) => (
+                              <ul className="list-disc list-inside space-y-1">{children}</ul>
+                            ),
+                            ol: ({ children }) => (
+                              <ol className="list-decimal list-inside space-y-1">{children}</ol>
+                            ),
+                            // Custom styling for headings
+                            h1: ({ children }) => (
+                              <h1 className="text-lg font-bold mb-2 break-words">{children}</h1>
+                            ),
+                            h2: ({ children }) => (
+                              <h2 className="text-base font-semibold mb-2 break-words">{children}</h2>
+                            ),
+                            h3: ({ children }) => (
+                              <h3 className="text-sm font-medium mb-1 break-words">{children}</h3>
+                            ),
+                            // Custom styling for paragraphs
+                            p: ({ children }) => (
+                              <p className="mb-2 last:mb-0 break-words overflow-wrap-anywhere">{children}</p>
+                            ),
+                            // Custom styling for blockquotes
+                            blockquote: ({ children }) => (
+                              <blockquote className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic break-words">
+                                {children}
+                              </blockquote>
+                            ),
+                            // Custom styling for tables
+                            table: ({ children }) => (
+                              <div className="w-full">
+                                <table className="w-full border-collapse border border-gray-300 dark:border-gray-600 table-fixed">
+                                  {children}
+                                </table>
+                              </div>
+                            ),
+                            th: ({ children }) => (
+                              <th className="border border-gray-300 dark:border-gray-600 px-2 py-1 bg-gray-100 dark:bg-gray-800 text-left break-words">
+                                {children}
+                              </th>
+                            ),
+                            td: ({ children }) => (
+                              <td className="border border-gray-300 dark:border-gray-600 px-2 py-1 break-words">
+                                {children}
+                              </td>
+                            ),
+                          }}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
+                        {isLoading && message.id === messages[messages.length - 1]?.id && message.content === "" && (
+                          <span className="inline-block w-2 h-4 bg-gray-400 animate-pulse ml-1"></span>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm whitespace-pre-wrap">
+                        {message.content}
+                      </p>
+                    )}
+                    <p className="text-xs opacity-70 mt-1">
+                      {message.timestamp.toLocaleTimeString()}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         
-        {isLoading && (
+        {isLoading && messages.length > 0 && messages[messages.length - 1]?.content === "" && (
           <div className="flex justify-start">
             <div className="bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-lg">
               <div className="flex items-center space-x-2">

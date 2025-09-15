@@ -153,7 +153,7 @@ function GalleryView() {
         <div className="relative flex min-h-0 flex-1">
           {/* Keep eye (exit) in same position: top-right */}
           <button
-            className="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-red-300 bg-red-50 text-red-600 shadow-sm backdrop-blur transition-colors hover:bg-red-100 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+            className="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-red-300 bg-red-50 text-red-600 opacity-70 shadow-sm backdrop-blur transition-opacity duration-300 ease-out hover:bg-red-100 hover:opacity-100 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
             onClick={() => setFocusedIdentity(null)}
             title="Exit focus"
             aria-label="Exit focus"
@@ -163,7 +163,7 @@ function GalleryView() {
             </svg>
           </button>
           <button
-            className="absolute top-3 right-14 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white/90 text-gray-700 shadow-sm backdrop-blur transition-colors hover:bg-white dark:border-gray-600 dark:bg-gray-800/90 dark:text-white dark:hover:bg-gray-800"
+            className="absolute top-3 right-14 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white/90 text-gray-700 opacity-70 shadow-sm backdrop-blur transition-opacity duration-300 ease-out hover:bg-white hover:opacity-100 dark:border-gray-600 dark:bg-gray-800/90 dark:text-white dark:hover:bg-gray-800"
             onClick={toggleFullscreen}
             title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
             aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
@@ -204,7 +204,7 @@ function GalleryView() {
                   <ParticipantTile />
                 </GridLayout>
                 <button
-                  className={`pointer-events-none absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full opacity-0 shadow-sm backdrop-blur transition-opacity duration-300 ease-out group-hover:pointer-events-auto group-hover:opacity-100 hover:bg-white sm:h-9 sm:w-9 dark:hover:bg-gray-800 ${
+                  className={`pointer-events-none absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full opacity-0 shadow-sm backdrop-blur transition-opacity duration-300 ease-out group-hover:pointer-events-auto group-hover:opacity-70 hover:bg-white hover:opacity-100 sm:h-9 sm:w-9 dark:hover:bg-gray-800 ${
                     focusedIdentity === guestTracks[0].participant.identity
                       ? "border border-red-300 bg-red-50 text-red-600 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400"
                       : "border border-gray-300 bg-white/80 text-gray-700 dark:border-gray-600 dark:bg-gray-800/80 dark:text-white"
@@ -233,7 +233,7 @@ function GalleryView() {
                   </svg>
                 </button>
                 <button
-                  className="pointer-events-none absolute top-3 right-14 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80 text-gray-700 opacity-0 shadow-sm backdrop-blur transition-opacity duration-300 ease-out group-hover:pointer-events-auto group-hover:opacity-100 hover:bg-white sm:h-9 sm:w-9 dark:border-gray-600 dark:bg-gray-800/80 dark:text-white dark:hover:bg-gray-800"
+                  className="pointer-events-none absolute top-3 right-14 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80 text-gray-700 opacity-0 shadow-sm backdrop-blur transition-opacity duration-300 ease-out group-hover:pointer-events-auto group-hover:opacity-70 hover:bg-white hover:opacity-100 sm:h-9 sm:w-9 dark:border-gray-600 dark:bg-gray-800/80 dark:text-white dark:hover:bg-gray-800"
                   onClick={() => {
                     if (focusedIdentity === guestTracks[0].participant.identity) {
                       setManualFocus(false);
@@ -301,7 +301,7 @@ function GalleryView() {
                   <ParticipantTile />
                 </GridLayout>
                 <button
-                  className={`pointer-events-none absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full opacity-0 shadow-sm backdrop-blur transition-opacity duration-300 ease-out group-hover:pointer-events-auto group-hover:opacity-100 hover:bg-white sm:h-9 sm:w-9 dark:hover:bg-gray-800 ${
+                  className={`pointer-events-none absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full opacity-0 shadow-sm backdrop-blur transition-opacity duration-300 ease-out group-hover:pointer-events-auto group-hover:opacity-70 hover:bg-white hover:opacity-100 sm:h-9 sm:w-9 dark:hover:bg-gray-800 ${
                     focusedIdentity === localParticipant?.identity
                       ? "border border-red-300 bg-red-50 text-red-600 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400"
                       : "border border-gray-300 bg-white/80 text-gray-700 dark:border-gray-600 dark:bg-gray-800/80 dark:text-white"
@@ -329,7 +329,7 @@ function GalleryView() {
                   </svg>
                 </button>
                 <button
-                  className="pointer-events-none absolute top-3 right-14 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80 text-gray-700 opacity-0 shadow-sm backdrop-blur transition-opacity duration-300 ease-out group-hover:pointer-events-auto group-hover:opacity-100 hover:bg-white sm:h-9 sm:w-9 dark:border-gray-600 dark:bg-gray-800/80 dark:text-white dark:hover:bg-gray-800"
+                  className="pointer-events-none absolute top-3 right-14 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80 text-gray-700 opacity-0 shadow-sm backdrop-blur transition-opacity duration-300 ease-out group-hover:pointer-events-auto group-hover:opacity-70 hover:bg-white hover:opacity-100 sm:h-9 sm:w-9 dark:border-gray-600 dark:bg-gray-800/80 dark:text-white dark:hover:bg-gray-800"
                   onClick={() => {
                     if (!localParticipant) return;
                     if (focusedIdentity === localParticipant.identity) {

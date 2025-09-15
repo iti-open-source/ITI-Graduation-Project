@@ -645,8 +645,8 @@ export default function Creator({
               </Card>
             </motion.div>
             {/* Assigned Students */}
-            <motion.div variants={fadeIn} initial="hidden" animate="visible" className="space-y-6">
-              <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+            <motion.div variants={fadeIn} initial="hidden" animate="visible" className="space-y-6 lg:col-span-2">
+              <Card className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500 text-white">
@@ -690,6 +690,7 @@ export default function Creator({
                                 </p>
                                 {student.interview_date && student.interview_time && (
                                   <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+                                    Interview:
                                     <span className="flex items-center gap-1">
                                       📅{" "}
                                       {new Date(student.interview_date).toLocaleDateString(
@@ -763,7 +764,7 @@ export default function Creator({
                 </CardContent>
               </Card>
             </motion.div>
-            <div className="space-y-6">
+         
               {/* Assign New Student */}
               <motion.div
                 variants={fadeIn}
@@ -901,7 +902,7 @@ export default function Creator({
                                   if (s) setStudentToUpdate(s);
                                 }}
                               >
-                                Update
+                                {updatingStudent ? "Updating..." : "Update"}
                               </Button>
                             </div>
                           );
@@ -936,7 +937,7 @@ export default function Creator({
                   />
                 </Card>
               </motion.div>
-            </div>
+            
           </div>
 
           {/* Room Link Card */}

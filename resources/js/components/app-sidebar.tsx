@@ -13,7 +13,7 @@ import {
 // import { dashboard } from "@/routes";
 import { SharedData, type NavItem } from "@/types";
 import { Link, usePage } from "@inertiajs/react";
-import { LayoutGrid, Settings, Shield, User } from "lucide-react";
+import { LayoutGrid, PanelsRightBottom, Settings, Shield, ShieldAlert, ShieldCheck, User } from "lucide-react";
 import AppLogo from "./app-logo";
 
 export function AppSidebar() {
@@ -43,6 +43,11 @@ export function AppSidebar() {
             href: "/settings",
             icon: Settings,
           },
+          {
+            title: "Lobby",
+            href: "/lobby",
+            icon: PanelsRightBottom,
+          },
         ]
       : []),
     ...(auth.user?.role === "admin"
@@ -56,6 +61,11 @@ export function AppSidebar() {
             title: "Settings",
             href: "/settings",
             icon: Settings,
+          },
+          {
+            title: "Lobby",
+            href: "/lobby",
+            icon: PanelsRightBottom,
           },
         ]
       : []),
@@ -74,6 +84,8 @@ export function AppSidebar() {
           },
         ]
       : []),
+     
+
   ];
 
   return (

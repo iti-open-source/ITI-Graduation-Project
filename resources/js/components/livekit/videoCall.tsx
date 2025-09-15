@@ -52,17 +52,25 @@ function GalleryView() {
               <ParticipantTile />
             </GridLayout>
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[var(--color-bg)]">
-              <div className="text-center text-[var(--color-text-secondary)]">
-                <svg className="mx-auto mb-4 h-16 w-16" fill="currentColor" viewBox="0 0 20 20">
+            <div className="flex h-full w-full items-center justify-center bg-white dark:bg-[var(--color-bg)]">
+              <div className="text-center text-gray-600 dark:text-[var(--color-text-secondary)]">
+                <svg
+                  className="mx-auto mb-4 h-16 w-16 text-gray-400 dark:text-current"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path
                     fillRule="evenodd"
                     d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                     clipRule="evenodd"
                   />
                 </svg>
-                <p className="text-lg text-[var(--color-text)]">Waiting for guest to join...</p>
-                <p className="mt-2 text-sm">Share your session code to invite someone</p>
+                <p className="text-lg text-gray-900 dark:text-[var(--color-text)]">
+                  Waiting for guest to join...
+                </p>
+                <p className="mt-2 text-sm text-gray-500 dark:text-[var(--color-text-secondary)]">
+                  Please wait until the other participant joins the call.
+                </p>
               </div>
             </div>
           )}
@@ -288,8 +296,8 @@ function GalleryView() {
 
         {/* Chat Popover */}
         {showChat && (
-          <div className="absolute right-4 bottom-16 z-40 rounded-lg border border-gray-200 bg-transparent shadow-xl dark:border-gray-600">
-            <div className="rounded-lg bg-white p-2 dark:bg-gray-800">
+          <div className="bg-transparentrder-gray-600 absolute right-4 bottom-16 z-40 border-0">
+            <div className="filter-blur-2xl border-0 bg-transparent p-2 opacity-80 drop-shadow-2xl backdrop-blur-md">
               <style>{`
                   .lk-chat {
                     height: 384px !important;
@@ -298,9 +306,10 @@ function GalleryView() {
                     flex-direction: column !important;
                     padding: 5px !important;
                     position: relative !important;
+                    border-radius: 10px !important;
                   }
-                  .lk-chat .lk-message-list {
-                    height: 60% !important;
+                  .lk-chat-messages {
+                    height: calc(100% - 70px) !important;
                   }
                   .lk-chat-header{
                     display: none !important;
@@ -316,8 +325,7 @@ function GalleryView() {
                     right: 5px !important;
                     height: 60px !important;
                     z-index: 10 !important;
-                    background: white !important;
-                    border-top: 1px solid #e5e7eb !important;
+                    border-top: 1px solid #374151 !important;
                   }
                   .dark .lk-chat .lk-chat-form {
                     background: #1f2937 !important;
@@ -453,10 +461,6 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
                     {isConnected ? "Live" : "Connecting..."}
                   </span>
                 </div>
-                <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
-                <span className="text-sm text-gray-600 dark:text-[var(--color-text-secondary)]">
-                  Session: {sessionCode || roomName.replace("session-", "")}
-                </span>
               </div>
               <div className="text-xs text-gray-600 dark:text-[var(--color-text-secondary)]">
                 {new Date().toLocaleTimeString()}

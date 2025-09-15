@@ -28,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
             'auth.user' => fn() => Auth::user(),
             'roomsCount' => fn() => $this->getRoomsCount(),
             'assignedRooms' => fn() => $this->getAssignedRooms(),
+            'csrf_token' => fn() => csrf_token(),
             'webrtc' => [
                 'serverUrl' => config('webrtc.server_url'),
             ],

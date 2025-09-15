@@ -347,14 +347,15 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
   const [isGeneratingToken, setIsGeneratingToken] = useState(true);
 
   // Get WebRTC configuration from Inertia shared data
-  const { webrtc } = usePage().props as any;
+  const { webrtc, csrf_token } = usePage().props as any;
   const serverUrl = webrtc?.serverUrl || "ws://localhost:7880";
 
   // Generate LiveKit token
   const generateToken = async () => {
     try {
       setIsGeneratingToken(true);
-      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content");
+      const csrfToken =
+        csrf_token || document.querySelector('meta[name="csrf-token"]')?.getAttribute("content");
 
       const response = await fetch("/api/livekit/token", {
         method: "POST",
@@ -448,24 +449,26 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
       >
         <div className="flex h-full flex-col">
           {/* Connection Status */}
-           {!isConnected ? (
-          <div className="border-b border-[var(--color-border)] bg-blue-50 px-4 py-3 dark:bg-[var(--color-muted)]">
-            <div className="flex items-center justify-center">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`}
-                  ></div>
-                  <span
-                    className={`text-sm font-medium ${isConnected ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
-                  >
-                    {isConnected ? "Live" : "Connecting..."}
-                  </span>
+          {!isConnected ? (
+            <div className="border-b border-[var(--color-border)] bg-blue-50 px-4 py-3 dark:bg-[var(--color-muted)]">
+              <div className="flex items-center justify-center">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`}
+                    ></div>
+                    <span
+                      className={`text-sm font-medium ${isConnected ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                    >
+                      {isConnected ? "Live" : "Connecting..."}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-           ):""}
+          ) : (
+            ""
+          )}
           {/* Custom Gallery View */}
           <div className="min-h-0 flex-1 overflow-hidden">
             <GalleryView />

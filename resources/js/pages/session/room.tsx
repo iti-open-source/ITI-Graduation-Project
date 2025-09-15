@@ -46,9 +46,6 @@ export default function SessionRoom(props: PageProps) {
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-medium text-[var(--color-text)]">Video Call</h2>
                   <div className="flex items-center gap-4">
-                    <div className="text-sm text-[var(--color-text)]">
-                      {isCreator ? "Interviewer" : "Interviewee"}
-                    </div>
                     {isVideoConnected && (
                       <div className="flex items-center gap-1">
                         <span className="inline-block h-2 w-2 rounded-full bg-green-500"></span>

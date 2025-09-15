@@ -46,16 +46,20 @@ export default function SessionRoom(props: PageProps) {
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-medium text-[var(--color-text)]">Video Call</h2>
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`h-2 w-2 rounded-full ${isVideoConnected ? "bg-green-500" : "bg-red-500"}`}
-                      ></div>
-                      <span
-                        className={`text-sm font-medium ${isVideoConnected ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
-                      >
-                        {isVideoConnected ? "Live" : "Connecting..."}
-                      </span>
-                    </div>
+                    {isVideoConnected ? (
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`h-2 w-2 rounded-full ${isVideoConnected ? "bg-green-500" : "bg-red-500"}`}
+                        ></div>
+                        <span
+                          className={`text-sm font-medium ${isVideoConnected ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                        >
+                          {isVideoConnected ? "Live" : "Connecting..."}
+                        </span>
+                      </div>
+                    ) : (
+                      ""
+                    )}
                   </div>
                 </div>
               </div>

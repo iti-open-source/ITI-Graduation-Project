@@ -449,25 +449,29 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
       >
         <div className="flex h-full flex-col">
           {/* Connection Status */}
-          {/* <div className="border-b border-[var(--color-border)] bg-blue-50 px-4 py-3 dark:bg-[var(--color-muted)]">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`}
-                  ></div>
-                  <span
-                    className={`text-sm font-medium ${isConnected ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
-                  >
-                    {isConnected ? "Live" : "Connecting..."}
-                  </span>
+          {!isConnected ? (
+            <div className="border-b border-[var(--color-border)] bg-blue-50 px-4 py-3 dark:bg-[var(--color-muted)]">
+              <div className="flex items-center justify-center">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`}
+                    ></div>
+                    <span
+                      className={`text-sm font-medium ${isConnected ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                    >
+                      {isConnected ? "Live" : "Connecting..."}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="text-xs text-gray-600 dark:text-[var(--color-text-secondary)]">
+                {/* <div className="text-xs text-gray-600 dark:text-[var(--color-text-secondary)]">
                 {new Date().toLocaleTimeString()}
+              </div> */}
               </div>
             </div>
-          </div> */}
+          ) : (
+            ""
+          )}
           {/* Custom Gallery View */}
           <div className="min-h-0 flex-1 overflow-hidden">
             <GalleryView />

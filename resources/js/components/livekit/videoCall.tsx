@@ -112,17 +112,21 @@ function GalleryView() {
 
           {/* Controls on top: Exit focus (eye) and Fullscreen */}
           <button
-            className="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-red-300 bg-red-50 text-red-600 shadow-sm backdrop-blur transition-colors hover:bg-red-100 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+            className="absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-red-300 bg-red-50 text-red-600 opacity-70 shadow-sm backdrop-blur transition-opacity duration-300 ease-out hover:bg-red-100 hover:opacity-100 sm:h-9 sm:w-9 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
             onClick={() => setFocusedIdentity(null)}
             title="Exit focus"
             aria-label="Exit focus"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 5c-4.5 0-8.3 2.6-10 7 1.7 4.4 5.5 7 10 7s8.3-2.6 10-7c-1.7-4.4-5.5-7-10-7zm0 12a5 5 0 110-10 5 5 0 010 10zm0-2.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M12 2.25c-3.728 0-6.75 2.85-6.75 6.364 0 3.18 2.64 6.84 6.14 10.674.27.296.73.296 1 0 3.5-3.835 6.14-7.494 6.14-10.674 0-3.514-3.022-6.364-6.75-6.364zm0 9.114a2.75 2.75 0 100-5.5 2.75 2.75 0 000 5.5z"
+              />
             </svg>
           </button>
           <button
-            className="absolute top-3 right-14 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white/90 text-gray-700 shadow-sm backdrop-blur transition-colors hover:bg-white dark:border-gray-600 dark:bg-gray-800/90 dark:text-white dark:hover:bg-gray-800"
+            className="absolute top-3 right-14 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80 text-gray-700 opacity-70 shadow-sm backdrop-blur transition-opacity duration-300 ease-out hover:bg-white hover:opacity-100 sm:h-9 sm:w-9 dark:border-gray-600 dark:bg-gray-800/80 dark:text-white dark:hover:bg-gray-800"
             onClick={toggleFullscreen}
             title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
             aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
@@ -193,10 +197,10 @@ function GalleryView() {
                   <ParticipantTile />
                 </GridLayout>
                 <button
-                  className={`absolute top-3 right-3 z-10 hidden h-9 w-9 items-center justify-center rounded-full shadow-sm backdrop-blur transition-colors group-hover:flex hover:bg-white dark:hover:bg-gray-800 ${
+                  className={`pointer-events-none absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full opacity-0 shadow-sm backdrop-blur transition-opacity duration-300 ease-out group-hover:pointer-events-auto group-hover:opacity-100 hover:bg-white sm:h-9 sm:w-9 dark:hover:bg-gray-800 ${
                     focusedIdentity === guestTracks[0].participant.identity
                       ? "border border-red-300 bg-red-50 text-red-600 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400"
-                      : "border border-gray-300 bg-white/90 text-gray-700 dark:border-gray-600 dark:bg-gray-800/90 dark:text-white"
+                      : "border border-gray-300 bg-white/80 text-gray-700 dark:border-gray-600 dark:bg-gray-800/80 dark:text-white"
                   }`}
                   onClick={() => {
                     if (focusedIdentity === guestTracks[0].participant.identity) {
@@ -222,7 +226,7 @@ function GalleryView() {
                   </svg>
                 </button>
                 <button
-                  className="absolute top-3 right-14 z-10 hidden h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white/90 text-gray-700 shadow-sm backdrop-blur transition-colors group-hover:flex hover:bg-white dark:border-gray-600 dark:bg-gray-800/90 dark:text-white dark:hover:bg-gray-800"
+                  className="pointer-events-none absolute top-3 right-14 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80 text-gray-700 opacity-0 shadow-sm backdrop-blur transition-opacity duration-300 ease-out group-hover:pointer-events-auto group-hover:opacity-100 hover:bg-white sm:h-9 sm:w-9 dark:border-gray-600 dark:bg-gray-800/80 dark:text-white dark:hover:bg-gray-800"
                   onClick={toggleFullscreen}
                   title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
                   aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
@@ -281,10 +285,10 @@ function GalleryView() {
                   <ParticipantTile />
                 </GridLayout>
                 <button
-                  className={`absolute top-3 right-3 z-10 hidden h-9 w-9 items-center justify-center rounded-full shadow-sm backdrop-blur transition-colors group-hover:flex hover:bg-white dark:hover:bg-gray-800 ${
+                  className={`pointer-events-none absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full opacity-0 shadow-sm backdrop-blur transition-opacity duration-300 ease-out group-hover:pointer-events-auto group-hover:opacity-100 hover:bg-white sm:h-9 sm:w-9 dark:hover:bg-gray-800 ${
                     focusedIdentity === localParticipant?.identity
                       ? "border border-red-300 bg-red-50 text-red-600 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400"
-                      : "border border-gray-300 bg-white/90 text-gray-700 dark:border-gray-600 dark:bg-gray-800/90 dark:text-white"
+                      : "border border-gray-300 bg-white/80 text-gray-700 dark:border-gray-600 dark:bg-gray-800/80 dark:text-white"
                   }`}
                   onClick={() => {
                     if (!localParticipant) return;
@@ -309,7 +313,7 @@ function GalleryView() {
                   </svg>
                 </button>
                 <button
-                  className="absolute top-3 right-14 z-10 hidden h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white/90 text-gray-700 shadow-sm backdrop-blur transition-colors group-hover:flex hover:bg-white dark:border-gray-600 dark:bg-gray-800/90 dark:text-white dark:hover:bg-gray-800"
+                  className="pointer-events-none absolute top-3 right-14 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80 text-gray-700 opacity-0 shadow-sm backdrop-blur transition-opacity duration-300 ease-out group-hover:pointer-events-auto group-hover:opacity-100 hover:bg-white sm:h-9 sm:w-9 dark:border-gray-600 dark:bg-gray-800/80 dark:text-white dark:hover:bg-gray-800"
                   onClick={toggleFullscreen}
                   title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
                   aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}

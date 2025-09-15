@@ -11,7 +11,7 @@ import {
 } from "@livekit/components-react";
 import "@livekit/components-styles";
 import { Track } from "livekit-client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface VideoCallProps {
   roomName: string;
@@ -36,68 +36,322 @@ function GalleryView() {
   const audioOutputDevices = useMediaDevices({ kind: "audiooutput" });
   const [showDeviceSettings, setShowDeviceSettings] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [focusedIdentity, setFocusedIdentity] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isScreenShareActive, setIsScreenShareActive] = useState(false);
+  const [screenShareIdentity, setScreenShareIdentity] = useState<string | null>(null);
+  const [manualFocus, setManualFocus] = useState(false);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await containerRef.current?.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    const onFsChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
+
+  // Auto-focus on active screen share, unless user manually focused someone else
+  useEffect(() => {
+    const activeScreenShare = tracks.find((t) => t.source === Track.Source.ScreenShare);
+    if (activeScreenShare) {
+      setIsScreenShareActive(true);
+      setScreenShareIdentity(activeScreenShare.participant.identity);
+      if (!manualFocus) {
+        setFocusedIdentity(activeScreenShare.participant.identity);
+      }
+    } else {
+      setIsScreenShareActive(false);
+      setScreenShareIdentity(null);
+      if (!manualFocus) {
+        setFocusedIdentity(null);
+      }
+    }
+  }, [tracks, manualFocus]);
 
   // Separate tracks for guest and local participant
   const guestTracks = tracks.filter((t) => t.participant.identity !== localParticipant?.identity);
   const localTracks = tracks.filter((t) => t.participant.identity === localParticipant?.identity);
 
   return (
-    <div className="flex h-full w-full flex-col">
-      {/* Vertical Two-Participant Layout */}
-      <div className="flex min-h-0 flex-1 flex-col">
-        {/* Guest Video - Top Half */}
-        <div className="min-h-0 flex-1">
-          {guestTracks.length > 0 ? (
-            <GridLayout tracks={guestTracks} className="h-full">
+    <div ref={containerRef} className="flex h-full w-full flex-col">
+      {/* Screen Share Priority View */}
+      {isScreenShareActive && screenShareIdentity ? (
+        <div className="relative flex min-h-0 flex-1">
+          {/* Main: Screen Share */}
+          <GridLayout
+            tracks={tracks.filter(
+              (t) =>
+                t.source === Track.Source.ScreenShare &&
+                t.participant.identity === screenShareIdentity,
+            )}
+            className="h-full w-full"
+          >
+            <ParticipantTile />
+          </GridLayout>
+
+          {/* PiP: Camera videos */}
+          <div className="absolute right-3 bottom-3 z-10 rounded-lg border border-gray-300 bg-white/90 p-1 shadow-lg backdrop-blur dark:border-gray-600 dark:bg-gray-800/90">
+            <div className="grid h-28 w-40 gap-1 sm:h-36 sm:w-56">
+              <GridLayout
+                tracks={tracks.filter((t) => t.source === Track.Source.Camera)}
+                className="h-full w-full"
+              >
+                <ParticipantTile />
+              </GridLayout>
+            </div>
+          </div>
+
+          {/* Controls on top: Exit focus (eye) and Fullscreen */}
+          <button
+            className="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-red-300 bg-red-50 text-red-600 shadow-sm backdrop-blur transition-colors hover:bg-red-100 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+            onClick={() => setFocusedIdentity(null)}
+            title="Exit focus"
+            aria-label="Exit focus"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 5c-4.5 0-8.3 2.6-10 7 1.7 4.4 5.5 7 10 7s8.3-2.6 10-7c-1.7-4.4-5.5-7-10-7zm0 12a5 5 0 110-10 5 5 0 010 10zm0-2.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
+            </svg>
+          </button>
+          <button
+            className="absolute top-3 right-14 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white/90 text-gray-700 shadow-sm backdrop-blur transition-colors hover:bg-white dark:border-gray-600 dark:bg-gray-800/90 dark:text-white dark:hover:bg-gray-800"
+            onClick={toggleFullscreen}
+            title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          >
+            {isFullscreen ? (
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M7 10H5V5h5v2H7v3zm12-5h-5v2h3v3h2V5zM7 19h3v-2H7v-3H5v5h2zm12-5h-2v3h-3v2h5v-5z" />
+              </svg>
+            ) : (
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M9 3H5a2 2 0 0 0-2 2v4h2V5h4V3zm10 0h-4v2h4v4h2V5a2 2 0 0 0-2-2zM3 15v4a2 2 0 0 0 2 2h4v-2H5v-4H3zm18 0h-2v4h-4v2h4a2 2 0 0 0 2-2v-4z" />
+              </svg>
+            )}
+          </button>
+        </div>
+      ) : focusedIdentity ? (
+        <div className="relative flex min-h-0 flex-1">
+          {/* Keep eye (exit) in same position: top-right */}
+          <button
+            className="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-red-300 bg-red-50 text-red-600 shadow-sm backdrop-blur transition-colors hover:bg-red-100 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+            onClick={() => setFocusedIdentity(null)}
+            title="Exit focus"
+            aria-label="Exit focus"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 5c-4.5 0-8.3 2.6-10 7 1.7 4.4 5.5 7 10 7s8.3-2.6 10-7c-1.7-4.4-5.5-7-10-7zm0 12a5 5 0 110-10 5 5 0 010 10zm0-2.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
+            </svg>
+          </button>
+          <button
+            className="absolute top-3 right-14 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white/90 text-gray-700 shadow-sm backdrop-blur transition-colors hover:bg-white dark:border-gray-600 dark:bg-gray-800/90 dark:text-white dark:hover:bg-gray-800"
+            onClick={toggleFullscreen}
+            title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          >
+            {isFullscreen ? (
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M7 10H5V5h5v2H7v3zm12-5h-5v2h3v3h2V5zM7 19h3v-2H7v-3H5v5h2zm12-5h-2v3h-3v2h5v-5z" />
+              </svg>
+            ) : (
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M9 3H5a2 2 0 0 0-2 2v4h2V5h4V3zm10 0h-4v2h4v4h2V5a2 2 0 0 0-2-2zM3 15v4a2 2 0 0 0 2 2h4v-2H5v-4H3zm18 0h-2v4h-4v2h4a2 2 0 0 0 2-2v-4z" />
+              </svg>
+            )}
+          </button>
+          {tracks.filter((t) => t.participant.identity === focusedIdentity).length > 0 ? (
+            <GridLayout
+              tracks={tracks.filter((t) => t.participant.identity === focusedIdentity)}
+              className="h-full w-full"
+            >
               <ParticipantTile />
             </GridLayout>
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-white dark:bg-[var(--color-bg)]">
               <div className="text-center text-gray-600 dark:text-[var(--color-text-secondary)]">
-                <svg
-                  className="mx-auto mb-4 h-16 w-16 text-gray-400 dark:text-current"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
+                <p className="text-sm">Participant not available</p>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Vertical Two-Participant Layout */
+        <div className="flex min-h-0 flex-1 flex-col">
+          {/* Guest Video - Top Half */}
+          <div className="group relative min-h-0 flex-1">
+            {guestTracks.length > 0 ? (
+              <>
+                <GridLayout tracks={guestTracks} className="h-full">
+                  <ParticipantTile />
+                </GridLayout>
+                <button
+                  className={`absolute top-3 right-3 z-10 hidden h-9 w-9 items-center justify-center rounded-full shadow-sm backdrop-blur transition-colors group-hover:flex hover:bg-white dark:hover:bg-gray-800 ${
+                    focusedIdentity === guestTracks[0].participant.identity
+                      ? "border border-red-300 bg-red-50 text-red-600 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400"
+                      : "border border-gray-300 bg-white/90 text-gray-700 dark:border-gray-600 dark:bg-gray-800/90 dark:text-white"
+                  }`}
+                  onClick={() => {
+                    if (focusedIdentity === guestTracks[0].participant.identity) {
+                      setManualFocus(false);
+                      setFocusedIdentity(null);
+                    } else {
+                      setManualFocus(true);
+                      setFocusedIdentity(guestTracks[0].participant.identity);
+                    }
+                  }}
+                  title={
+                    focusedIdentity === guestTracks[0].participant.identity ? "Exit focus" : "Focus"
+                  }
+                  aria-label="Focus participant"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <p className="text-lg text-gray-900 dark:text-[var(--color-text)]">
-                  Waiting for guest to join...
-                </p>
-                <p className="mt-2 text-sm text-gray-500 dark:text-[var(--color-text-secondary)]">
-                  Please wait until the other participant joins the call.
-                </p>
+                  <svg
+                    className="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 5c-4.5 0-8.3 2.6-10 7 1.7 4.4 5.5 7 10 7s8.3-2.6 10-7c-1.7-4.4-5.5-7-10-7zm0 12a5 5 0 110-10 5 5 0 010 10zm0-2.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
+                  </svg>
+                </button>
+                <button
+                  className="absolute top-3 right-14 z-10 hidden h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white/90 text-gray-700 shadow-sm backdrop-blur transition-colors group-hover:flex hover:bg-white dark:border-gray-600 dark:bg-gray-800/90 dark:text-white dark:hover:bg-gray-800"
+                  onClick={toggleFullscreen}
+                  title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                  aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                >
+                  {isFullscreen ? (
+                    <svg
+                      className="h-5 w-5"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M7 10H5V5h5v2H7v3zm12-5h-5v2h3v3h2V5zM7 19h3v-2H7v-3H5v5h2zm12-5h-2v3h-3v2h5v-5z" />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="h-5 w-5"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M9 3H5a2 2 0 0 0-2 2v4h2V5h4V3zm10 0h-4v2h4v4h2V5a2 2 0 0 0-2-2zM3 15v4a2 2 0 0 0 2 2h4v-2H5v-4H3zm18 0h-2v4h-4v2h4a2 2 0 0 0 2-2v-4z" />
+                    </svg>
+                  )}
+                </button>
+              </>
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-white dark:bg-[var(--color-bg)]">
+                <div className="text-center text-gray-600 dark:text-[var(--color-text-secondary)]">
+                  <svg
+                    className="mx-auto mb-4 h-16 w-16 text-gray-400 dark:text-current"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <p className="text-lg text-gray-900 dark:text-[var(--color-text)]">
+                    Waiting for guest to join...
+                  </p>
+                  <p className="mt-2 text-sm text-gray-500 dark:text-[var(--color-text-secondary)]">
+                    Please wait until the other participant joins the call.
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-        {/* Local Participant Video - Bottom Half */}
-        <div className="min-h-0 flex-1">
-          {localTracks.length > 0 ? (
-            <GridLayout tracks={localTracks} className="h-full">
-              <ParticipantTile />
-            </GridLayout>
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[var(--color-section-bg)]">
-              <div className="text-center text-[var(--color-text-secondary)]">
-                <svg className="mx-auto mb-2 h-12 w-12" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fillRule="evenodd"
-                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <p className="text-sm text-[var(--color-text)]">Your camera is off</p>
+          {/* Local Participant Video - Bottom Half */}
+          <div className="group relative min-h-0 flex-1">
+            {localTracks.length > 0 ? (
+              <>
+                <GridLayout tracks={localTracks} className="h-full">
+                  <ParticipantTile />
+                </GridLayout>
+                <button
+                  className={`absolute top-3 right-3 z-10 hidden h-9 w-9 items-center justify-center rounded-full shadow-sm backdrop-blur transition-colors group-hover:flex hover:bg-white dark:hover:bg-gray-800 ${
+                    focusedIdentity === localParticipant?.identity
+                      ? "border border-red-300 bg-red-50 text-red-600 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400"
+                      : "border border-gray-300 bg-white/90 text-gray-700 dark:border-gray-600 dark:bg-gray-800/90 dark:text-white"
+                  }`}
+                  onClick={() => {
+                    if (!localParticipant) return;
+                    if (focusedIdentity === localParticipant.identity) {
+                      setManualFocus(false);
+                      setFocusedIdentity(null);
+                    } else {
+                      setManualFocus(true);
+                      setFocusedIdentity(localParticipant.identity);
+                    }
+                  }}
+                  title={focusedIdentity === localParticipant?.identity ? "Exit focus" : "Focus"}
+                  aria-label="Focus participant"
+                >
+                  <svg
+                    className="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 5c-4.5 0-8.3 2.6-10 7 1.7 4.4 5.5 7 10 7s8.3-2.6 10-7c-1.7-4.4-5.5-7-10-7zm0 12a5 5 0 110-10 5 5 0 010 10zm0-2.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
+                  </svg>
+                </button>
+                <button
+                  className="absolute top-3 right-14 z-10 hidden h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white/90 text-gray-700 shadow-sm backdrop-blur transition-colors group-hover:flex hover:bg-white dark:border-gray-600 dark:bg-gray-800/90 dark:text-white dark:hover:bg-gray-800"
+                  onClick={toggleFullscreen}
+                  title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                  aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                >
+                  {isFullscreen ? (
+                    <svg
+                      className="h-5 w-5"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M7 10H5V5h5v2H7v3zm12-5h-5v2h3v3h2V5zM7 19h3v-2H7v-3H5v5h2zm12-5h-2v3h-3v2h5v-5z" />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="h-5 w-5"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M9 3H5a2 2 0 0 0-2 2v4h2V5h4V3zm10 0h-4v2h4v4h2V5a2 2 0 0 0-2-2zM3 15v4a2 2 0 0 0 2 2h4v-2H5v-4H3zm18 0h-2v4h-4v2h4a2 2 0 0 0 2-2v-4z" />
+                    </svg>
+                  )}
+                </button>
+              </>
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-[var(--color-section-bg)]">
+                <div className="text-center text-[var(--color-text-secondary)]">
+                  <svg className="mx-auto mb-2 h-12 w-12" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <p className="text-sm text-[var(--color-text)]">Your camera is off</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Controls */}
       <div className="flex-shrink-0 border-t border-[var(--color-border)] bg-blue-50 px-4 py-3 dark:bg-[var(--color-muted)]">
@@ -294,48 +548,51 @@ function GalleryView() {
           </div>
         )}
 
-        {/* Chat Popover */}
-        {showChat && (
-          <div className="bg-transparentrder-gray-600 absolute right-4 bottom-16 z-40 border-0">
-            <div className="filter-blur-2xl border-0 bg-transparent p-2 opacity-80 drop-shadow-2xl backdrop-blur-md">
-              <style>{`
-                  .lk-chat {
-                    height: 384px !important;
-                    width: 384px !important;
-                    display: flex !important;
-                    flex-direction: column !important;
-                    padding: 5px !important;
-                    position: relative !important;
-                    border-radius: 10px !important;
-                  }
-                  .lk-chat-messages {
-                    height: calc(100% - 70px) !important;
-                  }
-                  .lk-chat-header{
-                    display: none !important;
-                  }
-                  .lk-chat .lk-message-input {
-                    flex-shrink: 0 !important;
-                    height: 60px !important;
-                  }
-                  .lk-chat .lk-chat-form {
-                    position: absolute !important;
-                    bottom: 5px !important;
-                    left: 5px !important;
-                    right: 5px !important;
-                    height: 60px !important;
-                    z-index: 10 !important;
-                    border-top: 1px solid #374151 !important;
-                  }
-                  .dark .lk-chat .lk-chat-form {
-                    background: #1f2937 !important;
-                    border-top: 1px solid #374151 !important;
-                  }
-                `}</style>
-              <Chat />
-            </div>
+        {/* Chat Popover - always mounted, visibility toggled */}
+        <div
+          className={`absolute right-4 bottom-16 z-40 border-0 transition-all duration-150 ${
+            showChat ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+          }`}
+          aria-hidden={!showChat}
+        >
+          <div className="filter-blur-2xl border-0 bg-transparent p-2 opacity-80 drop-shadow-2xl backdrop-blur-md">
+            <style>{`
+                .lk-chat {
+                  height: 384px !important;
+                  width: 384px !important;
+                  display: flex !important;
+                  flex-direction: column !important;
+                  padding: 5px !important;
+                  position: relative !important;
+                  border-radius: 10px !important;
+                }
+                .lk-chat-messages {
+                  height: calc(100% - 70px) !important;
+                }
+                .lk-chat-header{
+                  display: none !important;
+                }
+                .lk-chat .lk-message-input {
+                  flex-shrink: 0 !important;
+                  height: 60px !important;
+                }
+                .lk-chat .lk-chat-form {
+                  position: absolute !important;
+                  bottom: 5px !important;
+                  left: 5px !important;
+                  right: 5px !important;
+                  height: 60px !important;
+                  z-index: 10 !important;
+                  border-top: 1px solid #374151 !important;
+                }
+                .dark .lk-chat .lk-chat-form {
+                  background: #1f2937 !important;
+                  border-top: 1px solid #374151 !important;
+                }
+              `}</style>
+            <Chat />
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
@@ -444,7 +701,7 @@ export function VideoCall({ roomName, sessionCode, onConnected, onDisconnected }
           width: "100%",
           display: "flex",
           flexDirection: "column",
-          minHeight: "320px",
+          minHeight: "60vh",
         }}
       >
         <div className="flex h-full flex-col">

@@ -297,34 +297,6 @@ function CollaborativeEditorInner() {
       />
 
       <div className="overflow-hidden rounded-lg border border-[var(--color-border)]">
-        <style>{`
-          /* VS Code-like backgrounds that respect theme */
-          .monaco-editor.vs {
-            background-color: #ffffff !important;
-          }
-          .monaco-editor.vs .monaco-editor-background {
-            background-color: #ffffff !important;
-          }
-          .monaco-editor.vs .view-lines {
-            background-color: #ffffff !important;
-          }
-          .monaco-editor.vs .margin {
-            background-color: #f3f3f3 !important;
-          }
-          
-          .monaco-editor.vs-dark {
-            background-color: #1e1e1e !important;
-          }
-          .monaco-editor.vs-dark .monaco-editor-background {
-            background-color: #1e1e1e !important;
-          }
-          .monaco-editor.vs-dark .view-lines {
-            background-color: #1e1e1e !important;
-          }
-          .monaco-editor.vs-dark .margin {
-            background-color: #252526 !important;
-          }
-        `}</style>
         <Editor
           onMount={handleOnMount}
           height="50vh"

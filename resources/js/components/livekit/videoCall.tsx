@@ -1,5 +1,6 @@
 import { usePage } from "@inertiajs/react";
 import {
+  Chat,
   GridLayout,
   LiveKitRoom,
   ParticipantTile,
@@ -34,6 +35,7 @@ function GalleryView() {
   const videoInputDevices = useMediaDevices({ kind: "videoinput" });
   const audioOutputDevices = useMediaDevices({ kind: "audiooutput" });
   const [showDeviceSettings, setShowDeviceSettings] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   // Separate tracks for guest and local participant
   const guestTracks = tracks.filter((t) => t.participant.identity !== localParticipant?.identity);
@@ -147,6 +149,21 @@ function GalleryView() {
           >
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
               <path d="M2 4a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V4zm2 0v8h12V4H4zm2 10h8v2H6v-2z" />
+            </svg>
+          </button>
+
+          {/* Chat Button */}
+          <button
+            className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+              showChat
+                ? "border border-blue-300 bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600"
+                : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-[var(--color-button-secondary-border)] dark:bg-[var(--color-button-secondary-bg)] dark:text-[var(--color-button-secondary-text)] dark:hover:bg-[var(--color-button-secondary-hover-bg)]"
+            }`}
+            onClick={() => setShowChat(!showChat)}
+            title={showChat ? "Close chat" : "Open chat"}
+          >
+            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
             </svg>
           </button>
 
@@ -265,6 +282,49 @@ function GalleryView() {
                   Done
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Chat Popover */}
+        {showChat && (
+          <div className="absolute right-4 bottom-16 z-40 rounded-lg border border-gray-200 bg-transparent shadow-xl dark:border-gray-600">
+            <div className="rounded-lg bg-white p-2 dark:bg-gray-800">
+              <style>{`
+                  .lk-chat {
+                    height: 384px !important;
+                    width: 384px !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    padding: 5px !important;
+                    position: relative !important;
+                  }
+                  .lk-chat .lk-message-list {
+                    height: 60% !important;
+                  }
+                  .lk-chat-header{
+                    display: none !important;
+                  }
+                  .lk-chat .lk-message-input {
+                    flex-shrink: 0 !important;
+                    height: 60px !important;
+                  }
+                  .lk-chat .lk-chat-form {
+                    position: absolute !important;
+                    bottom: 5px !important;
+                    left: 5px !important;
+                    right: 5px !important;
+                    height: 60px !important;
+                    z-index: 10 !important;
+                    background: white !important;
+                    border-top: 1px solid #e5e7eb !important;
+                  }
+                  .dark .lk-chat .lk-chat-form {
+                    background: #1f2937 !important;
+                    border-top: 1px solid #374151 !important;
+                  }
+                `}</style>
+              <Chat />
             </div>
           </div>
         )}

@@ -45,7 +45,6 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
 
     sections.forEach((sec) => observer.observe(sec));
 
-    // 👇 Fix: when scroll at top, force "home"
     const handleScroll = () => {
       if (window.scrollY < 100) {
         setActiveSection("home");
@@ -60,7 +59,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
   }, []);
 
   const navLinks = [
-    { href: "/", label: "Home" },
+    { href: "/#home", label: "Home" },
     { href: "/#about", label: "About" },
     { href: "/#services", label: "Services" },
     { href: "/#features", label: "Features" },
@@ -88,9 +87,9 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
                 key={link.href}
                 href={link.href}
                 className={`relative inline-block transition ${
-                  shouldHighlight && activeSection === link.href.replace("#", "")
-                    ? "font-semibold text-primary after:w-full"
-                    : "text-foreground after:w-0"
+                  shouldHighlight && activeSection === link.href.replace("/#", "")
+                     ? "font-semibold text-primary after:w-full"
+  : "text-foreground after:w-0"
                 } after:absolute after:-bottom-1 after:left-0 after:h-[3px] after:bg-blue-500 after:transition-all after:duration-500 after:content-['']`}
               >
                 {link.label}

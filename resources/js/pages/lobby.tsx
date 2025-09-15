@@ -9,6 +9,8 @@ import { Head, Link, router, usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import { Copy, Eye, Plus, Trash2, Users, Wind } from "lucide-react";
 import { useState } from "react";
+import { Calendar, Clock } from "lucide-react";
+
 // It's good practice to define types in a separate file, but here's a quick reference
 interface User {
   id: number;
@@ -46,6 +48,27 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
 
   const [interviewDates, setInterviewDates] = useState<{ [key: number]: string }>({});
   const [interviewTimes, setInterviewTimes] = useState<{ [key: number]: string }>({});
+
+
+  const [searchQuery, setSearchQuery] = useState("");
+  // Search in students (name/email only)
+  const filteredStudents = students.filter(
+    (s) =>
+      (s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.email.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      s.role === "student",
+  );
+
+  // Pagination for selected students
+  const [selectedPage, setSelectedPage] = useState(1);
+  const selectedPerPage = 2;
+  const selectedTotalPages = Math.ceil(selectedStudents.length / selectedPerPage);
+  const paginatedSelected = selectedStudents.slice(
+    (selectedPage - 1) * selectedPerPage,
+    selectedPage * selectedPerPage,
+  );
+
+
 
   const handleCreateRoom = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -150,7 +173,7 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
             </div>
 
             {/* Create Room Form */}
-            {role !== "student" && showCreateForm && (
+            {role !== "student" && role !== null && showCreateForm && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
@@ -178,63 +201,173 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                           required
                         />
                       </div>
-                      {/* Student Assignment */}
 
-                      {role !== "student" && role !== null && (
-                        <div className="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto rounded-md border p-2">
-                          <Label className="mb-2 block font-medium">Assign Students:</Label>
-                          {students.map((student) => (
-                            <div key={student.id} className="flex flex-col gap-1 border-b pb-1">
-                              <label className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  value={student.id}
-                                  checked={selectedStudents.includes(student.id)}
-                                  onChange={(e) => {
-                                    const id = Number(e.target.value);
-                                    setSelectedStudents((prev) =>
-                                      prev.includes(id)
-                                        ? prev.filter((s) => s !== id)
-                                        : [...prev, id],
-                                    );
-                                  }}
-                                  className="h-4 w-4"
-                                />
-                                <span>
-                                  {student.name} ({student.email})
-                                </span>
-                              </label>
+{/* Assign Students Section */}
+<div className="">
+  <Label className="mb-3 block text-lg font-semibold">Assign Students</Label>
 
-                              {selectedStudents.includes(student.id) && (
-                                <div className="flex gap-2">
-                                  <input
-                                    type="date"
-                                    className="flex-1 rounded-md border p-1 text-sm"
-                                    value={interviewDates[student.id] || ""}
-                                    onChange={(e) =>
-                                      setInterviewDates((prev) => ({
-                                        ...prev,
-                                        [student.id]: e.target.value,
-                                      }))
-                                    }
-                                  />
-                                  <input
-                                    type="time"
-                                    className="flex-1 rounded-md border p-1 text-sm"
-                                    value={interviewTimes[student.id] || ""}
-                                    onChange={(e) =>
-                                      setInterviewTimes((prev) => ({
-                                        ...prev,
-                                        [student.id]: e.target.value,
-                                      }))
-                                    }
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+  {/* Search Input */}
+  <Input
+    type="text"
+    placeholder="🔍 Search by name or email..."
+    className="mb-4"
+    onChange={(e) => setSearchQuery(e.target.value)}
+    value={searchQuery}
+  />
+
+  {/* Searchable Students (only role === "student") */}
+  <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+    {searchQuery.trim() !== "" ? (
+      filteredStudents
+        .filter((s) => s.role === "student")
+        .map((student) => (
+          <div
+            key={student.id}
+            className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 transition shadow-sm ${
+              selectedStudents.includes(student.id)
+                ? "bg-primary/10 border-primary ring-2 ring-primary/40"
+                : "hover:bg-muted"
+            }`}
+            onClick={() => {
+              setSelectedStudents((prev) =>
+                prev.includes(student.id)
+                  ? prev.filter((s) => s !== student.id)
+                  : [...prev, student.id],
+              );
+              setSelectedPage(Math.ceil((selectedStudents.length + 1) / selectedPerPage));
+            }}
+          >
+            <span className="font-medium">
+              {student.name}{" "}
+              <span className="text-muted-foreground text-sm">({student.email})</span>
+            </span>
+            {selectedStudents.includes(student.id) && (
+              <Badge variant="secondary" className="px-2 py-0.5">✓ Selected</Badge>
+            )}
+          </div>
+        ))
+    ) : (
+      <p className="text-sm text-muted-foreground italic">
+        Start typing to search students...
+      </p>
+    )}
+  </div>
+
+ {/* Selected Students with Pagination */}
+{selectedStudents.length > 0 && (
+  <div className="mt-6 space-y-4 rounded-xl border p-5 bg-gradient-to-br from-primary/5 via-white to-secondary/5 shadow-md">
+    <Label className="block text-base font-semibold mb-2">🎓 Selected Students</Label>
+
+    {paginatedSelected.map((id) => {
+      const student = students.find((s) => s.id === id);
+      if (!student) return null;
+      return (
+        <div
+          key={id}
+          className="relative space-y-3 rounded-lg border-l-4 border-primary bg-gradient-to-r from-primary/10 via-white to-primary/5 p-4 shadow-sm transition hover:shadow-md"
+        >
+          {/* Deselect Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute top-2 right-2 rounded-full bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700"
+            onClick={() =>
+              setSelectedStudents((prev) => prev.filter((s) => s !== id))
+            }
+          >
+            ✕
+          </Button>
+
+          {/* Student Info */}
+          <p className="text-sm font-semibold text-primary">
+            {student.name}{" "}
+            <span className="ml-1 rounded bg-primary/10 px-2 py-0.5 text-xs text-muted-foreground">
+              {student.email}
+            </span>
+          </p>
+
+         {/* Date + Time Pickers */}
+
+{/* Date + Time Pickers */}
+<div className="flex flex-col gap-4 sm:flex-row">
+  {/* Interview Date */}
+  <div className="flex flex-col flex-1">
+    <Label className="mb-1 text-sm font-medium text-primary">Interview Date</Label>
+    <div className="relative">
+      <Calendar className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      <input
+        type="date"
+        className="w-full rounded-md border border-primary/30 bg-white pl-10 pr-3 py-2 text-sm shadow-sm 
+                   focus:border-primary focus:ring focus:ring-primary/30 transition"
+        value={interviewDates[id] || ""}
+        onChange={(e) =>
+          setInterviewDates((prev) => ({
+            ...prev,
+            [id]: e.target.value,
+          }))
+        }
+      />
+    </div>
+  </div>
+
+  {/* Interview Time */}
+  <div className="flex flex-col flex-1">
+    <Label className="mb-1 text-sm font-medium text-primary">Interview Time</Label>
+    <div className="relative">
+      <Clock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      <input
+        type="time"
+        className="w-full rounded-md border border-primary/30 bg-white pl-10 pr-3 py-2 text-sm shadow-sm 
+                   focus:border-primary focus:ring focus:ring-primary/30 transition"
+        value={interviewTimes[id] || ""}
+        onChange={(e) =>
+          setInterviewTimes((prev) => ({
+            ...prev,
+            [id]: e.target.value,
+          }))
+        }
+      />
+    </div>
+  </div>
+</div>
+
+
+          
+        </div>
+      );
+    })}
+
+    {/* Pagination Controls */}
+    <div className="mt-5 flex items-center justify-between">
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={selectedPage === 1}
+        onClick={() => setSelectedPage((p) => p - 1)}
+        className="hover:bg-primary/10"
+      >
+        ⬅ Prev
+      </Button>
+      <span className="text-sm font-medium text-primary">
+        Page {selectedPage} of {selectedTotalPages}
+      </span>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={selectedPage === selectedTotalPages}
+        onClick={() => setSelectedPage((p) => p + 1)}
+        className="hover:bg-primary/10"
+      >
+        Next ➡
+      </Button>
+    </div>
+  </div>
+)}
+
+</div>
+
+
+
 
                       <div className="flex items-center gap-2">
                         <Button type="submit" disabled={isCreating}>

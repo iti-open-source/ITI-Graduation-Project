@@ -1,6 +1,7 @@
 import AIChatbot from "@/components/ai-chatbot/ai-chatbot";
 import CollaborativeEditor from "@/components/editor/collaborative-editor";
 import { VideoCall } from "@/components/livekit/videoCall";
+import Problem from "@/components/problem/problem";
 import Whiteboard from "@/components/whiteboard/collaborative-whiteboard";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
@@ -118,6 +119,16 @@ export default function SessionRoom(props: PageProps) {
                         AI Assistant
                       </button>
                     )}
+                    <button
+                      onClick={() => setActiveTab("problem")}
+                      className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                        activeTab === "problem"
+                          ? "bg-blue-500 text-white shadow-sm"
+                          : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+                      }`}
+                    >
+                      Problem
+                    </button>
                   </div>
                 </div>
               </div>
@@ -135,6 +146,9 @@ export default function SessionRoom(props: PageProps) {
                     <AIChatbot roomCode={roomCode} isCreator={isCreator} />
                   </div>
                 )}
+                <div className={activeTab === "problem" ? "block min-h-full" : "hidden"}>
+                  <Problem isCreator={isCreator} roomId={`session-${roomCode}`} />
+                </div>
               </div>
             </div>
           </div>

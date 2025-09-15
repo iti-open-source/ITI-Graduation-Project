@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\LeetCodeScraperController;
 
 Route::get('/', function () {
     return Inertia::render('home', ["isLoggedIn" => Auth::check(),]);
@@ -68,6 +69,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // WebRTC API routes
     Route::post('api/livekit/token', [WebRtcController::class, 'generateToken'])->name('livekit.token');
+
+    // Leetcode problem scraper 
+    Route::get('/leetcode/{titleSlug}', [LeetCodeScraperController::class, 'fetchProblem'])->name('leetcode.problem');
 });
 
 

@@ -1,3 +1,4 @@
+import FlashMessage from "@/components/flash-message";
 import AuthLayoutTemplate from "@/layouts/auth/auth-simple-layout";
 
 export default function AuthLayout({
@@ -12,6 +13,7 @@ export default function AuthLayout({
 }) {
   return (
     <AuthLayoutTemplate title={title} description={description} {...props}>
+      <FlashMessage />
       {children}
     </AuthLayoutTemplate>
   );

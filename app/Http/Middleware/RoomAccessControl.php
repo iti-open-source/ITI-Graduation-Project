@@ -21,7 +21,7 @@ class RoomAccessControl
         $user = $request->user();
 
         if ($this->canAccessRoom($roomCode, $user) == false) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            abort(403, 'You are not authorized to access this room.');
         }
         return $next($request);
     }

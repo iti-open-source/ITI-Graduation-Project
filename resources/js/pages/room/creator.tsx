@@ -64,6 +64,7 @@ interface CreatorProps {
 interface AssignedStudent extends User {
   interview_date?: string;
   interview_time?: string;
+  interview_done?: boolean;
 }
 
 export default function Creator({
@@ -94,6 +95,7 @@ export default function Creator({
 
   const [updatingStudent, setUpdatingStudent] = useState(false);
   const [studentToUpdate, setStudentToUpdate] = useState<AssignedStudent | null>(null);
+
 
   // Pagination state
   const [assignedCurrentPage, setAssignedCurrentPage] = useState(1);
@@ -250,6 +252,47 @@ export default function Creator({
       setUpdatingStudent(false);
     }
   };
+
+  const [markingDoneIds, setMarkingDoneIds] = useState<number[]>([]);
+  const [studentToMarkDone, setStudentToMarkDone] = useState<any | null>(null);
+
+  const handleToggleInterviewDone = async (roomId: number, student: any) => {
+    const studentId = student.id;
+    setMarkingDoneIds((prev) => [...prev, studentId]);
+
+    try {
+      const res = await fetch(`/rooms/${roomId}/students/${studentId}/toggle-done`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-CSRF-TOKEN": getCsrf(),
+        },
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        // flip in state
+        setAssigned((prev) =>
+          prev.map((s) =>
+            s.id === studentId ? { ...s, interview_done: !s.interview_done } : s
+          )
+        );
+        toast.success(json.message || "Interview status updated");
+      } else {
+        toast.error(json.message || "Could not update interview status");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not update interview status");
+    } finally {
+      setMarkingDoneIds((prev) => prev.filter((id) => id !== studentId));
+      setStudentToMarkDone(null);
+    }
+  };
+
+
+
 
   // Pagination component
   const PaginationControls = ({
@@ -717,6 +760,30 @@ export default function Creator({
                                 )}
                               </div>
                             </div>
+                            <div className="flex items-center gap-2">
+                              <div className="group">
+                                <button
+                                  onClick={() => setStudentToMarkDone(student)}
+                                  disabled={markingDoneIds.includes(student.id)}
+                                  className={`
+        rounded-md border px-3 py-1 text-sm font-medium transition-colors
+        ${student.interview_done
+                                      ? 'border-yellow-300 text-yellow-600 hover:border-yellow-400 hover:bg-yellow-50 dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-900/20'
+                                      : 'border-green-300 text-green-600 hover:border-green-400 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20'}
+      `}
+                                >
+                                  {student.interview_done ? (
+                                    <>
+                                      <span className="block group-hover:hidden">✅ Done</span>
+                                      <span className="hidden group-hover:block">Undo Done</span>
+                                    </>
+                                  ) : (
+                                    'Mark as Done'
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+
 
                             <Button
                               size="icon"
@@ -740,6 +807,20 @@ export default function Creator({
                   ) : (
                     <p className="text-[var(--color-text-secondary)]">No students assigned yet.</p>
                   )}
+                  <ConfirmationDialog
+                    open={!!studentToMarkDone}
+                    onOpenChange={(open) => !open && setStudentToMarkDone(null)}
+                    onConfirm={() => handleToggleInterviewDone(room.id, studentToMarkDone)}
+                    title={studentToMarkDone?.interview_done ? "Undo Done Interview" : "Mark Interview as Done"}
+                    description={
+                      studentToMarkDone?.interview_done
+                        ? `Are you sure you want to undo interview done for "${studentToMarkDone?.name}"?`
+                        : `Are you sure you want to mark "${studentToMarkDone?.name}" interview as done?`
+                    }
+                    confirmText={studentToMarkDone?.interview_done ? "Undo Done" : "Mark as Done"}
+                    cancelText="Cancel"
+                    variant="default"
+                  />
 
                   <ConfirmationDialog
                     open={!!studentToRemove}
@@ -764,180 +845,180 @@ export default function Creator({
                 </CardContent>
               </Card>
             </motion.div>
-         
-              {/* Assign New Student */}
-              <motion.div
-                variants={fadeIn}
-                initial="hidden"
-                animate="visible"
-                className="space-y-6"
-              >
-                <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-500 text-white">
-                        <UserPlus className="h-5 w-5" />
-                      </div>
-                      <div className="flex items-center gap-2">Assigne New Students</div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Add New Student */}
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium text-[var(--color-text)]">
-                        Assign new students
-                      </h4>
 
-                      <div className="flex flex-col gap-2 sm:flex-row">
-                        <select
-                          className="min-w-0 flex-1 rounded-md border p-2 text-sm"
-                          value={selectedStudent}
-                          onChange={(e) => setSelectedStudent(Number(e.target.value) || "")}
-                        >
-                          <option value="" className="text-gray-800">
-                            Select a student
-                          </option>
-                          {unassigned.map((s) => (
-                            <option key={s.id} value={s.id} className="text-gray-800">
-                              {s.name} ({s.email})
-                            </option>
-                          ))}
-                        </select>
-
-                        <input
-                          type="date"
-                          className="w-full rounded-md border p-2 text-sm sm:w-auto"
-                          value={interviewDate}
-                          onChange={(e) => setInterviewDate(e.target.value)}
-                        />
-
-                        <input
-                          type="time"
-                          className="w-full rounded-md border p-2 text-sm sm:w-auto"
-                          value={interviewTime}
-                          onChange={(e) => setInterviewTime(e.target.value)}
-                        />
-                      </div>
-                      <Button onClick={handleAssign} disabled={!selectedStudent || assigning}>
-                        {assigning ? "Assigning..." : "Assign"}
-                      </Button>
+            {/* Assign New Student */}
+            <motion.div
+              variants={fadeIn}
+              initial="hidden"
+              animate="visible"
+              className="space-y-6"
+            >
+              <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-500 text-white">
+                      <UserPlus className="h-5 w-5" />
                     </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-              {/* Edit Student Interviews */}
-              <motion.div
-                variants={fadeIn}
-                initial="hidden"
-                animate="visible"
-                className="space-y-6"
-              >
-                <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-500 text-white">
-                        <User className="h-5 w-5" />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        Edit Assigned Students' Interview Dates and Times
-                      </div>
-                    </CardTitle>
-                  </CardHeader>
+                    <div className="flex items-center gap-2">Assigne New Students</div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Add New Student */}
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-[var(--color-text)]">
+                      Assign new students
+                    </h4>
 
-                  <CardContent className="max-h-96 space-y-4 overflow-y-auto">
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium text-[var(--color-text)]">
-                        Select a student
-                      </h4>
-
+                    <div className="flex flex-col gap-2 sm:flex-row">
                       <select
-                        className="w-full rounded-md border p-2 text-sm"
+                        className="min-w-0 flex-1 rounded-md border p-2 text-sm"
                         value={selectedStudent}
                         onChange={(e) => setSelectedStudent(Number(e.target.value) || "")}
                       >
-                        <option value=""> Select a student </option>
-                        {assigned.map((student) => (
-                          <option key={student.id} value={student.id} className="text-gray-800">
-                            {student.name} ({student.email})
+                        <option value="" className="text-gray-800">
+                          Select a student
+                        </option>
+                        {unassigned.map((s) => (
+                          <option key={s.id} value={s.id} className="text-gray-800">
+                            {s.name} ({s.email})
                           </option>
                         ))}
                       </select>
+
+                      <input
+                        type="date"
+                        className="w-full rounded-md border p-2 text-sm sm:w-auto"
+                        value={interviewDate}
+                        onChange={(e) => setInterviewDate(e.target.value)}
+                      />
+
+                      <input
+                        type="time"
+                        className="w-full rounded-md border p-2 text-sm sm:w-auto"
+                        value={interviewTime}
+                        onChange={(e) => setInterviewTime(e.target.value)}
+                      />
                     </div>
+                    <Button onClick={handleAssign} disabled={!selectedStudent || assigning}>
+                      {assigning ? "Assigning..." : "Assign"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+            {/* Edit Student Interviews */}
+            <motion.div
+              variants={fadeIn}
+              initial="hidden"
+              animate="visible"
+              className="space-y-6"
+            >
+              <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-500 text-white">
+                      <User className="h-5 w-5" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      Edit Assigned Students' Interview Dates and Times
+                    </div>
+                  </CardTitle>
+                </CardHeader>
 
-                    {selectedStudent && (
-                      <div className="space-y-2 border-t pt-2">
-                        {(() => {
-                          const student = assigned.find((s) => s.id === selectedStudent);
-                          if (!student) return null;
+                <CardContent className="max-h-96 space-y-4 overflow-y-auto">
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-[var(--color-text)]">
+                      Select a student
+                    </h4>
 
-                          return (
-                            <div className="flex flex-col gap-2">
-                              <div className="flex gap-2">
-                                <input
-                                  type="date"
-                                  className="flex-1 rounded-md border p-2 text-sm"
-                                  value={student.interview_date || ""}
-                                  onChange={(e) => {
-                                    const updated = [...assigned];
-                                    const index = updated.findIndex((s) => s.id === student.id);
-                                    if (index > -1) updated[index].interview_date = e.target.value;
-                                    setAssigned(updated);
-                                  }}
-                                />
-                                <input
-                                  type="time"
-                                  className="flex-1 rounded-md border p-2 text-sm"
-                                  value={student.interview_time || ""}
-                                  onChange={(e) => {
-                                    const updated = [...assigned];
-                                    const index = updated.findIndex((s) => s.id === student.id);
-                                    if (index > -1) updated[index].interview_time = e.target.value;
-                                    setAssigned(updated);
-                                  }}
-                                />
-                              </div>
-                              <Button
-                                onClick={() => {
-                                  const s = assigned.find((a) => a.id === selectedStudent);
-                                  if (s) setStudentToUpdate(s);
+                    <select
+                      className="w-full rounded-md border p-2 text-sm"
+                      value={selectedStudent}
+                      onChange={(e) => setSelectedStudent(Number(e.target.value) || "")}
+                    >
+                      <option value=""> Select a student </option>
+                      {assigned.map((student) => (
+                        <option key={student.id} value={student.id} className="text-gray-800">
+                          {student.name} ({student.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {selectedStudent && (
+                    <div className="space-y-2 border-t pt-2">
+                      {(() => {
+                        const student = assigned.find((s) => s.id === selectedStudent);
+                        if (!student) return null;
+
+                        return (
+                          <div className="flex flex-col gap-2">
+                            <div className="flex gap-2">
+                              <input
+                                type="date"
+                                className="flex-1 rounded-md border p-2 text-sm"
+                                value={student.interview_date || ""}
+                                onChange={(e) => {
+                                  const updated = [...assigned];
+                                  const index = updated.findIndex((s) => s.id === student.id);
+                                  if (index > -1) updated[index].interview_date = e.target.value;
+                                  setAssigned(updated);
                                 }}
-                              >
-                                {updatingStudent ? "Updating..." : "Update"}
-                              </Button>
+                              />
+                              <input
+                                type="time"
+                                className="flex-1 rounded-md border p-2 text-sm"
+                                value={student.interview_time || ""}
+                                onChange={(e) => {
+                                  const updated = [...assigned];
+                                  const index = updated.findIndex((s) => s.id === student.id);
+                                  if (index > -1) updated[index].interview_time = e.target.value;
+                                  setAssigned(updated);
+                                }}
+                              />
                             </div>
-                          );
-                        })()}
-                      </div>
-                    )}
-                  </CardContent>
-
-                  <ConfirmationDialog
-                    open={!!studentToUpdate}
-                    onOpenChange={(open) => !open && setStudentToUpdate(null)}
-                    onConfirm={() => {
-                      if (studentToUpdate) {
-                        updateStudentInterview(
-                          studentToUpdate.id,
-                          studentToUpdate.interview_date ?? "",
-                          studentToUpdate.interview_time ?? "",
+                            <Button
+                              onClick={() => {
+                                const s = assigned.find((a) => a.id === selectedStudent);
+                                if (s) setStudentToUpdate(s);
+                              }}
+                            >
+                              {updatingStudent ? "Updating..." : "Update"}
+                            </Button>
+                          </div>
                         );
-                        setStudentToUpdate(null);
-                      }
-                    }}
-                    title="Update Interview Schedule"
-                    description={
-                      studentToUpdate
-                        ? `Are you sure you want to update the interview date and time for "${studentToUpdate.name}"?`
-                        : "Are you sure you want to update the interview schedule?"
+                      })()}
+                    </div>
+                  )}
+                </CardContent>
+
+                <ConfirmationDialog
+                  open={!!studentToUpdate}
+                  onOpenChange={(open) => !open && setStudentToUpdate(null)}
+                  onConfirm={() => {
+                    if (studentToUpdate) {
+                      updateStudentInterview(
+                        studentToUpdate.id,
+                        studentToUpdate.interview_date ?? "",
+                        studentToUpdate.interview_time ?? "",
+                      );
+                      setStudentToUpdate(null);
                     }
-                    confirmText="Update Schedule"
-                    cancelText="Cancel"
-                    variant="default"
-                    isLoading={updatingStudent}
-                  />
-                </Card>
-              </motion.div>
-            
+                  }}
+                  title="Update Interview Schedule"
+                  description={
+                    studentToUpdate
+                      ? `Are you sure you want to update the interview date and time for "${studentToUpdate.name}"?`
+                      : "Are you sure you want to update the interview schedule?"
+                  }
+                  confirmText="Update Schedule"
+                  cancelText="Cancel"
+                  variant="default"
+                  isLoading={updatingStudent}
+                />
+              </Card>
+            </motion.div>
+
           </div>
 
           {/* Room Link Card */}

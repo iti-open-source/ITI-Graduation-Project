@@ -127,7 +127,7 @@ class Room extends Model
 public function assignedStudents()
 {
     return $this->belongsToMany(User::class, 'room_user', 'room_id', 'user_id')
-    ->withPivot('interview_date', 'interview_time')
+    ->withPivot('interview_date', 'interview_time','interview_done')
                 ->withTimestamps();
 }
 

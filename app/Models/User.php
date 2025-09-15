@@ -75,7 +75,7 @@ class User extends Authenticatable implements MustVerifyEmail
 public function assignedRooms(): BelongsToMany
 {
     return $this->belongsToMany(Room::class, 'room_user', 'user_id', 'room_id')
-                ->withPivot('interview_date', 'interview_time')
+                ->withPivot('interview_date', 'interview_time','interview_done')
                 ->withTimestamps();
 }
 

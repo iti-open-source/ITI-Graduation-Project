@@ -88,6 +88,8 @@ class RoomController extends Controller
             'students.*.id' => 'required|exists:users,id',
             'students.*.interview_date' => 'nullable|date',
             'students.*.interview_time' => 'nullable|date_format:H:i',
+            // 'students.*.interview_done' => 'default',
+
         ]);
 
         $room = Room::create([
@@ -100,6 +102,7 @@ class RoomController extends Controller
                 $room->assignedStudents()->attach($student['id'], [
                     'interview_date' => $student['interview_date'],
                     'interview_time' => $student['interview_time'],
+                    // 'interview_done' => $student['interview_done'], 
                 ]);
 
                 $studentUser = User::find($student['id']);
@@ -107,7 +110,7 @@ class RoomController extends Controller
 
                 $sessionDetails = $room->assignedStudents()
                     ->where('users.id', $studentUser->id)
-                    ->withPivot('interview_date', 'interview_time')
+                    ->withPivot('interview_date', 'interview_time','interview_done' )
                     ->first();
 
 
@@ -164,6 +167,7 @@ class RoomController extends Controller
                     'email' => $student->email,
                     'interview_date' => $student->pivot->interview_date,
                     'interview_time' => $student->pivot->interview_time,
+                    'interview_done' => (bool) $student->pivot->interview_done, 
                 ];
             });
 
@@ -332,7 +336,7 @@ class RoomController extends Controller
         foreach ($assignedStudents as $student) {
             $sessionDetails = $room->assignedStudents()
                 ->where('users.id', $student->id)
-                ->withPivot('interview_date', 'interview_time')
+                ->withPivot('interview_date', 'interview_time','interview_done')
                 ->first();
             Mail::to($student->email)->send(new InterviewCancelled($room, $student, $sessionDetails));
         }
@@ -378,7 +382,7 @@ class RoomController extends Controller
 
         $sessionDetails = $room->assignedStudents()
             ->where('users.id', $request->student_id)
-            ->withPivot('interview_date', 'interview_time')
+            ->withPivot('interview_date', 'interview_time','interview_done')
             ->first();
 
         $student = User::find($request->student_id);
@@ -392,6 +396,7 @@ class RoomController extends Controller
                 'email' => $student->email,
                 'interview_date' => $student->pivot->interview_date,
                 'interview_time' => $student->pivot->interview_time,
+                'interview_done' => (bool) $student->pivot->interview_done, 
             ];
         });
 
@@ -413,7 +418,7 @@ class RoomController extends Controller
 
         $sessionDetails = $room->assignedStudents()
             ->where('users.id', $student->id)
-            ->withPivot('interview_date', 'interview_time')
+            ->withPivot('interview_date', 'interview_time','interview_done')
             ->first();
 
         $room->assignedStudents()->detach([$student->id]);
@@ -430,6 +435,7 @@ class RoomController extends Controller
                 'email' => $s->email,
                 'interview_date' => $s->pivot->interview_date,
                 'interview_time' => $s->pivot->interview_time,
+                'interview_done' => (bool) $s->pivot->interview_done,
             ];
         });
 
@@ -472,7 +478,7 @@ class RoomController extends Controller
 
         $newSessionDetails = $room->assignedStudents()
             ->where('users.id', $student->id)
-            ->withPivot('interview_date', 'interview_time')
+            ->withPivot('interview_date', 'interview_time', 'interview_done')
             ->first();
 
         // Send reschedule email
@@ -486,6 +492,7 @@ class RoomController extends Controller
                 'email' => $s->email,
                 'interview_date' => $s->pivot->interview_date,
                 'interview_time' => $s->pivot->interview_time,
+                'interview_done' => $s->pivot->interview_done, 
             ];
         });
 
@@ -500,4 +507,26 @@ class RoomController extends Controller
             'message' => 'Student interview updated successfully',
         ]);
     }
+
+public function toggleInterviewDone(Room $room, User $student)
+{
+    $pivot = $room->assignedStudents()->where('user_id', $student->id)->firstOrFail()->pivot;
+
+    $newValue = !$pivot->interview_done;
+
+    $room->assignedStudents()->updateExistingPivot($student->id, [
+        'interview_done' => $newValue,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'interview_done' => $newValue,
+        'message' => $newValue
+            ? 'Interview marked as done.'
+            : 'Interview marked as not done.',
+    ]);
+}
+
+
+
 }

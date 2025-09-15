@@ -81,14 +81,16 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // catches authorization exceptions and redirects back with an error message
         $exceptions->renderable(function (AuthorizationException $e, $request) use ($handleRedirect) {
-            return $handleRedirect()->with('error', $e->getMessage());
+            $message = $e->getMessage() ?: 'You are not authorized to access this resource.';
+            return $handleRedirect()->with('error', $message);
         });
 
         // catches HTTP 403 ( happens when using abort() )exceptions and redirects back with an error message
         $exceptions->renderable(function (HttpException $e, $request)  use ($handleRedirect) {
 
             if ($e->getStatusCode() === 403) {
-                return $handleRedirect()->with('error', $e->getMessage());
+                $message = $e->getMessage() ?: 'You are not authorized to access this resource.';
+                return $handleRedirect()->with('error', $message);
             }
         });
     })->create();

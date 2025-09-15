@@ -54,7 +54,14 @@ function GalleryView() {
   };
 
   useEffect(() => {
-    const onFsChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    const onFsChange = () => {
+      const nowFs = Boolean(document.fullscreenElement);
+      setIsFullscreen(nowFs);
+      if (!nowFs) {
+        setManualFocus(false);
+        setFocusedIdentity(null);
+      }
+    };
     document.addEventListener("fullscreenchange", onFsChange);
     return () => document.removeEventListener("fullscreenchange", onFsChange);
   }, []);
@@ -227,7 +234,16 @@ function GalleryView() {
                 </button>
                 <button
                   className="pointer-events-none absolute top-3 right-14 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80 text-gray-700 opacity-0 shadow-sm backdrop-blur transition-opacity duration-300 ease-out group-hover:pointer-events-auto group-hover:opacity-100 hover:bg-white sm:h-9 sm:w-9 dark:border-gray-600 dark:bg-gray-800/80 dark:text-white dark:hover:bg-gray-800"
-                  onClick={toggleFullscreen}
+                  onClick={() => {
+                    if (focusedIdentity === guestTracks[0].participant.identity) {
+                      setManualFocus(false);
+                      setFocusedIdentity(null);
+                    } else {
+                      setManualFocus(true);
+                      setFocusedIdentity(guestTracks[0].participant.identity);
+                    }
+                    toggleFullscreen();
+                  }}
                   title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
                   aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
                 >
@@ -314,7 +330,17 @@ function GalleryView() {
                 </button>
                 <button
                   className="pointer-events-none absolute top-3 right-14 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80 text-gray-700 opacity-0 shadow-sm backdrop-blur transition-opacity duration-300 ease-out group-hover:pointer-events-auto group-hover:opacity-100 hover:bg-white sm:h-9 sm:w-9 dark:border-gray-600 dark:bg-gray-800/80 dark:text-white dark:hover:bg-gray-800"
-                  onClick={toggleFullscreen}
+                  onClick={() => {
+                    if (!localParticipant) return;
+                    if (focusedIdentity === localParticipant.identity) {
+                      setManualFocus(false);
+                      setFocusedIdentity(null);
+                    } else {
+                      setManualFocus(true);
+                      setFocusedIdentity(localParticipant.identity);
+                    }
+                    toggleFullscreen();
+                  }}
                   title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
                   aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
                 >

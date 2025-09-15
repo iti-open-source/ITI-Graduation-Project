@@ -9,6 +9,8 @@ class AIChatMessage extends Model
 {
     use HasFactory;
 
+    protected $table = 'ai_chat_messages';
+
     protected $fillable = [
         'session_code',
         'role',

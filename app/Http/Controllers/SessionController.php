@@ -138,6 +138,27 @@ class SessionController extends Controller
 
         return redirect()->route('lobby');
     }
+
+    public function state(Request $request, string $sessionCode)
+    {
+        $session = LobbySession::where('session_code', $sessionCode)->first();
+        if (!$session) {
+            return response()->json(['exists' => false], 404);
+        }
+
+        $userId = Auth::id();
+        if ($userId !== $session->creator_id && $userId !== $session->guest_id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        return response()->json([
+            'exists' => true,
+            'status' => $session->status,
+            'started_at' => $session->started_at,
+            'ended_at' => $session->ended_at,
+            'room_id' => $session->room_id,
+        ]);
+    }
 }
 
 

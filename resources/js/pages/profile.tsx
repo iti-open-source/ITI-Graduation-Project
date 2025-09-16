@@ -67,6 +67,8 @@ export default function Profile() {
   // Pagination for previous interviews
   const [prevPage, setPrevPage] = useState(1);
   const PREV_PER_PAGE = 5;
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackItem, setFeedbackItem] = useState<PreviousInterviewItem | null>(null);
 
   // Ensure current page is valid when data updates
   useEffect(() => {
@@ -554,28 +556,24 @@ export default function Profile() {
                                   </div>
                                 )}
                               </div>
-                              <div className="shrink-0">
+                              <div className="flex shrink-0 items-center gap-2">
                                 <span
                                   className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${ratingBadgeClass}`}
                                 >
                                   {r === null ? "No Rating" : `Rating: ${r}/10`}
                                 </span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setFeedbackItem(it);
+                                    setFeedbackOpen(true);
+                                  }}
+                                >
+                                  Show Feedback
+                                </Button>
                               </div>
                             </div>
-
-                            {it.comments && (
-                              <div className="mt-3 rounded-lg border border-[var(--color-border)] bg-muted/30 p-3 text-sm">
-                                <div className="mb-1 font-medium">Feedback</div>
-                                <p className="whitespace-pre-wrap text-muted-foreground">
-                                  {it.comments}
-                                </p>
-                              </div>
-                            )}
-                            {!it.comments && (
-                              <div className="mt-3 text-sm text-muted-foreground">
-                                No feedback provided
-                              </div>
-                            )}
                           </div>
                         );
                       })}
@@ -620,6 +618,44 @@ export default function Profile() {
                 )}
               </CardContent>
             </Card>
+            {feedbackOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                <div className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5 shadow-xl">
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-lg font-semibold text-[var(--color-text)]">
+                        {feedbackItem?.room_name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Instructor: {feedbackItem?.instructor_name}
+                      </p>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => setFeedbackOpen(false)}>
+                      ✕
+                    </Button>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="text-sm">
+                      <span className="font-medium">Rating:</span>{" "}
+                      {typeof feedbackItem?.rating === "number"
+                        ? `${feedbackItem?.rating}/10`
+                        : "No Rating"}
+                    </div>
+                    <div className="rounded-lg border border-[var(--color-border)] bg-muted/30 p-3 text-sm">
+                      <div className="mb-1 font-medium">Feedback</div>
+                      <p className="whitespace-pre-wrap text-muted-foreground">
+                        {feedbackItem?.comments && feedbackItem?.comments.trim() !== ""
+                          ? feedbackItem?.comments
+                          : "No feedback provided"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex justify-end">
+                    <Button onClick={() => setFeedbackOpen(false)}>Close</Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

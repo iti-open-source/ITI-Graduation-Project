@@ -64,6 +64,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('session/{sessionCode}', [SessionController::class, 'room'])->name('session.room');
     Route::post('session/{sessionCode}/signal', [SessionController::class, 'signal'])->name('session.signal');
     Route::post('session/{sessionCode}/terminate', [SessionController::class, 'terminate'])->name('session.terminate');
+    Route::post('session/{sessionCode}/evaluate', [SessionController::class, 'evaluate'])->name('session.evaluate');
 
     // AI Chat routes
     Route::post('api/ai-chat/{roomCode}', [AIChatController::class, 'chat'])->name('ai.chat');

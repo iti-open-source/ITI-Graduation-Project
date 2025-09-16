@@ -525,16 +525,15 @@ class RoomController extends Controller
             ], 400);
         }
 
-         try {
-        $interviewDateTime = \Carbon\Carbon::parse("{$pivot->interview_date} {$pivot->interview_time}", config('app.timezone'));
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid interview date/time format.',
-        ], 400);
-    }
-
-    if (!$interviewDateTime->isFuture()) {
+        try {
+            $interviewDateTime = \Carbon\Carbon::parse("{$pivot->interview_date} {$pivot->interview_time}", config('app.timezone'));
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid interview date/time format.',
+            ], 400);
+        }
+        if ($interviewDateTime->isFuture()) {
             return response()->json([
                 'success' => false,
                 'message' => 'You cannot mark the interview as done before its scheduled date and time.',
@@ -559,49 +558,48 @@ class RoomController extends Controller
 
 
     public function toggleStudentIsAbsent(Room $room, User $student)
-{
-    $pivot = $room->assignedStudents()->where('user_id', $student->id)->firstOrFail()->pivot;
+    {
+        $pivot = $room->assignedStudents()->where('user_id', $student->id)->firstOrFail()->pivot;
 
-    
-    if (empty($pivot->interview_date) || empty($pivot->interview_time)) {
+
+        if (empty($pivot->interview_date) || empty($pivot->interview_time)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Interview date or time is missing.',
+            ], 400);
+        }
+
+        try {
+            $interviewDateTime = \Carbon\Carbon::parse("{$pivot->interview_date} {$pivot->interview_time}", config('app.timezone'));
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid interview date/time format.',
+            ], 400);
+        }
+
+        if ($interviewDateTime->isFuture()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You cannot mark the student as absent before the scheduled interview date and time.',
+            ], 400);
+        }
+
+
+        $newValue = !$pivot->is_absent;
+
+        $room->assignedStudents()->updateExistingPivot($student->id, [
+            'is_absent' => $newValue,
+            'interview_done' => $newValue,
+        ]);
+
         return response()->json([
-            'success' => false,
-            'message' => 'Interview date or time is missing.',
-        ], 400);
+            'success' => true,
+            'is_absent' => $newValue,
+            'interview_done' => $newValue,
+            'message' => $newValue
+                ? 'Student marked absent (interview done).'
+                : 'Student marked present again.',
+        ]);
     }
-
-    try {
-        $interviewDateTime = \Carbon\Carbon::parse("{$pivot->interview_date} {$pivot->interview_time}", config('app.timezone'));
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid interview date/time format.',
-        ], 400);
-    }
-
-    if (!$interviewDateTime->isFuture()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'You cannot mark the student as absent before the scheduled interview date and time.',
-        ], 400);
-    }
-
-
-    $newValue = !$pivot->is_absent;
-
-    $room->assignedStudents()->updateExistingPivot($student->id, [
-        'is_absent' => $newValue,
-        'interview_done' => $newValue,
-    ]);
-
-    return response()->json([
-        'success' => true,
-        'is_absent' => $newValue,
-        'interview_done' => $newValue,
-        'message' => $newValue
-           ? 'Student marked absent (interview done).'
-           : 'Student marked present again.',
-    ]);
-}
-
 }

@@ -3,12 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { DialogHeader } from "@/components/ui/dialog";
 import { useRoomUpdates } from "@/hooks/use-room-updates";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem, type SharedData } from "@/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
-import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -87,8 +85,6 @@ export default function Creator({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
 
-
-
   // const [selectedStudent, setSelectedStudent] = useState<number | null>(null);
 
   // const [assigned, setAssigned] = useState<User[]>(initialAssigned);
@@ -108,7 +104,6 @@ export default function Creator({
 
   const [updatingStudent, setUpdatingStudent] = useState(false);
   const [studentToUpdate, setStudentToUpdate] = useState<AssignedStudent | null>(null);
-
 
   // Pagination state
   const [assignedCurrentPage, setAssignedCurrentPage] = useState(1);
@@ -153,7 +148,6 @@ export default function Creator({
       return;
     }
     setAssigning(true);
-
 
     try {
       const res = await fetch(`/rooms/${room.id}/assign-student`, {
@@ -290,11 +284,8 @@ export default function Creator({
 
       const json = await res.json();
       if (json.success) {
-
         setAssigned((prev) =>
-          prev.map((s) =>
-            s.id === studentId ? { ...s, interview_done: !s.interview_done } : s
-          )
+          prev.map((s) => (s.id === studentId ? { ...s, interview_done: !s.interview_done } : s)),
         );
         toast.success(json.message || "Interview status updated");
       } else {
@@ -338,16 +329,15 @@ export default function Creator({
               };
             }
             return s;
-          })
+          }),
         );
         toast.success(
           json.message ||
-          (json.is_absent
-            ? "Student marked absent and interview done"
-            : "Student marked as present again (interview undone)")
+            (json.is_absent
+              ? "Student marked absent and interview done"
+              : "Student marked as present again (interview undone)"),
         );
-      }
-      else {
+      } else {
         toast.error(json.message || "Could not update attendance status");
       }
     } catch (err) {
@@ -359,32 +349,37 @@ export default function Creator({
     }
   };
 
-
   // Disable button if: Student is absent & Interview time has not arrived yet (for marking done)
   function disableMarkDone(student: AssignedStudent): boolean {
     if (!student) return true;
 
     const now = new Date();
-    const interviewDateTime = student.interview_date && student.interview_time
-      ? new Date(`${student.interview_date}T${student.interview_time}`)
-      : null;
+    const interviewDateTime =
+      student.interview_date && student.interview_time
+        ? new Date(`${student.interview_date}T${student.interview_time}`)
+        : null;
 
-    return markingDoneIds.includes(student.id)
-      || student.is_absent
-      || (!!interviewDateTime && now < interviewDateTime);
+    return (
+      markingDoneIds.includes(student.id) ||
+      student.is_absent ||
+      (!!interviewDateTime && now < interviewDateTime)
+    );
   }
   function disableMarkAbsent(student: AssignedStudent): boolean {
     if (!student) return true;
 
     const now = new Date();
-    const interviewDateTime = student.interview_date && student.interview_time
-      ? new Date(`${student.interview_date}T${student.interview_time}`)
-      : null;
+    const interviewDateTime =
+      student.interview_date && student.interview_time
+        ? new Date(`${student.interview_date}T${student.interview_time}`)
+        : null;
 
     // Disable if interview is done or interview time hasn't come yet
-    return (student.interview_done && student.is_absent === false) || (!!interviewDateTime && now < interviewDateTime);
+    return (
+      (student.interview_done && student.is_absent === false) ||
+      (!!interviewDateTime && now < interviewDateTime)
+    );
   }
-
 
   // Pagination component
   const PaginationControls = ({
@@ -780,7 +775,12 @@ export default function Creator({
               </Card>
             </motion.div>
             {/* Assigned Students */}
-            <motion.div variants={fadeIn} initial="hidden" animate="visible" className="space-y-6 lg:col-span-2">
+            <motion.div
+              variants={fadeIn}
+              initial="hidden"
+              animate="visible"
+              className="space-y-6 lg:col-span-2"
+            >
               <Card className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between gap-3 text-[var(--color-text)]">
@@ -811,7 +811,6 @@ export default function Creator({
                     <>
                       <div className="space-y-3">
                         {getPaginatedItems(assigned, assignedCurrentPage).map((student) => (
-
                           <motion.div
                             key={student.id}
                             initial={{ opacity: 0, x: -20 }}
@@ -865,21 +864,21 @@ export default function Creator({
                                 <button
                                   onClick={() => setStudentToMarkDone(student)}
                                   disabled={disableMarkDone(student)}
-                                  className={`
-              rounded-md border px-3 py-1 text-sm font-medium transition-colors
-              ${student.interview_done
-                                      ? 'border-yellow-300 text-yellow-600 hover:border-yellow-400 hover:bg-yellow-50 dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-900/20'
-                                      : 'border-green-300 text-green-600 hover:border-green-400 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20'}
-              ${disableMarkDone(student) ? 'opacity-50 cursor-not-allowed' : ''}
-            `}
+                                  className={`rounded-md border px-3 py-1 text-sm font-medium transition-colors ${
+                                    student.interview_done
+                                      ? "border-yellow-300 text-yellow-600 hover:border-yellow-400 hover:bg-yellow-50 dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
+                                      : "border-green-300 text-green-600 hover:border-green-400 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20"
+                                  } ${disableMarkDone(student) ? "cursor-not-allowed opacity-50" : ""} `}
                                 >
                                   {student.interview_done ? (
                                     <>
-                                      <span className="block group-hover:hidden">✅Interview Done</span>
+                                      <span className="block group-hover:hidden">
+                                        ✅Interview Done
+                                      </span>
                                       <span className="hidden group-hover:block">Undo Done</span>
                                     </>
                                   ) : (
-                                    'Mark Interview Done'
+                                    "Mark Interview Done"
                                   )}
                                 </button>
                               </div>
@@ -889,21 +888,23 @@ export default function Creator({
                               <div className="group">
                                 <button
                                   onClick={() => setStudentToMarkAbsent(student)}
-                                  disabled={markingAbsentIds.includes(student.id) || disableMarkAbsent(student)}
-                                  className={`
-        relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold shadow-md transition-all
-        ${student.is_absent
-                                      ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white hover:from-yellow-500 hover:to-yellow-600 dark:from-yellow-500 dark:to-yellow-600 dark:hover:from-yellow-600 dark:hover:to-yellow-700'
-                                      : 'bg-gradient-to-r from-green-400 to-green-500 text-white hover:from-green-500 hover:to-green-600 dark:from-green-500 dark:to-green-600 dark:hover:from-green-600 dark:hover:to-green-700'
-                                    }
-        disabled:opacity-50 disabled:cursor-not-allowed
-      `}
+                                  disabled={
+                                    markingAbsentIds.includes(student.id) ||
+                                    disableMarkAbsent(student)
+                                  }
+                                  className={`relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold shadow-md transition-all ${
+                                    student.is_absent
+                                      ? "bg-gradient-to-r from-yellow-400 to-yellow-500 text-white hover:from-yellow-500 hover:to-yellow-600 dark:from-yellow-500 dark:to-yellow-600 dark:hover:from-yellow-600 dark:hover:to-yellow-700"
+                                      : "bg-gradient-to-r from-green-400 to-green-500 text-white hover:from-green-500 hover:to-green-600 dark:from-green-500 dark:to-green-600 dark:hover:from-green-600 dark:hover:to-green-700"
+                                  } disabled:cursor-not-allowed disabled:opacity-50`}
                                 >
                                   {student.is_absent ? (
                                     <>
                                       <UserX className="h-4 w-4" />
-                                      <span className="block group-hover:hidden">Student Absent</span>
-                                      <span className="hidden group-hover:block flex items-center gap-1">
+                                      <span className="block group-hover:hidden">
+                                        Student Absent
+                                      </span>
+                                      <span className="flex hidden items-center gap-1 group-hover:block">
                                         Undo Absent
                                       </span>
                                     </>
@@ -958,7 +959,11 @@ export default function Creator({
                     open={!!studentToMarkDone}
                     onOpenChange={(open) => !open && setStudentToMarkDone(null)}
                     onConfirm={() => handleToggleInterviewDone(room.id, studentToMarkDone)}
-                    title={studentToMarkDone?.interview_done ? "Undo Done Interview" : "Mark Interview as Done"}
+                    title={
+                      studentToMarkDone?.interview_done
+                        ? "Undo Done Interview"
+                        : "Mark Interview as Done"
+                    }
                     description={
                       studentToMarkDone?.interview_done
                         ? `Are you sure you want to undo interview done for "${studentToMarkDone?.name}"?`
@@ -972,13 +977,21 @@ export default function Creator({
                     open={!!studentToMarkAbsent}
                     onOpenChange={(open) => !open && setStudentToMarkAbsent(null)}
                     onConfirm={() => handleToggleStudentAbsent(room.id, studentToMarkAbsent)}
-                    title={studentToMarkAbsent?.is_absent ? "Undo Student Absent Interview" : "Mark Student as absent"}
+                    title={
+                      studentToMarkAbsent?.is_absent
+                        ? "Undo Student Absent Interview"
+                        : "Mark Student as absent"
+                    }
                     description={
                       studentToMarkAbsent?.is_absent
                         ? `Are you sure you want to undo interview absent for "${studentToMarkAbsent?.name}"?`
                         : `Are you sure you want to mark "${studentToMarkAbsent?.name}" interview as absent?`
                     }
-                    confirmText={studentToMarkAbsent?.is_absent ? "Undo Student Absent Interview" : "Mark Student as absent"}
+                    confirmText={
+                      studentToMarkAbsent?.is_absent
+                        ? "Undo Student Absent Interview"
+                        : "Mark Student as absent"
+                    }
                     cancelText="Cancel"
                     variant="default"
                   />
@@ -1010,8 +1023,10 @@ export default function Creator({
               {showAddModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                   <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
-                    <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Assign New Student</h2>
+                    <div className="mb-4 flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Assign New Student
+                      </h2>
                       <button
                         onClick={() => setShowAddModal(false)}
                         className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
@@ -1023,7 +1038,7 @@ export default function Creator({
                       <select
                         className="w-full rounded-md border p-2 text-sm"
                         value={selectedStudent}
-                        onChange={(e) => setSelectedStudent(Number(e.target.value) || '')}
+                        onChange={(e) => setSelectedStudent(Number(e.target.value) || "")}
                       >
                         <option value="">Select a student</option>
                         {unassigned.map((s) => (
@@ -1048,7 +1063,7 @@ export default function Creator({
                       />
 
                       <Button onClick={handleAssign} disabled={!selectedStudent || assigning}>
-                        {assigning ? 'Assigning...' : 'Assign'}
+                        {assigning ? "Assigning..." : "Assign"}
                       </Button>
                     </div>
                   </div>
@@ -1059,7 +1074,7 @@ export default function Creator({
               {showEditModal && selectedStudent && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                   <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
-                    <div className="flex justify-between items-center mb-4">
+                    <div className="mb-4 flex items-center justify-between">
                       <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                         Edit Interview Schedule
                       </h2>
@@ -1089,7 +1104,7 @@ export default function Creator({
                               <input
                                 type="date"
                                 className="flex-1 rounded-md border p-2 text-sm"
-                                value={student.interview_date || ''}
+                                value={student.interview_date || ""}
                                 onChange={(e) => {
                                   const updated = [...assigned];
                                   const index = updated.findIndex((s) => s.id === student.id);
@@ -1100,7 +1115,7 @@ export default function Creator({
                               <input
                                 type="time"
                                 className="flex-1 rounded-md border p-2 text-sm"
-                                value={student.interview_time || ''}
+                                value={student.interview_time || ""}
                                 onChange={(e) => {
                                   const updated = [...assigned];
                                   const index = updated.findIndex((s) => s.id === student.id);
@@ -1112,12 +1127,16 @@ export default function Creator({
 
                             {/* Update button */}
                             <Button
-                              onClick={() => updateStudentInterview(student.id,
-                                student.interview_date || '',
-                                student.interview_time || '')}
+                              onClick={() =>
+                                updateStudentInterview(
+                                  student.id,
+                                  student.interview_date || "",
+                                  student.interview_time || "",
+                                )
+                              }
                               disabled={updatingStudent}
                             >
-                              {updatingStudent ? 'Updating...' : 'Update'}
+                              {updatingStudent ? "Updating..." : "Update"}
                             </Button>
                           </div>
                         );
@@ -1126,12 +1145,15 @@ export default function Creator({
                   </div>
                 </div>
               )}
-
             </motion.div>
-
           </div>
 
-          <motion.div variants={fadeIn} initial="hidden" animate="visible" className="space-y-6 lg:col-span-2">
+          <motion.div
+            variants={fadeIn}
+            initial="hidden"
+            animate="visible"
+            className="space-y-6 lg:col-span-2"
+          >
             {/* Section 1: Interview Done / Absent */}
             <Card className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
               <CardHeader>
@@ -1141,19 +1163,19 @@ export default function Creator({
                   </div>
                   <div className="flex items-center gap-2">
                     Interviewed / Absent Students
-                    {assigned.filter(s => s.interview_done || s.is_absent).length > 0 && (
+                    {assigned.filter((s) => s.interview_done || s.is_absent).length > 0 && (
                       <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                        ({assigned.filter(s => s.interview_done || s.is_absent).length})
+                        ({assigned.filter((s) => s.interview_done || s.is_absent).length})
                       </span>
                     )}
                   </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {assigned.filter(s => s.interview_done || s.is_absent).length > 0 ? (
+                {assigned.filter((s) => s.interview_done || s.is_absent).length > 0 ? (
                   <div className="space-y-3">
                     {assigned
-                      .filter(s => s.interview_done || s.is_absent)
+                      .filter((s) => s.interview_done || s.is_absent)
                       .map((student) => (
                         <motion.div
                           key={student.id}
@@ -1168,8 +1190,12 @@ export default function Creator({
                               </AvatarFallback>
                             </Avatar>
                             <div className="min-w-0">
-                              <h4 className="truncate font-medium text-[var(--color-text)]">{student.name}</h4>
-                              <p className="truncate text-sm text-[var(--color-text-secondary)]">{student.email}</p>
+                              <h4 className="truncate font-medium text-[var(--color-text)]">
+                                {student.name}
+                              </h4>
+                              <p className="truncate text-sm text-[var(--color-text-secondary)]">
+                                {student.email}
+                              </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -1187,7 +1213,9 @@ export default function Creator({
                       ))}
                   </div>
                 ) : (
-                  <p className="text-[var(--color-text-secondary)]">No students have completed their interview or are absent yet.</p>
+                  <p className="text-[var(--color-text-secondary)]">
+                    No students have completed their interview or are absent yet.
+                  </p>
                 )}
               </CardContent>
             </Card>
@@ -1201,19 +1229,19 @@ export default function Creator({
                   </div>
                   <div className="flex items-center gap-2">
                     Students To Be Interviewed
-                    {assigned.filter(s => !s.interview_done && !s.is_absent).length > 0 && (
+                    {assigned.filter((s) => !s.interview_done && !s.is_absent).length > 0 && (
                       <span className="ml-2 text-sm text-pink-600 dark:text-pink-400">
-                        ({assigned.filter(s => !s.interview_done && !s.is_absent).length})
+                        ({assigned.filter((s) => !s.interview_done && !s.is_absent).length})
                       </span>
                     )}
                   </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {assigned.filter(s => !s.interview_done && !s.is_absent).length > 0 ? (
+                {assigned.filter((s) => !s.interview_done && !s.is_absent).length > 0 ? (
                   <div className="space-y-3">
                     {assigned
-                      .filter(s => !s.interview_done && !s.is_absent)
+                      .filter((s) => !s.interview_done && !s.is_absent)
                       .map((student) => (
                         <motion.div
                           key={student.id}
@@ -1228,8 +1256,12 @@ export default function Creator({
                               </AvatarFallback>
                             </Avatar>
                             <div className="min-w-0">
-                              <h4 className="truncate font-medium text-[var(--color-text)]">{student.name}</h4>
-                              <p className="truncate text-sm text-[var(--color-text-secondary)]">{student.email}</p>
+                              <h4 className="truncate font-medium text-[var(--color-text)]">
+                                {student.name}
+                              </h4>
+                              <p className="truncate text-sm text-[var(--color-text-secondary)]">
+                                {student.email}
+                              </p>
                               {student.interview_date && student.interview_time && (
                                 <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
                                   Interview:
@@ -1267,21 +1299,21 @@ export default function Creator({
                                 <button
                                   onClick={() => setStudentToMarkDone(student)}
                                   disabled={disableMarkDone(student)}
-                                  className={`
-              rounded-md border px-3 py-1 text-sm font-medium transition-colors
-              ${student.interview_done
-                                      ? 'border-yellow-300 text-yellow-600 hover:border-yellow-400 hover:bg-yellow-50 dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-900/20'
-                                      : 'border-green-300 text-green-600 hover:border-green-400 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20'}
-              ${disableMarkDone(student) ? 'opacity-50 cursor-not-allowed' : ''}
-            `}
+                                  className={`rounded-md border px-3 py-1 text-sm font-medium transition-colors ${
+                                    student.interview_done
+                                      ? "border-yellow-300 text-yellow-600 hover:border-yellow-400 hover:bg-yellow-50 dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
+                                      : "border-green-300 text-green-600 hover:border-green-400 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20"
+                                  } ${disableMarkDone(student) ? "cursor-not-allowed opacity-50" : ""} `}
                                 >
                                   {student.interview_done ? (
                                     <>
-                                      <span className="block group-hover:hidden">✅Interview Done</span>
+                                      <span className="block group-hover:hidden">
+                                        ✅Interview Done
+                                      </span>
                                       <span className="hidden group-hover:block">Undo Done</span>
                                     </>
                                   ) : (
-                                    'Mark Interview Done'
+                                    "Mark Interview Done"
                                   )}
                                 </button>
                               </div>
@@ -1291,21 +1323,23 @@ export default function Creator({
                               <div className="group">
                                 <button
                                   onClick={() => setStudentToMarkAbsent(student)}
-                                  disabled={markingAbsentIds.includes(student.id) || disableMarkAbsent(student)}
-                                  className={`
-        relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold shadow-md transition-all
-        ${student.is_absent
-                                      ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white hover:from-yellow-500 hover:to-yellow-600 dark:from-yellow-500 dark:to-yellow-600 dark:hover:from-yellow-600 dark:hover:to-yellow-700'
-                                      : 'bg-gradient-to-r from-green-400 to-green-500 text-white hover:from-green-500 hover:to-green-600 dark:from-green-500 dark:to-green-600 dark:hover:from-green-600 dark:hover:to-green-700'
-                                    }
-        disabled:opacity-50 disabled:cursor-not-allowed
-      `}
+                                  disabled={
+                                    markingAbsentIds.includes(student.id) ||
+                                    disableMarkAbsent(student)
+                                  }
+                                  className={`relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold shadow-md transition-all ${
+                                    student.is_absent
+                                      ? "bg-gradient-to-r from-yellow-400 to-yellow-500 text-white hover:from-yellow-500 hover:to-yellow-600 dark:from-yellow-500 dark:to-yellow-600 dark:hover:from-yellow-600 dark:hover:to-yellow-700"
+                                      : "bg-gradient-to-r from-green-400 to-green-500 text-white hover:from-green-500 hover:to-green-600 dark:from-green-500 dark:to-green-600 dark:hover:from-green-600 dark:hover:to-green-700"
+                                  } disabled:cursor-not-allowed disabled:opacity-50`}
                                 >
                                   {student.is_absent ? (
                                     <>
                                       <UserX className="h-4 w-4" />
-                                      <span className="block group-hover:hidden">Student Absent</span>
-                                      <span className="hidden group-hover:block flex items-center gap-1">
+                                      <span className="block group-hover:hidden">
+                                        Student Absent
+                                      </span>
+                                      <span className="flex hidden items-center gap-1 group-hover:block">
                                         Undo Absent
                                       </span>
                                     </>
@@ -1347,12 +1381,13 @@ export default function Creator({
                       ))}
                   </div>
                 ) : (
-                  <p className="text-[var(--color-text-secondary)]">No students left to be interviewed.</p>
+                  <p className="text-[var(--color-text-secondary)]">
+                    No students left to be interviewed.
+                  </p>
                 )}
               </CardContent>
             </Card>
           </motion.div>
-
 
           {/* Room Link Card */}
           <motion.div variants={fadeIn} initial="hidden" animate="visible" className="mt-8">

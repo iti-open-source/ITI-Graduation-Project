@@ -781,7 +781,7 @@ export default function Creator({
               animate="visible"
               className="space-y-6 lg:col-span-2"
             >
-              <Card className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+              <Card className="mb-5 w-full border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between gap-3 text-[var(--color-text)]">
                     <div className="flex items-center gap-2">

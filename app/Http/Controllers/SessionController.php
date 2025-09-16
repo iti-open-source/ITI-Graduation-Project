@@ -65,7 +65,10 @@ class SessionController extends Controller
             event(new \App\Events\RoomStatusUpdated($room->fresh(), 'call_ended'));
         }
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+            'roomCode' => $room?->room_code,
+        ]);
     }
 
     public function room(string $sessionCode, Request $request)
@@ -132,6 +135,9 @@ class SessionController extends Controller
             event(new \App\Events\RoomStatusUpdated($room->fresh(), 'call_ended'));
         }
 
+        if ($room) {
+            return redirect()->route('room.show', ['roomCode' => $room->room_code]);
+        }
         return redirect()->route('lobby');
     }
 
@@ -147,12 +153,14 @@ class SessionController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
+        $room = \App\Models\Room::find($session->room_id);
         return response()->json([
             'exists' => true,
             'status' => $session->status,
             'started_at' => $session->started_at,
             'ended_at' => $session->ended_at,
             'room_id' => $session->room_id,
+            'room_code' => $room?->room_code,
         ]);
     }
 }

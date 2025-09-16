@@ -42,7 +42,7 @@ export default function SessionRoom(props: PageProps) {
         if (!res.ok) return;
         const json = await res.json();
         if (!aborted && json?.status === "ended") {
-          if (isCreator) window.location.href = "/lobby";
+          if (isCreator && json?.room_code) window.location.href = `/room/${json.room_code}`;
           else window.location.href = "/dashboard";
         }
       } catch {}
@@ -223,7 +223,12 @@ export default function SessionRoom(props: PageProps) {
                     body: JSON.stringify({ rating, comments }),
                   });
                   if (res.ok) {
-                    window.location.href = "/lobby";
+                    const data = await res.json().catch(() => ({}) as any);
+                    if (data?.roomCode) {
+                      window.location.href = `/room/${data.roomCode}`;
+                    } else {
+                      window.location.href = "/lobby";
+                    }
                   }
                 } finally {
                   setSubmitting(false);

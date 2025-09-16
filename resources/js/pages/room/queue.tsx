@@ -42,6 +42,7 @@ interface Room {
   current_participant: User | null;
   queue: QueueUser[];
   queue_count: number;
+  sessions?: { id: number; session_code: string; status: string }[];
 }
 
 interface QueueProps {
@@ -62,6 +63,19 @@ export default function Queue({
   // Find current queue position from updated room data
   const currentQueueEntry = room.queue.find((q) => q.user?.id === initialQueueEntry?.user?.id);
   const queuePosition = currentQueueEntry?.position || initialQueuePosition;
+
+  // Auto-redirect when accepted (current participant becomes this user)
+  useEffect(() => {
+    const isThisUserActive = room.current_participant?.id === initialQueueEntry?.user?.id;
+    if (!isThisUserActive) return;
+
+    const activeSession = Array.isArray(room.sessions)
+      ? room.sessions.find((s) => s.status === "active")
+      : undefined;
+    if (activeSession?.session_code) {
+      window.location.href = `/session/${activeSession.session_code}`;
+    }
+  }, [room.current_participant?.id, room.sessions, initialQueueEntry?.user?.id]);
 
   useEffect(() => {
     if (!initialQueueEntry?.joined_at) return;

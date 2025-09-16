@@ -3,19 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem, type SharedData } from "@/types";
-import { Head, Link, router, usePage } from "@inertiajs/react";
-import {
-  Building2,
-  Calendar,
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  Edit,
-  ExternalLink,
-  Users,
-} from "lucide-react";
-import { useState } from "react";
+import { Head, Link, usePage } from "@inertiajs/react";
+import { Building2, Calendar, CalendarDays, Clock, Edit, ExternalLink, Users } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -38,38 +28,41 @@ interface UpcomingInterview {
   id: number;
   room_name: string;
   room_code: string;
-  interview_date: string;
-  interview_time: string;
+  interview_date?: string | null;
+  interview_time?: string | null;
   instructor_name: string;
   is_absent: boolean;
   interview_done: boolean;
 }
 
-interface PaginatedInterviews {
-  data: UpcomingInterview[];
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
-  from?: number;
-  to?: number;
-  next_page_url?: string | null;
-  prev_page_url?: string | null;
+interface PreviousInterviewItem {
+  session_id: number;
+  session_code: string;
+  room_name: string;
+  room_code: string;
+  instructor_name: string;
+  ended_at?: string | null;
+  rating?: number | null;
+  comments?: string | null;
 }
 
 interface ProfilePageProps extends SharedData {
-  data: {
-    userRooms?: Room[];
-    upcomingInterviews?: PaginatedInterviews;
-  };
+  userRooms?: Room[];
+  upcomingInterviews?: UpcomingInterview[];
+  previousInterviews?: PreviousInterviewItem[];
 }
 
 export default function Profile() {
-  const { auth, userRooms = [], upcomingInterviews = [] } = usePage<ProfilePageProps>().props;
+  const {
+    auth,
+    userRooms = [],
+    upcomingInterviews = [],
+    previousInterviews = [],
+  } = usePage<ProfilePageProps>().props;
   const [editingRoomId, setEditingRoomId] = useState<number | null>(null);
   const [editingRoomName, setEditingRoomName] = useState("");
-  const [upcoming, setUpcoming] = useState(upcomingInterviews);
-  const [previous, setPrevious] = useState(previousInterviews);
+  const [upcoming, setUpcoming] = useState<UpcomingInterview[]>(upcomingInterviews || []);
+  const [previous, setPrevious] = useState<PreviousInterviewItem[]>(previousInterviews || []);
   const pollRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -83,8 +76,8 @@ export default function Profile() {
         if (!res.ok) return;
         const json = await res.json();
         if (!aborted) {
-          setUpcoming(json.upcomingInterviews || []);
-          setPrevious(json.previousInterviews || []);
+          setUpcoming((json.upcomingInterviews as UpcomingInterview[]) || []);
+          setPrevious((json.previousInterviews as PreviousInterviewItem[]) || []);
         }
       } catch {}
     };
@@ -134,10 +127,6 @@ export default function Profile() {
     setEditingRoomId(null);
     setEditingRoomName("");
   };
-
-  // const canJoin = (interviewTime: Date) => {
-  //   return new Date() < interviewTime;
-  // };
 
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return "TBD";
@@ -449,10 +438,9 @@ export default function Profile() {
                 <CardDescription>Your scheduled interviews</CardDescription>
               </CardHeader>
               <CardContent>
-                {upcomingInterviews.data.length > 0 ? (
                 {upcoming.length > 0 ? (
                   <div className="space-y-4">
-                    {upcomingInterviews.data.map((interview) => (
+                    {upcoming.map((interview) => (
                       <div
                         key={interview.id}
                         className="flex items-center justify-between rounded-lg border p-4"
@@ -483,45 +471,7 @@ export default function Profile() {
                         <div className="flex items-center gap-2">{StatusButton(interview)}</div>
                       </div>
                     ))}
-
-                    {/* Pagination Controls */}
-                    {upcomingInterviews.last_page > 1 && (
-                      <div className="mt-6 flex items-center justify-between border-t pt-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={upcomingInterviews.current_page === 1}
-                          onClick={() => handlePageChange(upcomingInterviews.prev_page_url || null)}
-                          className="flex items-center gap-2"
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                          Previous
-                        </Button>
-
-                        <span className="text-sm text-muted-foreground">
-                          Page {upcomingInterviews.current_page} of {upcomingInterviews.last_page}
-                          {upcomingInterviews.total > 0 && (
-                            <span className="ml-2">
-                              ({upcomingInterviews.from}-{upcomingInterviews.to} of{" "}
-                              {upcomingInterviews.total})
-                            </span>
-                          )}
-                        </span>
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={
-                            upcomingInterviews.current_page === upcomingInterviews.last_page
-                          }
-                          onClick={() => handlePageChange(upcomingInterviews.next_page_url || null)}
-                          className="flex items-center gap-2"
-                        >
-                          Next
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    )}
+                    {/* Pagination removed in polling mode */}
                   </div>
                 ) : (
                   <div className="py-8 text-center">

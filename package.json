@@ -63,7 +63,6 @@
     "livekit-client": "^2.15.7",
     "lucide-react": "^0.544.0",
     "motion": "^12.23.12",
-    "pusher-js": "^8.4.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.6.0",

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\RoomSessionSignaling;
+// use App\Events\RoomSessionSignaling; // Removed: no longer broadcasting to Pusher
 use App\Models\LobbySession;
 use App\Models\InterviewEvaluation;
 use Illuminate\Http\Request;
@@ -46,7 +46,7 @@ class SessionController extends Controller
             'ended_at' => now(),
         ]);
 
-        event(new RoomSessionSignaling($sessionCode, 'terminated', ['by' => $userId, 'reason' => 'evaluated'], $userId));
+        // No broadcast; clients poll session state
 
         $room = \App\Models\Room::find($session->room_id);
         if ($room) {
@@ -125,8 +125,7 @@ class SessionController extends Controller
             'ended_at' => now(),
         ]);
 
-        // Notify both session participants
-        event(new RoomSessionSignaling($sessionCode, 'terminated', ['by' => $userId], $userId));
+        // No broadcast; clients poll session state
 
         // Clear current participant and broadcast room status so UIs update accordingly
         $room = \App\Models\Room::find($session->room_id);

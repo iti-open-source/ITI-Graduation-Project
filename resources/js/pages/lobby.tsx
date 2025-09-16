@@ -660,81 +660,35 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                 </>
               )}
 
-              {/* Past */}
-              {pastRooms.length > 0 && (
-                <>
-                  <h2 className="mt-12 mb-4 text-2xl font-semibold">Past Interviews</h2>
-                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {pastRooms.map((room) => {
-                      const pivot = room.pivot;
-                      let statusText = "";
-                      let statusBadge: "destructive" | "secondary" = "secondary";
-
-                      if (pivot?.is_absent) {
-                        statusText = "Absent";
-                        statusBadge = "destructive"; // red badge
-                      } else if (pivot?.interview_done) {
-                        statusText = "Completed";
-                        statusBadge = "secondary"; // gray badge
-                      }
-
-                      return (
-                        <motion.div key={room.id} variants={fadeIn} whileHover={{ y: -5 }}>
-                          <Card className="flex h-full flex-col overflow-hidden opacity-70 transition-all hover:border-primary/50">
-                            <CardHeader>
-                              <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1">
-                                  <CardTitle className="text-lg">{room.name}</CardTitle>
-                                  <CardDescription>Code: {room.room_code}</CardDescription>
-                                </div>
-                                <Badge
-                                  variant="outline"
-                                  className={`border ${statusBadge === "destructive" ? "border-red-500 text-red-500" : "border-gray-400 text-gray-500"}`}
-                                >
-                                  {statusText}
-                                </Badge>
-                              </div>
-                            </CardHeader>
-                            <CardContent className="flex flex-1 flex-col justify-between space-y-4">
-                              <div className="space-y-3">
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                  <span className="font-medium">Your interview was:</span>
-                                  {room.student_interview_date && room.student_interview_time && (
-                                    <>
-                                      <span className="flex items-center gap-1">
-                                        📅{" "}
-                                        {new Date(room.student_interview_date).toLocaleDateString(
-                                          undefined,
-                                          {
-                                            weekday: "short",
-                                            year: "numeric",
-                                            month: "short",
-                                            day: "numeric",
-                                          },
-                                        )}
-                                      </span>
-                                      <span className="flex items-center gap-1">
-                                        ⏰{" "}
-                                        {new Date(
-                                          `${room.student_interview_date}T${room.student_interview_time}`,
-                                        ).toLocaleTimeString(undefined, {
-                                          hour: "2-digit",
-                                          minute: "2-digit",
-                                          hour12: true,
-                                        })}
-                                      </span>
-                                    </>
-                                  )}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
+              {/* Past Interviews removed for student on Lobby */}
+              {/**
+               {pastRooms.length > 0 && (
+                 <>
+                   <h2 className="mt-12 mb-4 text-2xl font-semibold">Past Interviews</h2>
+                   <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                     {pastRooms.map((room) => {
+                       const pivot = room.pivot;
+                       let statusText = "";
+                       let statusBadge: "destructive" | "secondary" = "secondary";
+                       if (pivot?.is_absent) {
+                         statusText = "Absent";
+                         statusBadge = "destructive";
+                       } else if (pivot?.interview_done) {
+                         statusText = "Completed";
+                         statusBadge = "secondary";
+                       }
+                       return (
+                         <motion.div key={room.id} variants={fadeIn} whileHover={{ y: -5 }}>
+                           <Card className="flex h-full flex-col overflow-hidden opacity-70 transition-all hover:border-primary/50">
+                             <CardHeader>...content removed...</CardHeader>
+                           </Card>
+                         </motion.div>
+                       );
+                     })}
+                   </div>
+                 </>
+               )}
+               */}
             </>
           )}
         </motion.div>

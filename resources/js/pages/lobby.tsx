@@ -29,6 +29,10 @@ interface Room {
   student_interview_date?: string | null;
   student_interview_time?: string | null;
   student_interview_done?: boolean;
+  pivot?: {
+    interview_done: boolean;
+    is_absent: boolean;
+  };
 }
 
 interface LobbyProps {
@@ -108,7 +112,7 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
               : null;
 
           return (
-            interviewDate && interviewDate > now && !r.pivot?.interview_done && !r.pivot?.absent
+            interviewDate && interviewDate > now && !r.pivot?.interview_done && !r.pivot?.is_absent
           );
         })
       : userRooms;

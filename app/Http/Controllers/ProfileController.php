@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Room;
+use Illuminate\Support\Facades\DB;
 
 class ProfileController extends Controller
 {

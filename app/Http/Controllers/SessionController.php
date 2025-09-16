@@ -89,8 +89,6 @@ class SessionController extends Controller
         return \Inertia\Inertia::render('session/room', [
             'roomCode' => $sessionCode,
             'isCreator' => $userId === (int) $session->creator_id,
-            'pusherKey' => config('broadcasting.connections.pusher.key'),
-            'pusherCluster' => config('broadcasting.connections.pusher.options.cluster') ?? 'mt1',
         ]);
     }
 
@@ -107,8 +105,7 @@ class SessionController extends Controller
             abort(403, 'Not authorized for this session');
         }
 
-        event(new RoomSessionSignaling($sessionCode, $validated['type'], $validated['data'], $userId));
-
+        // Signaling broadcasts removed; rely on LiveKit connection and polling
         return response()->json(['ok' => true]);
     }
 

@@ -5,7 +5,6 @@ import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AppLayout from "@/layouts/app-layout";
-import CustomLayout from "@/layouts/custom-layout";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import { Calendar, Clock, Copy, Eye, Plus, Trash2, Users, Wind } from "lucide-react";
@@ -170,22 +169,20 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   };
-  const isStudent = role === "student";
-  const Layout = isStudent ? CustomLayout : AppLayout;
   const breadcrumbs = [
     // { title: "Home", href: "/" },
     { title: "Lobby", href: "/lobby" },
   ];
   return (
-    <Layout {...(!isStudent ? { breadcrumbs } : {})}>
+    <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Lobby" />
-      <div className="min-h-screen bg-background text-foreground">
-        <div className="container mx-auto px-4 py-8 md:py-12">
+      <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-6">
+        <div className="mx-auto w-full max-w-7xl">
           <motion.div
             variants={fadeIn}
             initial="hidden"
             animate="visible"
-            className="mx-auto max-w-7xl"
+            className="mx-auto w-full"
           >
             {/* Header */}
             <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -577,7 +574,7 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
             )}
 
             {/* STUDENT VIEW */}
-            {isStudent && (
+            {role === "student" && (
               <>
                 {/* Upcoming */}
                 {upcomingRooms.length > 0 && (
@@ -754,6 +751,6 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
           isLoading={isDeleting}
         />
       </div>
-    </Layout>
+    </AppLayout>
   );
 }

@@ -4,13 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import AppLayout from "@/layouts/app-layout";
 import CustomLayout from "@/layouts/custom-layout";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
-import { Copy, Eye, Plus, Trash2, Users, Wind } from "lucide-react";
+import { Calendar, Clock, Copy, Eye, Plus, Trash2, Users, Wind } from "lucide-react";
 import { useState } from "react";
-import { Calendar, Clock } from "lucide-react";
-import AppLayout from "@/layouts/app-layout";
 
 // It's good practice to define types in a separate file, but here's a quick reference
 interface User {
@@ -51,7 +50,6 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
   const [interviewDates, setInterviewDates] = useState<{ [key: number]: string }>({});
   const [interviewTimes, setInterviewTimes] = useState<{ [key: number]: string }>({});
 
-
   const [searchQuery, setSearchQuery] = useState("");
   // Search in students (name/email only)
   const filteredStudents = students.filter(
@@ -69,8 +67,6 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
     (selectedPage - 1) * selectedPerPage,
     selectedPage * selectedPerPage,
   );
-
-
 
   const handleCreateRoom = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -101,50 +97,43 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
     );
   };
 
-const now = new Date();
-
-const upcomingRooms = role === "student"
-  ? userRooms.filter(r => {
-      const interviewDate = r.student_interview_date && r.student_interview_time
-        ? new Date(`${r.student_interview_date}T${r.student_interview_time}`)
-        : null;
-
-      return (
-        interviewDate &&
-        interviewDate > now &&
-        !r.pivot?.interview_done &&
-        !r.pivot?.absent
-      );
-    })
-  : userRooms;
-
-
- const pastRooms = role === "student"
-  ? userRooms.filter(r => r.pivot && (r.pivot.interview_done || r.pivot.is_absent))
-  : [];
-
-
-
-
-
-  function canStudentEnter(room: Room) {
-  const pivot = room.pivot;
-
-  // Can't enter if no pivot info, or if interview is done, or student was absent
-  if (!pivot || pivot.interview_done || pivot.is_absent) return false;
-
-  if (!room.student_interview_date || !room.student_interview_time) return false;
-
-  const interviewDateTime = new Date(
-    `${room.student_interview_date}T${room.student_interview_time}`
-  );
   const now = new Date();
 
-  // Only allow entering if interview time has arrived
-  return now >= interviewDateTime;
-}
+  const upcomingRooms =
+    role === "student"
+      ? userRooms.filter((r) => {
+          const interviewDate =
+            r.student_interview_date && r.student_interview_time
+              ? new Date(`${r.student_interview_date}T${r.student_interview_time}`)
+              : null;
 
+          return (
+            interviewDate && interviewDate > now && !r.pivot?.interview_done && !r.pivot?.absent
+          );
+        })
+      : userRooms;
 
+  const pastRooms =
+    role === "student"
+      ? userRooms.filter((r) => r.pivot && (r.pivot.interview_done || r.pivot.is_absent))
+      : [];
+
+  function canStudentEnter(room: Room) {
+    const pivot = room.pivot;
+
+    // Can't enter if no pivot info, or if interview is done, or student was absent
+    if (!pivot || pivot.interview_done || pivot.is_absent) return false;
+
+    if (!room.student_interview_date || !room.student_interview_time) return false;
+
+    const interviewDateTime = new Date(
+      `${room.student_interview_date}T${room.student_interview_time}`,
+    );
+    const now = new Date();
+
+    // Only allow entering if interview time has arrived
+    return now >= interviewDateTime;
+  }
 
   const copyRoomLink = (roomCode: string) => {
     const roomUrl = `${window.location.origin}/room/${roomCode}`;
@@ -178,12 +167,13 @@ const upcomingRooms = role === "student"
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   };
   const isStudent = role === "student";
-  const Layout = isStudent ? CustomLayout : AppLayout; const breadcrumbs = [
+  const Layout = isStudent ? CustomLayout : AppLayout;
+  const breadcrumbs = [
     // { title: "Home", href: "/" },
     { title: "Lobby", href: "/lobby" },
   ];
   return (
-    < Layout {...(!isStudent ? { breadcrumbs } : {})}>
+    <Layout {...(!isStudent ? { breadcrumbs } : {})}>
       <Head title="Lobby" />
       <div className="min-h-screen bg-background text-foreground">
         <div className="container mx-auto px-4 py-8 md:py-12">
@@ -255,32 +245,39 @@ const upcomingRooms = role === "student"
                         />
 
                         {/* Searchable Students (only role === "student") */}
-                        <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                        <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
                           {searchQuery.trim() !== "" ? (
                             filteredStudents
                               .filter((s) => s.role === "student")
                               .map((student) => (
                                 <div
                                   key={student.id}
-                                  className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 transition shadow-sm ${selectedStudents.includes(student.id)
-                                    ? "bg-primary/10 border-primary ring-2 ring-primary/40"
-                                    : "hover:bg-muted"
-                                    }`}
+                                  className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 shadow-sm transition ${
+                                    selectedStudents.includes(student.id)
+                                      ? "border-primary bg-primary/10 ring-2 ring-primary/40"
+                                      : "hover:bg-muted"
+                                  }`}
                                   onClick={() => {
                                     setSelectedStudents((prev) =>
                                       prev.includes(student.id)
                                         ? prev.filter((s) => s !== student.id)
                                         : [...prev, student.id],
                                     );
-                                    setSelectedPage(Math.ceil((selectedStudents.length + 1) / selectedPerPage));
+                                    setSelectedPage(
+                                      Math.ceil((selectedStudents.length + 1) / selectedPerPage),
+                                    );
                                   }}
                                 >
                                   <span className="font-medium">
                                     {student.name}{" "}
-                                    <span className="text-muted-foreground text-sm">({student.email})</span>
+                                    <span className="text-sm text-muted-foreground">
+                                      ({student.email})
+                                    </span>
                                   </span>
                                   {selectedStudents.includes(student.id) && (
-                                    <Badge variant="secondary" className="px-2 py-0.5">✓ Selected</Badge>
+                                    <Badge variant="secondary" className="px-2 py-0.5">
+                                      ✓ Selected
+                                    </Badge>
                                   )}
                                 </div>
                               ))
@@ -293,8 +290,10 @@ const upcomingRooms = role === "student"
 
                         {/* Selected Students with Pagination */}
                         {selectedStudents.length > 0 && (
-                          <div className="mt-6 space-y-4 rounded-xl border p-5 bg-gradient-to-br from-primary/5 via-white to-secondary/5 shadow-md">
-                            <Label className="block text-base font-semibold mb-2">🎓 Selected Students</Label>
+                          <div className="mt-6 space-y-4 rounded-lg border bg-card p-4 shadow-sm">
+                            <Label className="mb-2 block text-base font-semibold text-foreground">
+                              🎓 Selected Students
+                            </Label>
 
                             {paginatedSelected.map((id) => {
                               const student = students.find((s) => s.id === id);
@@ -302,13 +301,13 @@ const upcomingRooms = role === "student"
                               return (
                                 <div
                                   key={id}
-                                  className="relative space-y-3 rounded-lg border-l-4 border-primary bg-gradient-to-r from-primary/10 via-white to-primary/5 p-4 shadow-sm transition hover:shadow-md"
+                                  className="relative space-y-3 rounded-lg border bg-muted/40 p-4 transition-colors hover:bg-muted/60"
                                 >
                                   {/* Deselect Button */}
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="absolute top-2 right-2 rounded-full bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700"
+                                    className="absolute top-2 right-2 h-6 w-6 rounded-full p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                                     onClick={() =>
                                       setSelectedStudents((prev) => prev.filter((s) => s !== id))
                                     }
@@ -317,24 +316,25 @@ const upcomingRooms = role === "student"
                                   </Button>
 
                                   {/* Student Info */}
-                                  <p className="text-sm font-semibold text-primary">
-                                    {student.name}{" "}
-                                    <span className="ml-1 rounded bg-primary/10 px-2 py-0.5 text-xs text-muted-foreground">
-                                      {student.email}
-                                    </span>
-                                  </p>
+                                  <div className="pr-8">
+                                    <p className="text-sm font-semibold text-foreground">
+                                      {student.name}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">{student.email}</p>
+                                  </div>
 
                                   {/* Date + Time Pickers */}
-                                  <div className="flex flex-col gap-4 sm:flex-row">
+                                  <div className="grid gap-3 sm:grid-cols-2">
                                     {/* Interview Date */}
-                                    <div className="flex flex-col flex-1">
-                                      <Label className="mb-1 text-sm font-medium text-primary">Interview Date</Label>
+                                    <div className="space-y-2">
+                                      <Label className="text-xs font-medium text-foreground">
+                                        Interview Date
+                                      </Label>
                                       <div className="relative">
-                                        <Calendar className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                                        <input
+                                        <Calendar className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                        <Input
                                           type="date"
-                                          className="w-full rounded-md border border-primary/30 bg-white pl-10 pr-3 py-2 text-sm shadow-sm 
-                   focus:border-primary focus:ring focus:ring-primary/30 transition"
+                                          className="pl-10 text-sm"
                                           value={interviewDates[id] || ""}
                                           onChange={(e) =>
                                             setInterviewDates((prev) => ({
@@ -347,14 +347,15 @@ const upcomingRooms = role === "student"
                                     </div>
 
                                     {/* Interview Time */}
-                                    <div className="flex flex-col flex-1">
-                                      <Label className="mb-1 text-sm font-medium text-primary">Interview Time</Label>
+                                    <div className="space-y-2">
+                                      <Label className="text-xs font-medium text-foreground">
+                                        Interview Time
+                                      </Label>
                                       <div className="relative">
-                                        <Clock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                                        <input
+                                        <Clock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                        <Input
                                           type="time"
-                                          className="w-full rounded-md border border-primary/30 bg-white pl-10 pr-3 py-2 text-sm shadow-sm 
-                   focus:border-primary focus:ring focus:ring-primary/30 transition"
+                                          className="pl-10 text-sm"
                                           value={interviewTimes[id] || ""}
                                           onChange={(e) =>
                                             setInterviewTimes((prev) => ({
@@ -366,25 +367,21 @@ const upcomingRooms = role === "student"
                                       </div>
                                     </div>
                                   </div>
-
-
-
                                 </div>
                               );
                             })}
 
                             {/* Pagination Controls */}
-                            <div className="mt-5 flex items-center justify-between">
+                            <div className="flex items-center justify-between border-t pt-4">
                               <Button
                                 variant="outline"
                                 size="sm"
                                 disabled={selectedPage === 1}
                                 onClick={() => setSelectedPage((p) => p - 1)}
-                                className="hover:bg-primary/10"
                               >
-                                ⬅ Prev
+                                Previous
                               </Button>
-                              <span className="text-sm font-medium text-primary">
+                              <span className="text-sm text-muted-foreground">
                                 Page {selectedPage} of {selectedTotalPages}
                               </span>
                               <Button
@@ -392,18 +389,13 @@ const upcomingRooms = role === "student"
                                 size="sm"
                                 disabled={selectedPage === selectedTotalPages}
                                 onClick={() => setSelectedPage((p) => p + 1)}
-                                className="hover:bg-primary/10"
                               >
-                                Next ➡
+                                Next
                               </Button>
                             </div>
                           </div>
                         )}
-
                       </div>
-
-
-
 
                       <div className="flex items-center gap-2">
                         <Button type="submit" disabled={isCreating}>
@@ -425,7 +417,7 @@ const upcomingRooms = role === "student"
 
             {/* Rooms Grid */}
             {userRooms.length > 0 ? (
-              <div className="grid gap-6 mb-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mb-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {userRooms.map((room) => (
                   <motion.div key={room.id} variants={fadeIn} whileHover={{ y: -5 }}>
                     <Card className="flex h-full flex-col overflow-hidden transition-all hover:border-primary/50">
@@ -517,14 +509,14 @@ const upcomingRooms = role === "student"
                               </Button>
                             ) : (
                               // student cannot enter yet
-                               <Button disabled className="flex-1 opacity-50">
-    <Eye className="mr-2 h-4 w-4" />{" "}
-    {room.pivot?.is_absent
-      ? "Absent"
-      : room.pivot?.interview_done
-      ? "Completed"
-      : "Not Available Yet"}
-  </Button>
+                              <Button disabled className="flex-1 opacity-50">
+                                <Eye className="mr-2 h-4 w-4" />{" "}
+                                {room.pivot?.is_absent
+                                  ? "Absent"
+                                  : room.pivot?.interview_done
+                                    ? "Completed"
+                                    : "Not Available Yet"}
+                              </Button>
                             )
                           ) : (
                             // instructors/admins always can enter
@@ -580,156 +572,165 @@ const upcomingRooms = role === "student"
               </motion.div>
             )}
 
-
-{/* STUDENT VIEW */}
-{isStudent && (
-  <>
-    {/* Upcoming */}
-    {upcomingRooms.length > 0 && (
-      <>
-        <h2 className="mb-4 mt-12 text-2xl font-semibold">Upcoming Interviews</h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {upcomingRooms.map((room) => (
-            <motion.div key={room.id} variants={fadeIn} whileHover={{ y: -5 }}>
-              <Card className="flex h-full flex-col overflow-hidden transition-all hover:border-primary/50">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">{room.name}</CardTitle>
-                      <CardDescription>Code: {room.room_code}</CardDescription>
+            {/* STUDENT VIEW */}
+            {isStudent && (
+              <>
+                {/* Upcoming */}
+                {upcomingRooms.length > 0 && (
+                  <>
+                    <h2 className="mt-12 mb-4 text-2xl font-semibold">Upcoming Interviews</h2>
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                      {upcomingRooms.map((room) => (
+                        <motion.div key={room.id} variants={fadeIn} whileHover={{ y: -5 }}>
+                          <Card className="flex h-full flex-col overflow-hidden transition-all hover:border-primary/50">
+                            <CardHeader>
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1">
+                                  <CardTitle className="text-lg">{room.name}</CardTitle>
+                                  <CardDescription>Code: {room.room_code}</CardDescription>
+                                </div>
+                                <Badge
+                                  variant="outline"
+                                  className="border-green-500 text-green-500"
+                                >
+                                  Upcoming
+                                </Badge>
+                              </div>
+                            </CardHeader>
+                            <CardContent className="flex flex-1 flex-col justify-between space-y-4">
+                              {room.student_interview_date && room.student_interview_time && (
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <span className="font-medium">Your interview:</span>
+                                  <span className="flex items-center gap-1">
+                                    📅{" "}
+                                    {new Date(room.student_interview_date).toLocaleDateString(
+                                      undefined,
+                                      {
+                                        weekday: "short",
+                                        year: "numeric",
+                                        month: "short",
+                                        day: "numeric",
+                                      },
+                                    )}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    ⏰{" "}
+                                    {new Date(
+                                      `${room.student_interview_date}T${room.student_interview_time}`,
+                                    ).toLocaleTimeString(undefined, {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      hour12: true,
+                                    })}
+                                  </span>
+                                </div>
+                              )}
+                              <div className="mt-4 flex items-center gap-2">
+                                {canStudentEnter(room) ? (
+                                  <Button asChild className="flex-1">
+                                    <Link href={`/room/${room.room_code}`}>
+                                      <Eye className="mr-2 h-4 w-4" /> Enter Room
+                                    </Link>
+                                  </Button>
+                                ) : (
+                                  <Button disabled className="flex-1 opacity-50">
+                                    <Eye className="mr-2 h-4 w-4" /> Not Available Yet
+                                  </Button>
+                                )}
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  onClick={() => copyRoomLink(room.room_code)}
+                                >
+                                  <Copy className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      ))}
                     </div>
-                    <Badge
-                      variant="outline"
-                      className="border-green-500 text-green-500"
-                    >
-                      Upcoming
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex flex-1 flex-col justify-between space-y-4">
-                  {room.student_interview_date && room.student_interview_time && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span className="font-medium">Your interview:</span>
-                      <span className="flex items-center gap-1">
-                        📅{" "}
-                        {new Date(room.student_interview_date).toLocaleDateString(undefined, {
-                          weekday: "short",
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        ⏰{" "}
-                        {new Date(`${room.student_interview_date}T${room.student_interview_time}`).toLocaleTimeString(undefined, {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: true,
-                        })}
-                      </span>
+                  </>
+                )}
+
+                {/* Past */}
+                {pastRooms.length > 0 && (
+                  <>
+                    <h2 className="mt-12 mb-4 text-2xl font-semibold">Past Interviews</h2>
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                      {pastRooms.map((room) => {
+                        const pivot = room.pivot;
+                        let statusText = "";
+                        let statusBadge: "destructive" | "secondary" = "secondary";
+
+                        if (pivot?.is_absent) {
+                          statusText = "Absent";
+                          statusBadge = "destructive"; // red badge
+                        } else if (pivot?.interview_done) {
+                          statusText = "Completed";
+                          statusBadge = "secondary"; // gray badge
+                        }
+
+                        return (
+                          <motion.div key={room.id} variants={fadeIn} whileHover={{ y: -5 }}>
+                            <Card className="flex h-full flex-col overflow-hidden opacity-70 transition-all hover:border-primary/50">
+                              <CardHeader>
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex-1">
+                                    <CardTitle className="text-lg">{room.name}</CardTitle>
+                                    <CardDescription>Code: {room.room_code}</CardDescription>
+                                  </div>
+                                  <Badge
+                                    variant="outline"
+                                    className={`border ${statusBadge === "destructive" ? "border-red-500 text-red-500" : "border-gray-400 text-gray-500"}`}
+                                  >
+                                    {statusText}
+                                  </Badge>
+                                </div>
+                              </CardHeader>
+                              <CardContent className="flex flex-1 flex-col justify-between space-y-4">
+                                <div className="space-y-3">
+                                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <span className="font-medium">Your interview was:</span>
+                                    {room.student_interview_date && room.student_interview_time && (
+                                      <>
+                                        <span className="flex items-center gap-1">
+                                          📅{" "}
+                                          {new Date(room.student_interview_date).toLocaleDateString(
+                                            undefined,
+                                            {
+                                              weekday: "short",
+                                              year: "numeric",
+                                              month: "short",
+                                              day: "numeric",
+                                            },
+                                          )}
+                                        </span>
+                                        <span className="flex items-center gap-1">
+                                          ⏰{" "}
+                                          {new Date(
+                                            `${room.student_interview_date}T${room.student_interview_time}`,
+                                          ).toLocaleTimeString(undefined, {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            hour12: true,
+                                          })}
+                                        </span>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </motion.div>
+                        );
+                      })}
                     </div>
-                  )}
-                  <div className="mt-4 flex items-center gap-2">
-                    {canStudentEnter(room) ? (
-                      <Button asChild className="flex-1">
-                        <Link href={`/room/${room.room_code}`}>
-                          <Eye className="mr-2 h-4 w-4" /> Enter Room
-                        </Link>
-                      </Button>
-                    ) : (
-                      <Button disabled className="flex-1 opacity-50">
-                        <Eye className="mr-2 h-4 w-4" /> Not Available Yet
-                      </Button>
-                    )}
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => copyRoomLink(room.room_code)}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </>
-    )}
-
-    {/* Past */}
-    {pastRooms.length > 0 && (
-      <>
-        <h2 className="mb-4 mt-12 text-2xl font-semibold">Past Interviews</h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {pastRooms.map((room) => {
-  const pivot = room.pivot;
-  let statusText = "";
-  let statusBadge: "destructive" | "secondary" = "secondary";
-
-  if (pivot?.is_absent) {
-    statusText = "Absent";
-    statusBadge = "destructive"; // red badge
-  } else if (pivot?.interview_done) {
-    statusText = "Completed";
-    statusBadge = "secondary"; // gray badge
-  }
-
-  return (
-    <motion.div key={room.id} variants={fadeIn} whileHover={{ y: -5 }}>
-      <Card className="flex h-full flex-col overflow-hidden transition-all hover:border-primary/50 opacity-70">
-        <CardHeader>
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <CardTitle className="text-lg">{room.name}</CardTitle>
-              <CardDescription>Code: {room.room_code}</CardDescription>
-            </div>
-            <Badge variant="outline" className={`border ${statusBadge === "destructive" ? "border-red-500 text-red-500" : "border-gray-400 text-gray-500"}`}>
-              {statusText}
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="flex flex-1 flex-col justify-between space-y-4">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="font-medium">Your interview was:</span>
-              {room.student_interview_date && room.student_interview_time && (
-                <>
-                  <span className="flex items-center gap-1">
-                    📅 {new Date(room.student_interview_date).toLocaleDateString(undefined, {
-                      weekday: "short",
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    ⏰ {new Date(`${room.student_interview_date}T${room.student_interview_time}`).toLocaleTimeString(undefined, {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}
-                  </span>
-                </>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-})}
-
-        </div>
-      </>
-    )}
-  </>
-)}
-
-
+                  </>
+                )}
+              </>
+            )}
           </motion.div>
-
-
         </div>
 
         {/* Confirmation Dialog */}

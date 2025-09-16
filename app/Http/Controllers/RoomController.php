@@ -221,6 +221,71 @@ class RoomController extends Controller
         ]);
     }
 
+    public function state(Request $request, $roomCode)
+    {
+        $room = Room::where('room_code', $roomCode)
+            ->with([
+                'currentParticipant',
+                'queue.user',
+                'assignedStudents' => function ($q) {
+                    $q->select('users.id', 'users.name', 'users.email');
+                },
+                'sessions' => function ($q) {
+                    $q->latest('id');
+                },
+            ])
+            ->firstOrFail();
+
+        // Transform assigned students to include pivot fields explicitly
+        $assigned = $room->assignedStudents->map(function ($student) {
+            return [
+                'id' => $student->id,
+                'name' => $student->name,
+                'email' => $student->email,
+                'interview_date' => $student->pivot->interview_date,
+                'interview_time' => $student->pivot->interview_time,
+                'interview_done' => (bool) $student->pivot->interview_done,
+                'is_absent' => (bool) $student->pivot->is_absent,
+            ];
+        })->values();
+
+        $sessions = $room->sessions->map(function ($s) {
+            return [
+                'id' => $s->id,
+                'session_code' => $s->session_code,
+                'status' => $s->status,
+                'started_at' => $s->started_at,
+                'ended_at' => $s->ended_at,
+            ];
+        })->values();
+
+        return response()->json([
+            'room' => [
+                'id' => $room->id,
+                'name' => $room->name,
+                'room_code' => $room->room_code,
+                'is_active' => $room->is_active,
+                'last_activity' => $room->last_activity,
+                'current_participant' => $room->currentParticipant,
+                'queue' => $room->queue->map(function ($q) {
+                    return [
+                        'id' => $q->id,
+                        'position' => $q->position,
+                        'joined_at' => $q->joined_at,
+                        'user' => [
+                            'id' => $q->user->id,
+                            'name' => $q->user->name,
+                            'email' => $q->user->email,
+                        ],
+                    ];
+                })->values(),
+                'queue_count' => $room->queue()->count(),
+                'assignedStudents' => $assigned,
+                'sessions' => $sessions,
+            ],
+        ]);
+    }
+
     public function join(Request $request, $roomCode)
     {
         $room = Room::where('room_code', $roomCode)->firstOrFail();

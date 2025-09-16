@@ -873,7 +873,7 @@ export default function Creator({
                                   {student.interview_done ? (
                                     <>
                                       <span className="block group-hover:hidden">
-                                        ✅Interview Done
+                                        Interview Done
                                       </span>
                                       <span className="hidden group-hover:block">Undo Done</span>
                                     </>
@@ -1040,9 +1040,11 @@ export default function Creator({
                         value={selectedStudent}
                         onChange={(e) => setSelectedStudent(Number(e.target.value) || "")}
                       >
-                        <option value="">Select a student</option>
+                        <option value="" className="text-gray-800" disabled>
+                          Select a student
+                        </option>
                         {unassigned.map((s) => (
-                          <option key={s.id} value={s.id}>
+                          <option key={s.id} value={s.id} className="text-gray-800">
                             {s.name} ({s.email})
                           </option>
                         ))}

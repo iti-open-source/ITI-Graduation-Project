@@ -5,8 +5,9 @@ import Problem from "@/components/problem/problem";
 import Whiteboard from "@/components/whiteboard/collaborative-whiteboard";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
-import { Head } from "@inertiajs/react";
-import { useState } from "react";
+import { Head, usePage } from "@inertiajs/react";
+import Pusher from "pusher-js";
+import { useEffect, useState } from "react";
 
 interface PageProps {
   roomCode: string;
@@ -22,6 +23,39 @@ export default function SessionRoom(props: PageProps) {
   const { roomCode, isCreator } = props;
   const [activeTab, setActiveTab] = useState("editor");
   const [isVideoConnected, setIsVideoConnected] = useState(false);
+  const [showEvaluateModal, setShowEvaluateModal] = useState(false);
+  const [rating, setRating] = useState<number>(10);
+  const [comments, setComments] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const { csrf_token, pusherKey, pusherCluster } = usePage().props as any;
+
+  // Listen for session termination and redirect appropriately
+  useEffect(() => {
+    if (!pusherKey) return;
+
+    const pusher = new Pusher(pusherKey, {
+      cluster: pusherCluster || "mt1",
+      forceTLS: true,
+    });
+
+    const channel = pusher.subscribe(`session.room.${roomCode}`);
+    const handler = (payload: any) => {
+      if (payload?.type === "terminated") {
+        // Interviewer likely already redirected on submit; ensure guest goes to dashboard
+        if (!isCreator) {
+          window.location.href = "/dashboard";
+        }
+      }
+    };
+    channel.bind("room-session-signaling", handler);
+
+    return () => {
+      channel.unbind("room-session-signaling", handler);
+      pusher.unsubscribe(`session.room.${roomCode}`);
+      pusher.disconnect();
+    };
+  }, [roomCode, isCreator, pusherKey, pusherCluster]);
 
   // Handle video call connection
   const handleVideoConnected = () => {
@@ -60,6 +94,15 @@ export default function SessionRoom(props: PageProps) {
                       </div>
                     ) : (
                       ""
+                    )}
+                    {isCreator && (
+                      <button
+                        onClick={() => setShowEvaluateModal(true)}
+                        className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        title="End session and submit evaluation"
+                      >
+                        End & Evaluate
+                      </button>
                     )}
                   </div>
                 </div>
@@ -154,6 +197,99 @@ export default function SessionRoom(props: PageProps) {
           </div>
         </div>
       </div>
+
+      {/* Evaluate Modal */}
+      {showEvaluateModal && isCreator && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-xl">
+            <div className="border-b border-[var(--color-border)] px-5 py-4">
+              <h3 className="text-base font-semibold text-[var(--color-text)]">
+                Evaluate Interview
+              </h3>
+            </div>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  setSubmitting(true);
+                  const res = await fetch(`/session/${roomCode}/evaluate`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "X-CSRF-TOKEN":
+                        (csrf_token as string) ||
+                        (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)
+                          ?.content ||
+                        "",
+                    },
+                    body: JSON.stringify({ rating, comments }),
+                  });
+                  if (res.ok) {
+                    window.location.href = "/lobby";
+                  }
+                } finally {
+                  setSubmitting(false);
+                }
+              }}
+              className="px-5 py-4"
+            >
+              <div className="space-y-4">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-[var(--color-text)]">
+                    Rating
+                  </label>
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRating(r)}
+                        className={`flex h-9 w-9 items-center justify-center rounded-full border transition-colors ${
+                          rating >= r
+                            ? "border-yellow-400 bg-yellow-400 text-white"
+                            : "border-[var(--color-border)] bg-[var(--color-muted)] text-[var(--color-text)]"
+                        }`}
+                        aria-label={`Rate ${r}`}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-[var(--color-text)]">
+                    Comments
+                  </label>
+                  <textarea
+                    value={comments}
+                    onChange={(e) => setComments(e.target.value)}
+                    rows={5}
+                    className="w-full rounded-md border border-[var(--color-border)] bg-transparent p-2 text-sm text-[var(--color-text)] shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    placeholder="Share feedback about the interviewee..."
+                  />
+                </div>
+              </div>
+              <div className="mt-5 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEvaluateModal(false)}
+                  className="rounded-md border border-[var(--color-border)] bg-[var(--color-muted)] px-4 py-2 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-muted)]/80"
+                  disabled={submitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={submitting}
+                >
+                  {submitting ? "Submitting..." : "Submit & End Session"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 }

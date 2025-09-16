@@ -3,19 +3,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { DialogHeader } from "@/components/ui/dialog";
 import { useRoomUpdates } from "@/hooks/use-room-updates";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem, type SharedData } from "@/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
+import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
   Copy,
+  Edit2,
   Trash2,
   // Undo2,
   User,
+  UserCheck2,
   UserPlus,
   Users,
   UserX,
@@ -78,6 +82,12 @@ export default function Creator({
   const [copied, setCopied] = useState(false);
   const { auth } = usePage<SharedData>().props;
   const { room, isConnected } = useRoomUpdates(initialRoom.room_code, initialRoom);
+
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+
+
 
   // const [selectedStudent, setSelectedStudent] = useState<number | null>(null);
 
@@ -299,8 +309,6 @@ export default function Creator({
     }
   };
 
-
-
   const [markingAbsentIds, setMarkingAbsentIds] = useState<number[]>([]);
   const [studentToMarkAbsent, setStudentToMarkAbsent] = useState<any | null>(null);
 
@@ -352,9 +360,7 @@ export default function Creator({
   };
 
 
-  // Disable button if:
-  // 1. Student is absent
-  // 2. Interview time has not arrived yet (for marking done)
+  // Disable button if: Student is absent & Interview time has not arrived yet (for marking done)
   function disableMarkDone(student: AssignedStudent): boolean {
     if (!student) return true;
 
@@ -378,8 +384,6 @@ export default function Creator({
     // Disable if interview is done or interview time hasn't come yet
     return (student.interview_done && student.is_absent === false) || (!!interviewDateTime && now < interviewDateTime);
   }
-
-
 
 
   // Pagination component
@@ -779,11 +783,11 @@ export default function Creator({
             <motion.div variants={fadeIn} initial="hidden" animate="visible" className="space-y-6 lg:col-span-2">
               <Card className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500 text-white">
-                      <Users className="h-5 w-5" />
-                    </div>
+                  <CardTitle className="flex items-center justify-between gap-3 text-[var(--color-text)]">
                     <div className="flex items-center gap-2">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500 text-white">
+                        <Users className="h-5 w-5" />
+                      </div>
                       Assigned Students
                       {assigned.length > 0 && (
                         <span className="ml-2 text-sm text-purple-600 dark:text-purple-400">
@@ -791,8 +795,15 @@ export default function Creator({
                         </span>
                       )}
                     </div>
+                    <div className="flex gap-2">
+                      {/* Trigger Add Student Modal */}
+                      <Button onClick={() => setShowAddModal(true)} size="icon">
+                        <UserPlus className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </CardTitle>
                 </CardHeader>
+
                 <CardContent className="space-y-4">
                   {/* Assigned Students List */}
 
@@ -906,7 +917,20 @@ export default function Creator({
                               </div>
                             </div>
 
-
+                            {/* Edit button */}
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedStudent(student.id);
+                                setShowEditModal(true);
+                                // setEditSuccess(false);
+                                setUpdatingStudent(false);
+                              }}
+                              className="border-blue-300 text-blue-600 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 dark:border-blue-500 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
 
                             <Button
                               size="icon"
@@ -981,42 +1005,29 @@ export default function Creator({
                   />
                 </CardContent>
               </Card>
-            </motion.div>
 
-            {/* Assign New Student */}
-            <motion.div
-              variants={fadeIn}
-              initial="hidden"
-              animate="visible"
-              className="space-y-6"
-            >
-              <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-500 text-white">
-                      <UserPlus className="h-5 w-5" />
-                    </div>
-                    <div className="flex items-center gap-2">Assigne New Students</div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Add New Student */}
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-[var(--color-text)]">
-                      Assign new students
-                    </h4>
-
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                      <select
-                        className="min-w-0 flex-1 rounded-md border p-2 text-sm"
-                        value={selectedStudent}
-                        onChange={(e) => setSelectedStudent(Number(e.target.value) || "")}
+              {/* Add New Student Modal */}
+              {showAddModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                  <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Assign New Student</h2>
+                      <button
+                        onClick={() => setShowAddModal(false)}
+                        className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                       >
-                        <option value="" className="text-gray-800">
-                          Select a student
-                        </option>
+                        ✕
+                      </button>
+                    </div>
+                    <div className="space-y-4">
+                      <select
+                        className="w-full rounded-md border p-2 text-sm"
+                        value={selectedStudent}
+                        onChange={(e) => setSelectedStudent(Number(e.target.value) || '')}
+                      >
+                        <option value="">Select a student</option>
                         {unassigned.map((s) => (
-                          <option key={s.id} value={s.id} className="text-gray-800">
+                          <option key={s.id} value={s.id}>
                             {s.name} ({s.email})
                           </option>
                         ))}
@@ -1024,77 +1035,61 @@ export default function Creator({
 
                       <input
                         type="date"
-                        className="w-full rounded-md border p-2 text-sm sm:w-auto"
+                        className="w-full rounded-md border p-2 text-sm"
                         value={interviewDate}
                         onChange={(e) => setInterviewDate(e.target.value)}
                       />
 
                       <input
                         type="time"
-                        className="w-full rounded-md border p-2 text-sm sm:w-auto"
+                        className="w-full rounded-md border p-2 text-sm"
                         value={interviewTime}
                         onChange={(e) => setInterviewTime(e.target.value)}
                       />
+
+                      <Button onClick={handleAssign} disabled={!selectedStudent || assigning}>
+                        {assigning ? 'Assigning...' : 'Assign'}
+                      </Button>
                     </div>
-                    <Button onClick={handleAssign} disabled={!selectedStudent || assigning}>
-                      {assigning ? "Assigning..." : "Assign"}
-                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-            {/* Edit Student Interviews */}
-            <motion.div
-              variants={fadeIn}
-              initial="hidden"
-              animate="visible"
-              className="space-y-6"
-            >
-              <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-500 text-white">
-                      <User className="h-5 w-5" />
+                </div>
+              )}
+
+              {/* Edit Assigned Student Modal */}
+              {showEditModal && selectedStudent && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                  <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Edit Interview Schedule
+                      </h2>
+                      <button
+                        onClick={() => setShowEditModal(false)}
+                        className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                      >
+                        ✕
+                      </button>
                     </div>
-                    <div className="flex items-center gap-2">
-                      Edit Assigned Students' Interview Dates and Times
-                    </div>
-                  </CardTitle>
-                </CardHeader>
 
-                <CardContent className="max-h-96 space-y-4 overflow-y-auto">
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-[var(--color-text)]">
-                      Select a student
-                    </h4>
-
-                    <select
-                      className="w-full rounded-md border p-2 text-sm"
-                      value={selectedStudent}
-                      onChange={(e) => setSelectedStudent(Number(e.target.value) || "")}
-                    >
-                      <option value=""> Select a student </option>
-                      {assigned.map((student) => (
-                        <option key={student.id} value={student.id} className="text-gray-800">
-                          {student.name} ({student.email})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {selectedStudent && (
-                    <div className="space-y-2 border-t pt-2">
+                    <div className="space-y-4">
                       {(() => {
                         const student = assigned.find((s) => s.id === selectedStudent);
                         if (!student) return null;
 
                         return (
                           <div className="flex flex-col gap-2">
+                            {/* Student info */}
+                            <div className="text-sm text-gray-700 dark:text-gray-300">
+                              <p className="font-medium">{student.name}</p>
+                              <p className="truncate">{student.email}</p>
+                            </div>
+
+                            {/* Interview date & time */}
                             <div className="flex gap-2">
                               <input
                                 type="date"
                                 className="flex-1 rounded-md border p-2 text-sm"
-                                value={student.interview_date || ""}
+                                value={student.interview_date || ''}
                                 onChange={(e) => {
                                   const updated = [...assigned];
                                   const index = updated.findIndex((s) => s.id === student.id);
@@ -1105,7 +1100,7 @@ export default function Creator({
                               <input
                                 type="time"
                                 className="flex-1 rounded-md border p-2 text-sm"
-                                value={student.interview_time || ""}
+                                value={student.interview_time || ''}
                                 onChange={(e) => {
                                   const updated = [...assigned];
                                   const index = updated.findIndex((s) => s.id === student.id);
@@ -1114,63 +1109,40 @@ export default function Creator({
                                 }}
                               />
                             </div>
+
+                            {/* Update button */}
                             <Button
-                              onClick={() => {
-                                const s = assigned.find((a) => a.id === selectedStudent);
-                                if (s) setStudentToUpdate(s);
-                              }}
+                              onClick={() => updateStudentInterview(student.id,
+                                student.interview_date || '',
+                                student.interview_time || '')}
+                              disabled={updatingStudent}
                             >
-                              {updatingStudent ? "Updating..." : "Update"}
+                              {updatingStudent ? 'Updating...' : 'Update'}
                             </Button>
                           </div>
                         );
                       })()}
                     </div>
-                  )}
-                </CardContent>
+                  </div>
+                </div>
+              )}
 
-                <ConfirmationDialog
-                  open={!!studentToUpdate}
-                  onOpenChange={(open) => !open && setStudentToUpdate(null)}
-                  onConfirm={() => {
-                    if (studentToUpdate) {
-                      updateStudentInterview(
-                        studentToUpdate.id,
-                        studentToUpdate.interview_date ?? "",
-                        studentToUpdate.interview_time ?? "",
-                      );
-                      setStudentToUpdate(null);
-                    }
-                  }}
-                  title="Update Interview Schedule"
-                  description={
-                    studentToUpdate
-                      ? `Are you sure you want to update the interview date and time for "${studentToUpdate.name}"?`
-                      : "Are you sure you want to update the interview schedule?"
-                  }
-                  confirmText="Update Schedule"
-                  cancelText="Cancel"
-                  variant="default"
-                  isLoading={updatingStudent}
-                />
-              </Card>
             </motion.div>
 
           </div>
-
 
           <motion.div variants={fadeIn} initial="hidden" animate="visible" className="space-y-6 lg:col-span-2">
             {/* Section 1: Interview Done / Absent */}
             <Card className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500 text-white">
-                    <Users className="h-5 w-5" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-500 text-white">
+                    <UserCheck2 className="h-5 w-5" />
                   </div>
                   <div className="flex items-center gap-2">
                     Interviewed / Absent Students
                     {assigned.filter(s => s.interview_done || s.is_absent).length > 0 && (
-                      <span className="ml-2 text-sm text-purple-600 dark:text-purple-400">
+                      <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
                         ({assigned.filter(s => s.interview_done || s.is_absent).length})
                       </span>
                     )}
@@ -1187,11 +1159,11 @@ export default function Creator({
                           key={student.id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          className="flex items-center justify-between gap-4 rounded-lg border border-purple-900/40 bg-purple-200/20 p-4 transition-colors hover:bg-purple-300/30 dark:bg-purple-200/10 dark:hover:bg-purple-900/20"
+                          className="flex items-center justify-between gap-4 rounded-lg border border-gray-900/40 bg-gray-200/20 p-4 transition-colors hover:bg-gray-300/30 dark:bg-gray-200/10 dark:hover:bg-gray-900/20"
                         >
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10">
-                              <AvatarFallback className="bg-purple-50 font-semibold text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                              <AvatarFallback className="bg-gray-50 font-semibold text-gray-600 dark:bg-gray-900/30 dark:text-gray-400">
                                 {student.name.charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
@@ -1224,13 +1196,13 @@ export default function Creator({
             <Card className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500 text-white">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-500 text-white">
                     <Users className="h-5 w-5" />
                   </div>
                   <div className="flex items-center gap-2">
                     Students To Be Interviewed
                     {assigned.filter(s => !s.interview_done && !s.is_absent).length > 0 && (
-                      <span className="ml-2 text-sm text-blue-600 dark:text-blue-400">
+                      <span className="ml-2 text-sm text-pink-600 dark:text-pink-400">
                         ({assigned.filter(s => !s.interview_done && !s.is_absent).length})
                       </span>
                     )}
@@ -1247,11 +1219,11 @@ export default function Creator({
                           key={student.id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          className="flex items-center justify-between gap-4 rounded-lg border border-blue-900/40 bg-blue-200/20 p-4 transition-colors hover:bg-blue-300/30 dark:bg-blue-200/10 dark:hover:bg-blue-900/20"
+                          className="flex items-center justify-between gap-4 rounded-lg border border-pink-900/40 bg-pink-200/20 p-4 transition-colors hover:bg-pink-300/30 dark:bg-pink-200/10 dark:hover:bg-pink-900/20"
                         >
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10">
-                              <AvatarFallback className="bg-blue-50 font-semibold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                              <AvatarFallback className="bg-pink-50 font-semibold text-pink-600 dark:bg-pink-900/30 dark:text-pink-400">
                                 {student.name.charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
@@ -1259,30 +1231,117 @@ export default function Creator({
                               <h4 className="truncate font-medium text-[var(--color-text)]">{student.name}</h4>
                               <p className="truncate text-sm text-[var(--color-text-secondary)]">{student.email}</p>
                               {student.interview_date && student.interview_time && (
-                                <p className="text-sm text-[var(--color-text-secondary)]">
-                                  Interview scheduled: {new Date(`${student.interview_date}T${student.interview_time}`).toLocaleString()}
-                                </p>
+                                <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+                                  Interview:
+                                  <span className="flex items-center gap-1">
+                                    📅{" "}
+                                    {new Date(student.interview_date).toLocaleDateString(
+                                      undefined,
+                                      {
+                                        weekday: "short",
+                                        year: "numeric",
+                                        month: "short",
+                                        day: "numeric",
+                                      },
+                                    )}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    ⏰{" "}
+                                    {new Date(
+                                      `${student.interview_date}T${student.interview_time}`,
+                                    ).toLocaleTimeString(undefined, {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      hour12: true,
+                                    })}
+                                  </span>
+                                </div>
                               )}
                             </div>
                           </div>
 
                           <div className="flex items-center gap-2">
                             {/* Buttons for Mark Done / Mark Absent */}
-                            <button
-                              onClick={() => setStudentToMarkDone(student)}
-                              disabled={disableMarkDone(student)}
-                              className="rounded-md border border-green-300 px-3 py-1 text-sm font-medium text-green-600 hover:bg-green-50"
-                            >
-                              Mark Done
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <div className="group">
+                                <button
+                                  onClick={() => setStudentToMarkDone(student)}
+                                  disabled={disableMarkDone(student)}
+                                  className={`
+              rounded-md border px-3 py-1 text-sm font-medium transition-colors
+              ${student.interview_done
+                                      ? 'border-yellow-300 text-yellow-600 hover:border-yellow-400 hover:bg-yellow-50 dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-900/20'
+                                      : 'border-green-300 text-green-600 hover:border-green-400 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20'}
+              ${disableMarkDone(student) ? 'opacity-50 cursor-not-allowed' : ''}
+            `}
+                                >
+                                  {student.interview_done ? (
+                                    <>
+                                      <span className="block group-hover:hidden">✅Interview Done</span>
+                                      <span className="hidden group-hover:block">Undo Done</span>
+                                    </>
+                                  ) : (
+                                    'Mark Interview Done'
+                                  )}
+                                </button>
+                              </div>
+                            </div>
 
-                            <button
-                              onClick={() => setStudentToMarkAbsent(student)}
-                              disabled={markingAbsentIds.includes(student.id) || disableMarkAbsent(student)}
-                              className="rounded-md border border-yellow-300 px-3 py-1 text-sm font-medium text-yellow-600 hover:bg-yellow-50"
+                            <div className="flex items-center gap-2">
+                              <div className="group">
+                                <button
+                                  onClick={() => setStudentToMarkAbsent(student)}
+                                  disabled={markingAbsentIds.includes(student.id) || disableMarkAbsent(student)}
+                                  className={`
+        relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold shadow-md transition-all
+        ${student.is_absent
+                                      ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white hover:from-yellow-500 hover:to-yellow-600 dark:from-yellow-500 dark:to-yellow-600 dark:hover:from-yellow-600 dark:hover:to-yellow-700'
+                                      : 'bg-gradient-to-r from-green-400 to-green-500 text-white hover:from-green-500 hover:to-green-600 dark:from-green-500 dark:to-green-600 dark:hover:from-green-600 dark:hover:to-green-700'
+                                    }
+        disabled:opacity-50 disabled:cursor-not-allowed
+      `}
+                                >
+                                  {student.is_absent ? (
+                                    <>
+                                      <UserX className="h-4 w-4" />
+                                      <span className="block group-hover:hidden">Student Absent</span>
+                                      <span className="hidden group-hover:block flex items-center gap-1">
+                                        Undo Absent
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <UserX className="h-4 w-4" />
+                                      Mark as Absent
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                            {/* Edit button */}
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedStudent(student.id);
+                                setShowEditModal(true);
+                                // setEditSuccess(false);
+                                setUpdatingStudent(false);
+                              }}
+                              className="border-blue-300 text-blue-600 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 dark:border-blue-500 dark:text-blue-400 dark:hover:bg-blue-900/20"
                             >
-                              Mark Absent
-                            </button>
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => setStudentToRemove(student)}
+                              disabled={removingIds.includes(student.id)}
+                              className="border-red-300 text-red-600 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:border-red-500 dark:text-red-400 dark:hover:bg-red-900/20"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </motion.div>
                       ))}

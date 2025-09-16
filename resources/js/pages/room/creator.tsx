@@ -14,9 +14,11 @@ import {
   ChevronRight,
   Copy,
   Trash2,
+  // Undo2,
   User,
   UserPlus,
   Users,
+  UserX,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -64,7 +66,8 @@ interface CreatorProps {
 interface AssignedStudent extends User {
   interview_date?: string;
   interview_time?: string;
-  interview_done?: boolean;
+  interview_done: boolean;
+  is_absent: boolean;
 }
 
 export default function Creator({
@@ -135,7 +138,12 @@ export default function Creator({
   // assign handler
   const handleAssign = async () => {
     if (!selectedStudent) return;
+      if (!interviewDate || !interviewTime) {
+    toast.error("Please select both interview date and time before assigning.");
+    return;
+  }
     setAssigning(true);
+
 
     try {
       const res = await fetch(`/rooms/${room.id}/assign-student`, {
@@ -272,7 +280,7 @@ export default function Creator({
 
       const json = await res.json();
       if (json.success) {
-        // flip in state
+        
         setAssigned((prev) =>
           prev.map((s) =>
             s.id === studentId ? { ...s, interview_done: !s.interview_done } : s
@@ -293,6 +301,86 @@ export default function Creator({
 
 
 
+   const [markingAbsentIds, setMarkingAbsentIds] = useState<number[]>([]);
+  const [studentToMarkAbsent, setStudentToMarkAbsent] = useState<any | null>(null);
+
+const handleToggleStudentAbsent = async (roomId: number, student: any) => {
+  const studentId = student.id;
+  setMarkingAbsentIds((prev) => [...prev, studentId]);
+
+  try {
+    const res = await fetch(`/rooms/${roomId}/students/${studentId}/toggle-absent`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "X-CSRF-TOKEN": getCsrf(),
+      },
+    });
+
+    const json = await res.json();
+    if (json.success) {
+  setAssigned((prev) =>
+    prev.map((s) => {
+      if (s.id === studentId) {
+        return {
+          ...s,
+           is_absent: json.is_absent, 
+            interview_done: json.interview_done, 
+        };
+      }
+      return s;
+    })
+  );
+  toast.success(
+    json.message ||
+      (json.is_absent
+        ? "Student marked absent and interview done"
+        : "Student marked as present again (interview undone)")
+  );
+}
+else {
+      toast.error(json.message || "Could not update attendance status");
+    }
+  } catch (err) {
+    console.error(err);
+    toast.error("Could not update attendance status");
+  } finally {
+    setMarkingAbsentIds((prev) => prev.filter((id) => id !== studentId));
+    setStudentToMarkAbsent(null);
+  }
+};
+
+
+  // Disable button if:
+  // 1. Student is absent
+  // 2. Interview time has not arrived yet (for marking done)
+function disableMarkDone(student: AssignedStudent): boolean {
+  if (!student) return true;
+
+  const now = new Date();
+  const interviewDateTime = student.interview_date && student.interview_time
+    ? new Date(`${student.interview_date}T${student.interview_time}`)
+    : null;
+
+  return markingDoneIds.includes(student.id) 
+      || student.is_absent 
+      || (!!interviewDateTime && now < interviewDateTime);
+}
+function disableMarkAbsent(student: AssignedStudent): boolean {
+  if (!student) return true;
+
+  const now = new Date();
+  const interviewDateTime = student.interview_date && student.interview_time
+    ? new Date(`${student.interview_date}T${student.interview_time}`)
+    : null;
+
+  // Disable if interview is done or interview time hasn't come yet
+  return ( student.interview_done && student.is_absent ===false ) || (!!interviewDateTime && now < interviewDateTime);
+}
+
+
+ 
 
   // Pagination component
   const PaginationControls = ({
@@ -712,6 +800,7 @@ export default function Creator({
                     <>
                       <div className="space-y-3">
                         {getPaginatedItems(assigned, assignedCurrentPage).map((student) => (
+                          
                           <motion.div
                             key={student.id}
                             initial={{ opacity: 0, x: -20 }}
@@ -761,28 +850,63 @@ export default function Creator({
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <div className="group">
-                                <button
-                                  onClick={() => setStudentToMarkDone(student)}
-                                  disabled={markingDoneIds.includes(student.id)}
-                                  className={`
-        rounded-md border px-3 py-1 text-sm font-medium transition-colors
-        ${student.interview_done
-                                      ? 'border-yellow-300 text-yellow-600 hover:border-yellow-400 hover:bg-yellow-50 dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-900/20'
-                                      : 'border-green-300 text-green-600 hover:border-green-400 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20'}
+        <div className="group">
+          <button
+            onClick={() => setStudentToMarkDone(student)}
+            disabled={disableMarkDone(student)}
+            className={`
+              rounded-md border px-3 py-1 text-sm font-medium transition-colors
+              ${student.interview_done
+                ? 'border-yellow-300 text-yellow-600 hover:border-yellow-400 hover:bg-yellow-50 dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-900/20'
+                : 'border-green-300 text-green-600 hover:border-green-400 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20'}
+              ${disableMarkDone(student) ? 'opacity-50 cursor-not-allowed' : ''}
+            `}
+          >
+            {student.interview_done ? (
+              <>
+                <span className="block group-hover:hidden">✅Interview Done</span>
+                <span className="hidden group-hover:block">Undo Done</span>
+              </>
+            ) : (
+              'Mark Interview Done'
+            )}
+          </button>
+        </div>
+      </div>
+
+<div className="flex items-center gap-2">
+  <div className="group">
+    <button
+      onClick={() => setStudentToMarkAbsent(student)}
+      disabled={markingAbsentIds.includes(student.id) || disableMarkAbsent(student)}
+      className={`
+        relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold shadow-md transition-all
+        ${
+          student.is_absent
+            ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white hover:from-yellow-500 hover:to-yellow-600 dark:from-yellow-500 dark:to-yellow-600 dark:hover:from-yellow-600 dark:hover:to-yellow-700'
+            : 'bg-gradient-to-r from-green-400 to-green-500 text-white hover:from-green-500 hover:to-green-600 dark:from-green-500 dark:to-green-600 dark:hover:from-green-600 dark:hover:to-green-700'
+        }
+        disabled:opacity-50 disabled:cursor-not-allowed
       `}
-                                >
-                                  {student.interview_done ? (
-                                    <>
-                                      <span className="block group-hover:hidden">✅ Done</span>
-                                      <span className="hidden group-hover:block">Undo Done</span>
-                                    </>
-                                  ) : (
-                                    'Mark as Done'
-                                  )}
-                                </button>
-                              </div>
-                            </div>
+    >
+      {student.is_absent ? (
+        <>
+          <UserX className="h-4 w-4" />
+          <span className="block group-hover:hidden">Student Absent</span>
+          <span className="hidden group-hover:block flex items-center gap-1">
+            Undo Absent
+          </span>
+        </>
+      ) : (
+        <>
+          <UserX className="h-4 w-4" />
+          Mark as Absent
+        </>
+      )}
+    </button>
+  </div>
+</div>
+
 
 
                             <Button
@@ -818,6 +942,20 @@ export default function Creator({
                         : `Are you sure you want to mark "${studentToMarkDone?.name}" interview as done?`
                     }
                     confirmText={studentToMarkDone?.interview_done ? "Undo Done" : "Mark as Done"}
+                    cancelText="Cancel"
+                    variant="default"
+                  />
+                  <ConfirmationDialog
+                    open={!!studentToMarkAbsent}
+                    onOpenChange={(open) => !open && setStudentToMarkAbsent(null)}
+                    onConfirm={() => handleToggleStudentAbsent(room.id, studentToMarkAbsent)}
+                    title={studentToMarkAbsent?.is_absent ? "Undo Student Absent Interview" : "Mark Student as absent"}
+                    description={
+                      studentToMarkAbsent?.is_absent
+                        ? `Are you sure you want to undo interview absent for "${studentToMarkAbsent?.name}"?`
+                        : `Are you sure you want to mark "${studentToMarkAbsent?.name}" interview as absent?`
+                    }
+                    confirmText={studentToMarkAbsent?.is_absent ? "Undo Student Absent Interview" : "Mark Student as absent"}
                     cancelText="Cancel"
                     variant="default"
                   />

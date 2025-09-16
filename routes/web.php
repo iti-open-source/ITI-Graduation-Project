@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/rooms/{room}/remove-student/{student}', [RoomController::class, 'removeStudent']);
     Route::put('/rooms/{room}/update-student/{student}', [RoomController::class, 'updateStudentInterview']);
 Route::put('/rooms/{room}/students/{student}/toggle-done', [RoomController::class, 'toggleInterviewDone']);
+Route::put('/rooms/{room}/students/{student}/toggle-absent', [RoomController::class, 'toggleStudentIsAbsent']);
 
 
 

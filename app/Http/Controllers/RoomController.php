@@ -58,6 +58,8 @@ class RoomController extends Controller
 
                     $room->student_interview_date = $studentPivot?->pivot?->interview_date;
                     $room->student_interview_time = $studentPivot?->pivot?->interview_time;
+                    $room->student_interview_done = (bool) ($studentPivot?->pivot?->interview_done);
+                    $room->student_is_absent = (bool) ($studentPivot?->pivot?->is_absent);
 
                     return $room;
                 });
@@ -110,7 +112,7 @@ class RoomController extends Controller
 
                 $sessionDetails = $room->assignedStudents()
                     ->where('users.id', $studentUser->id)
-                    ->withPivot('interview_date', 'interview_time','interview_done' )
+                    ->withPivot('interview_date', 'interview_time', 'interview_done', 'is_absent')
                     ->first();
 
 
@@ -167,7 +169,8 @@ class RoomController extends Controller
                     'email' => $student->email,
                     'interview_date' => $student->pivot->interview_date,
                     'interview_time' => $student->pivot->interview_time,
-                    'interview_done' => (bool) $student->pivot->interview_done, 
+                    'interview_done' => (bool) $student->pivot->interview_done,
+                    'is_absent' => (bool) $student->pivot->is_absent,
                 ];
             });
 
@@ -336,7 +339,7 @@ class RoomController extends Controller
         foreach ($assignedStudents as $student) {
             $sessionDetails = $room->assignedStudents()
                 ->where('users.id', $student->id)
-                ->withPivot('interview_date', 'interview_time','interview_done')
+                ->withPivot('interview_date', 'interview_time', 'interview_done', 'is_absent')
                 ->first();
             Mail::to($student->email)->send(new InterviewCancelled($room, $student, $sessionDetails));
         }
@@ -382,7 +385,7 @@ class RoomController extends Controller
 
         $sessionDetails = $room->assignedStudents()
             ->where('users.id', $request->student_id)
-            ->withPivot('interview_date', 'interview_time','interview_done')
+            ->withPivot('interview_date', 'interview_time', 'interview_done', 'is_absent')
             ->first();
 
         $student = User::find($request->student_id);
@@ -396,7 +399,8 @@ class RoomController extends Controller
                 'email' => $student->email,
                 'interview_date' => $student->pivot->interview_date,
                 'interview_time' => $student->pivot->interview_time,
-                'interview_done' => (bool) $student->pivot->interview_done, 
+                'interview_done' => (bool) $student->pivot->interview_done,
+                'is_absent' => (bool) $student->pivot->is_absent,
             ];
         });
 
@@ -418,7 +422,7 @@ class RoomController extends Controller
 
         $sessionDetails = $room->assignedStudents()
             ->where('users.id', $student->id)
-            ->withPivot('interview_date', 'interview_time','interview_done')
+            ->withPivot('interview_date', 'interview_time', 'interview_done', 'is_absent')
             ->first();
 
         $room->assignedStudents()->detach([$student->id]);
@@ -436,6 +440,7 @@ class RoomController extends Controller
                 'interview_date' => $s->pivot->interview_date,
                 'interview_time' => $s->pivot->interview_time,
                 'interview_done' => (bool) $s->pivot->interview_done,
+                'is_absent' => (bool) $s->pivot->is_absent,
             ];
         });
 
@@ -478,7 +483,7 @@ class RoomController extends Controller
 
         $newSessionDetails = $room->assignedStudents()
             ->where('users.id', $student->id)
-            ->withPivot('interview_date', 'interview_time', 'interview_done')
+            ->withPivot('interview_date', 'interview_time', 'interview_done', 'is_absent')
             ->first();
 
         // Send reschedule email
@@ -492,7 +497,8 @@ class RoomController extends Controller
                 'email' => $s->email,
                 'interview_date' => $s->pivot->interview_date,
                 'interview_time' => $s->pivot->interview_time,
-                'interview_done' => $s->pivot->interview_done, 
+                'interview_done' => $s->pivot->interview_done,
+                'is_absent' => $s->pivot->is_absent,
             ];
         });
 
@@ -508,25 +514,94 @@ class RoomController extends Controller
         ]);
     }
 
-public function toggleInterviewDone(Room $room, User $student)
+    public function toggleInterviewDone(Room $room, User $student)
+    {
+        $pivot = $room->assignedStudents()->where('user_id', $student->id)->firstOrFail()->pivot;
+
+        if ($pivot->is_absent && $pivot->interview_done) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot undo interview done for a student marked absent.',
+            ], 400);
+        }
+
+         try {
+        $interviewDateTime = \Carbon\Carbon::parse("{$pivot->interview_date} {$pivot->interview_time}", config('app.timezone'));
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid interview date/time format.',
+        ], 400);
+    }
+
+    if (!$interviewDateTime->isFuture()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You cannot mark the interview as done before its scheduled date and time.',
+            ], 400);
+        }
+
+        $newValue = !$pivot->interview_done;
+
+        $room->assignedStudents()->updateExistingPivot($student->id, [
+            'interview_done' => $newValue,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'interview_done' => $newValue,
+            'message' => $newValue
+                ? 'Interview marked as done.'
+                : 'Interview marked as not done.',
+        ]);
+    }
+
+
+
+    public function toggleStudentIsAbsent(Room $room, User $student)
 {
     $pivot = $room->assignedStudents()->where('user_id', $student->id)->firstOrFail()->pivot;
 
-    $newValue = !$pivot->interview_done;
+    
+    if (empty($pivot->interview_date) || empty($pivot->interview_time)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Interview date or time is missing.',
+        ], 400);
+    }
+
+    try {
+        $interviewDateTime = \Carbon\Carbon::parse("{$pivot->interview_date} {$pivot->interview_time}", config('app.timezone'));
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid interview date/time format.',
+        ], 400);
+    }
+
+    if (!$interviewDateTime->isFuture()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You cannot mark the student as absent before the scheduled interview date and time.',
+        ], 400);
+    }
+
+
+    $newValue = !$pivot->is_absent;
 
     $room->assignedStudents()->updateExistingPivot($student->id, [
+        'is_absent' => $newValue,
         'interview_done' => $newValue,
     ]);
 
     return response()->json([
         'success' => true,
+        'is_absent' => $newValue,
         'interview_done' => $newValue,
         'message' => $newValue
-            ? 'Interview marked as done.'
-            : 'Interview marked as not done.',
+           ? 'Student marked absent (interview done).'
+           : 'Student marked present again.',
     ]);
 }
-
-
 
 }

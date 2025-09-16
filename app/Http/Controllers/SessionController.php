@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\RoomSessionSignaling;
 use App\Models\LobbySession;
+use App\Models\InterviewEvaluation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -16,6 +17,57 @@ class SessionController extends Controller
         return redirect()->route('session.room', ['roomCode' => $code, 'creator' => 1]);
     }
 
+    public function evaluate(Request $request, string $sessionCode)
+    {
+        $session = LobbySession::where('session_code', $sessionCode)->firstOrFail();
+        $userId = Auth::id();
+
+        // Only interviewer (creator) can evaluate
+        if ($userId !== (int) $session->creator_id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'rating' => 'required|integer|min:1|max:10',
+            'comments' => 'nullable|string|max:5000',
+        ]);
+
+        $evaluation = InterviewEvaluation::create([
+            'lobby_session_id' => $session->id,
+            'guest_id' => $session->guest_id,
+            'created_by' => $userId,
+            'rating' => $validated['rating'],
+            'comments' => $validated['comments'] ?? null,
+        ]);
+
+        // End the session as part of evaluation submission
+        $session->update([
+            'status' => 'ended',
+            'ended_at' => now(),
+        ]);
+
+        event(new RoomSessionSignaling($sessionCode, 'terminated', ['by' => $userId, 'reason' => 'evaluated'], $userId));
+
+        $room = \App\Models\Room::find($session->room_id);
+        if ($room) {
+            // Mark interview done on pivot for the guest in this room
+            try {
+                $room->assignedStudents()->updateExistingPivot($session->guest_id, [
+                    'interview_done' => true,
+                    'evaluation_id' => $evaluation->id,
+                ]);
+            } catch (\Throwable $e) {
+                // ignore if not assigned via pivot
+            }
+
+            // Disconnect and broadcast
+            $room->disconnectCurrentParticipant();
+            event(new \App\Events\RoomStatusUpdated($room->fresh(), 'call_ended'));
+        }
+
+        return response()->json(['success' => true]);
+    }
+
     public function room(string $sessionCode, Request $request)
     {
         $session = LobbySession::where('session_code', $sessionCode)->firstOrFail();
@@ -23,6 +75,15 @@ class SessionController extends Controller
 
         if ($userId !== $session->creator_id && $userId !== $session->guest_id) {
             abort(403);
+        }
+
+        // Prevent access to ended sessions
+        if ($session->status !== 'active') {
+            // Redirect creator to lobby, guest to dashboard
+            if ($userId === (int) $session->creator_id) {
+                return redirect()->route('lobby');
+            }
+            return redirect()->route('dashboard');
         }
 
         return \Inertia\Inertia::render('session/room', [

@@ -177,293 +177,420 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Lobby" />
       <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-6">
-        <div className="mx-auto w-full max-w-7xl">
-          <motion.div
-            variants={fadeIn}
-            initial="hidden"
-            animate="visible"
-            className="mx-auto w-full"
-          >
-            {/* Header */}
-            <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Interview Rooms</h1>
-                <p className="mt-2 text-muted-foreground">
-                  {role === "student"
-                    ? "Here are the rooms assigned to you."
-                    : "Create, manage, and join your interview rooms."}
-                </p>
-              </div>
-              {role !== "student" && (
-                <Button onClick={() => setShowCreateForm(!showCreateForm)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Room
-                </Button>
-              )}
+        <motion.div variants={fadeIn} initial="hidden" animate="visible" className="w-full">
+          {/* Header */}
+          <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Interview Rooms</h1>
+              <p className="mt-2 text-muted-foreground">
+                {role === "student"
+                  ? "Here are the rooms assigned to you."
+                  : "Create, manage, and join your interview rooms."}
+              </p>
             </div>
+            {role !== "student" && (
+              <Button onClick={() => setShowCreateForm(!showCreateForm)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Room
+              </Button>
+            )}
+          </div>
 
-            {/* Create Room Form */}
-            {role !== "student" && role !== null && showCreateForm && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mb-10"
-              >
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Create a New Room</CardTitle>
-                    <CardDescription>
-                      Give your room a name and share the link with participants.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleCreateRoom} className="space-y-4">
-                      <div>
-                        <Label htmlFor="roomName" className="mb-2 block">
-                          Room Name
-                        </Label>
-                        <Input
-                          id="roomName"
-                          name="name"
-                          type="text"
-                          placeholder="e.g., Senior Frontend Developer"
-                          required
-                        />
-                      </div>
+          {/* Create Room Form */}
+          {role !== "student" && role !== null && showCreateForm && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-10"
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Create a New Room</CardTitle>
+                  <CardDescription>
+                    Give your room a name and share the link with participants.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleCreateRoom} className="space-y-4">
+                    <div>
+                      <Label htmlFor="roomName" className="mb-2 block">
+                        Room Name
+                      </Label>
+                      <Input
+                        id="roomName"
+                        name="name"
+                        type="text"
+                        placeholder="e.g., Senior Frontend Developer"
+                        required
+                      />
+                    </div>
 
-                      {/* Assign Students Section */}
-                      <div className="">
-                        <Label className="mb-3 block text-lg font-semibold">Assign Students</Label>
+                    {/* Assign Students Section */}
+                    <div className="">
+                      <Label className="mb-3 block text-lg font-semibold">Assign Students</Label>
 
-                        {/* Search Input */}
-                        <Input
-                          type="text"
-                          placeholder="🔍 Search by name or email..."
-                          className="mb-4"
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          value={searchQuery}
-                        />
+                      {/* Search Input */}
+                      <Input
+                        type="text"
+                        placeholder="🔍 Search by name or email..."
+                        className="mb-4"
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        value={searchQuery}
+                      />
 
-                        {/* Searchable Students (only role === "student") */}
-                        <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
-                          {searchQuery.trim() !== "" ? (
-                            filteredStudents
-                              .filter((s) => s.role === "student")
-                              .map((student) => (
-                                <div
-                                  key={student.id}
-                                  className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 shadow-sm transition ${
-                                    selectedStudents.includes(student.id)
-                                      ? "border-primary bg-primary/10 ring-2 ring-primary/40"
-                                      : "hover:bg-muted"
-                                  }`}
-                                  onClick={() => {
-                                    setSelectedStudents((prev) =>
-                                      prev.includes(student.id)
-                                        ? prev.filter((s) => s !== student.id)
-                                        : [...prev, student.id],
-                                    );
-                                    setSelectedPage(
-                                      Math.ceil((selectedStudents.length + 1) / selectedPerPage),
-                                    );
-                                  }}
-                                >
-                                  <span className="font-medium">
-                                    {student.name}{" "}
-                                    <span className="text-sm text-muted-foreground">
-                                      ({student.email})
-                                    </span>
+                      {/* Searchable Students (only role === "student") */}
+                      <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
+                        {searchQuery.trim() !== "" ? (
+                          filteredStudents
+                            .filter((s) => s.role === "student")
+                            .map((student) => (
+                              <div
+                                key={student.id}
+                                className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 shadow-sm transition ${
+                                  selectedStudents.includes(student.id)
+                                    ? "border-primary bg-primary/10 ring-2 ring-primary/40"
+                                    : "hover:bg-muted"
+                                }`}
+                                onClick={() => {
+                                  setSelectedStudents((prev) =>
+                                    prev.includes(student.id)
+                                      ? prev.filter((s) => s !== student.id)
+                                      : [...prev, student.id],
+                                  );
+                                  setSelectedPage(
+                                    Math.ceil((selectedStudents.length + 1) / selectedPerPage),
+                                  );
+                                }}
+                              >
+                                <span className="font-medium">
+                                  {student.name}{" "}
+                                  <span className="text-sm text-muted-foreground">
+                                    ({student.email})
                                   </span>
-                                  {selectedStudents.includes(student.id) && (
-                                    <Badge variant="secondary" className="px-2 py-0.5">
-                                      ✓ Selected
-                                    </Badge>
-                                  )}
-                                </div>
-                              ))
-                          ) : (
-                            <p className="text-sm text-muted-foreground italic">
-                              Start typing to search students...
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Selected Students with Pagination */}
-                        {selectedStudents.length > 0 && (
-                          <div className="mt-6 space-y-4 rounded-lg border bg-card p-4 shadow-sm">
-                            <Label className="mb-2 block text-base font-semibold text-foreground">
-                              🎓 Selected Students
-                            </Label>
-
-                            {paginatedSelected.map((id) => {
-                              const student = students.find((s) => s.id === id);
-                              if (!student) return null;
-                              return (
-                                <div
-                                  key={id}
-                                  className="relative space-y-3 rounded-lg border bg-muted/40 p-4 transition-colors hover:bg-muted/60"
-                                >
-                                  {/* Deselect Button */}
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="absolute top-2 right-2 h-6 w-6 rounded-full p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                    onClick={() =>
-                                      setSelectedStudents((prev) => prev.filter((s) => s !== id))
-                                    }
-                                  >
-                                    ✕
-                                  </Button>
-
-                                  {/* Student Info */}
-                                  <div className="pr-8">
-                                    <p className="text-sm font-semibold text-foreground">
-                                      {student.name}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">{student.email}</p>
-                                  </div>
-
-                                  {/* Date + Time Pickers */}
-                                  <div className="grid gap-3 sm:grid-cols-2">
-                                    {/* Interview Date */}
-                                    <div className="space-y-2">
-                                      <Label className="text-xs font-medium text-foreground">
-                                        Interview Date
-                                      </Label>
-                                      <div className="relative">
-                                        <Calendar className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                        <Input
-                                          type="date"
-                                          className="pl-10 text-sm"
-                                          value={interviewDates[id] || ""}
-                                          onChange={(e) =>
-                                            setInterviewDates((prev) => ({
-                                              ...prev,
-                                              [id]: e.target.value,
-                                            }))
-                                          }
-                                        />
-                                      </div>
-                                    </div>
-
-                                    {/* Interview Time */}
-                                    <div className="space-y-2">
-                                      <Label className="text-xs font-medium text-foreground">
-                                        Interview Time
-                                      </Label>
-                                      <div className="relative">
-                                        <Clock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                        <Input
-                                          type="time"
-                                          className="pl-10 text-sm"
-                                          value={interviewTimes[id] || ""}
-                                          onChange={(e) =>
-                                            setInterviewTimes((prev) => ({
-                                              ...prev,
-                                              [id]: e.target.value,
-                                            }))
-                                          }
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-
-                            {/* Pagination Controls */}
-                            <div className="flex items-center justify-between border-t pt-4">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={selectedPage === 1}
-                                onClick={() => setSelectedPage((p) => p - 1)}
-                              >
-                                Previous
-                              </Button>
-                              <span className="text-sm text-muted-foreground">
-                                Page {selectedPage} of {selectedTotalPages}
-                              </span>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={selectedPage === selectedTotalPages}
-                                onClick={() => setSelectedPage((p) => p + 1)}
-                              >
-                                Next
-                              </Button>
-                            </div>
-                          </div>
+                                </span>
+                                {selectedStudents.includes(student.id) && (
+                                  <Badge variant="secondary" className="px-2 py-0.5">
+                                    ✓ Selected
+                                  </Badge>
+                                )}
+                              </div>
+                            ))
+                        ) : (
+                          <p className="text-sm text-muted-foreground italic">
+                            Start typing to search students...
+                          </p>
                         )}
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <Button type="submit" disabled={isCreating}>
-                          {isCreating ? "Creating..." : "Confirm & Create"}
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={() => setShowCreateForm(false)}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </form>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
+                      {/* Selected Students with Pagination */}
+                      {selectedStudents.length > 0 && (
+                        <div className="mt-6 space-y-4 rounded-lg border bg-card p-4 shadow-sm">
+                          <Label className="mb-2 block text-base font-semibold text-foreground">
+                            🎓 Selected Students
+                          </Label>
 
-            {/* Rooms Grid */}
-            {userRooms.length > 0 ? (
-              <div className="mb-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {userRooms.map((room) => (
-                  <motion.div key={room.id} variants={fadeIn} whileHover={{ y: -5 }}>
-                    <Card className="flex h-full flex-col overflow-hidden transition-all hover:border-primary/50">
-                      <CardHeader>
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">{room.name}</CardTitle>
-                            <CardDescription>Code: {room.room_code}</CardDescription>
-                          </div>
-                          {room.is_active ? (
-                            <Badge
+                          {paginatedSelected.map((id) => {
+                            const student = students.find((s) => s.id === id);
+                            if (!student) return null;
+                            return (
+                              <div
+                                key={id}
+                                className="relative space-y-3 rounded-lg border bg-muted/40 p-4 transition-colors hover:bg-muted/60"
+                              >
+                                {/* Deselect Button */}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="absolute top-2 right-2 h-6 w-6 rounded-full p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                  onClick={() =>
+                                    setSelectedStudents((prev) => prev.filter((s) => s !== id))
+                                  }
+                                >
+                                  ✕
+                                </Button>
+
+                                {/* Student Info */}
+                                <div className="pr-8">
+                                  <p className="text-sm font-semibold text-foreground">
+                                    {student.name}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">{student.email}</p>
+                                </div>
+
+                                {/* Date + Time Pickers */}
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                  {/* Interview Date */}
+                                  <div className="space-y-2">
+                                    <Label className="text-xs font-medium text-foreground">
+                                      Interview Date
+                                    </Label>
+                                    <div className="relative">
+                                      <Calendar className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                      <Input
+                                        type="date"
+                                        className="pl-10 text-sm"
+                                        value={interviewDates[id] || ""}
+                                        onChange={(e) =>
+                                          setInterviewDates((prev) => ({
+                                            ...prev,
+                                            [id]: e.target.value,
+                                          }))
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Interview Time */}
+                                  <div className="space-y-2">
+                                    <Label className="text-xs font-medium text-foreground">
+                                      Interview Time
+                                    </Label>
+                                    <div className="relative">
+                                      <Clock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                      <Input
+                                        type="time"
+                                        className="pl-10 text-sm"
+                                        value={interviewTimes[id] || ""}
+                                        onChange={(e) =>
+                                          setInterviewTimes((prev) => ({
+                                            ...prev,
+                                            [id]: e.target.value,
+                                          }))
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+
+                          {/* Pagination Controls */}
+                          <div className="flex items-center justify-between border-t pt-4">
+                            <Button
                               variant="outline"
-                              className="border-green-500 bg-green-500/10 text-green-500"
+                              size="sm"
+                              disabled={selectedPage === 1}
+                              onClick={() => setSelectedPage((p) => p - 1)}
                             >
-                              Active
-                            </Badge>
-                          ) : (
-                            <Badge variant="secondary">Inactive</Badge>
-                          )}
+                              Previous
+                            </Button>
+                            <span className="text-sm text-muted-foreground">
+                              Page {selectedPage} of {selectedTotalPages}
+                            </span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={selectedPage === selectedTotalPages}
+                              onClick={() => setSelectedPage((p) => p + 1)}
+                            >
+                              Next
+                            </Button>
+                          </div>
                         </div>
-                      </CardHeader>
-                      <CardContent className="flex flex-1 flex-col justify-between space-y-4">
-                        <div className="space-y-3">
-                          {/* Info Tags */}
-                          {room.current_participant ? (
-                            <div className="flex items-center gap-2 text-sm text-accent-foreground">
-                              <Users className="h-4 w-4 text-blue-500" />
-                              <span>In call with: {room.current_participant.name}</span>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Users className="h-4 w-4" />
-                              <span>Room is empty</span>
-                            </div>
-                          )}
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button type="submit" disabled={isCreating}>
+                        {isCreating ? "Creating..." : "Confirm & Create"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => setShowCreateForm(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Rooms Grid */}
+          {userRooms.length > 0 ? (
+            <div className="mb-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {userRooms.map((room) => (
+                <motion.div key={room.id} variants={fadeIn} whileHover={{ y: -5 }}>
+                  <Card className="flex h-full flex-col overflow-hidden transition-all hover:border-primary/50">
+                    <CardHeader>
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg">{room.name}</CardTitle>
+                          <CardDescription>Code: {room.room_code}</CardDescription>
+                        </div>
+                        {room.is_active ? (
+                          <Badge
+                            variant="outline"
+                            className="border-green-500 bg-green-500/10 text-green-500"
+                          >
+                            Active
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">Inactive</Badge>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex flex-1 flex-col justify-between space-y-4">
+                      <div className="space-y-3">
+                        {/* Info Tags */}
+                        {room.current_participant ? (
+                          <div className="flex items-center gap-2 text-sm text-accent-foreground">
+                            <Users className="h-4 w-4 text-blue-500" />
+                            <span>In call with: {room.current_participant.name}</span>
+                          </div>
+                        ) : (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Users className="h-4 w-4" />
-                            <span>
-                              {room.queue_count} user{room.queue_count !== 1 ? "s" : ""} in queue
-                            </span>
+                            <span>Room is empty</span>
                           </div>
-                          {/* Show interview schedule if student */}
-                          {role === "student" &&
-                            room.student_interview_date &&
-                            room.student_interview_time && (
+                        )}
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Users className="h-4 w-4" />
+                          <span>
+                            {room.queue_count} user{room.queue_count !== 1 ? "s" : ""} in queue
+                          </span>
+                        </div>
+                        {/* Show interview schedule if student */}
+                        {role === "student" &&
+                          room.student_interview_date &&
+                          room.student_interview_time && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <span className="font-medium">Your interview:</span>
+                              <span className="flex items-center gap-1">
+                                📅{" "}
+                                {new Date(room.student_interview_date).toLocaleDateString(
+                                  undefined,
+                                  {
+                                    weekday: "short",
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  },
+                                )}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                ⏰{" "}
+                                {new Date(
+                                  `${room.student_interview_date}T${room.student_interview_time}`,
+                                ).toLocaleTimeString(undefined, {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                })}
+                              </span>
+                            </div>
+                          )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="mt-4 flex items-center gap-2">
+                        {/* <Button asChild className="flex-1">
+                          <Link href={`/room/${room.room_code}`}>
+                            <Eye className="mr-2 h-4 w-4" /> Enter Room
+                          </Link>
+                        </Button> */}
+
+                        {role === "student" ? (
+                          canStudentEnter(room) ? (
+                            //student can enter
+                            <Button asChild className="flex-1">
+                              <Link href={`/room/${room.room_code}`}>
+                                <Eye className="mr-2 h-4 w-4" /> Enter Room
+                              </Link>
+                            </Button>
+                          ) : (
+                            // student cannot enter yet
+                            <Button disabled className="flex-1 opacity-50">
+                              <Eye className="mr-2 h-4 w-4" />{" "}
+                              {room.pivot?.is_absent
+                                ? "Absent"
+                                : room.pivot?.interview_done
+                                  ? "Completed"
+                                  : "Not Available Yet"}
+                            </Button>
+                          )
+                        ) : (
+                          // instructors/admins always can enter
+                          <Button asChild className="flex-1">
+                            <Link href={`/room/${room.room_code}`}>
+                              <Eye className="mr-2 h-4 w-4" /> Enter Room
+                            </Link>
+                          </Button>
+                        )}
+
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() => copyRoomLink(room.room_code)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        {role !== "student" && (
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => deleteRoom(room.room_code, room.name)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <motion.div variants={fadeIn} className="py-16 text-center">
+              <div className="mx-auto max-w-md">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                  <Wind className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="mb-2 text-xl font-semibold">It's quiet in here...</h3>
+                <p className="mb-6 text-muted-foreground">
+                  {role === "student"
+                    ? "No rooms have been assigned to you yet."
+                    : "Create your first interview room to get started."}
+                </p>
+                {/* ✅ Students can’t create rooms */}
+                {role !== "student" && (
+                  <Button onClick={() => setShowCreateForm(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Your First Room
+                  </Button>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* STUDENT VIEW */}
+          {role === "student" && (
+            <>
+              {/* Upcoming */}
+              {upcomingRooms.length > 0 && (
+                <>
+                  <h2 className="mt-12 mb-4 text-2xl font-semibold">Upcoming Interviews</h2>
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {upcomingRooms.map((room) => (
+                      <motion.div key={room.id} variants={fadeIn} whileHover={{ y: -5 }}>
+                        <Card className="flex h-full flex-col overflow-hidden transition-all hover:border-primary/50">
+                          <CardHeader>
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <CardTitle className="text-lg">{room.name}</CardTitle>
+                                <CardDescription>Code: {room.room_code}</CardDescription>
+                              </div>
+                              <Badge variant="outline" className="border-green-500 text-green-500">
+                                Upcoming
+                              </Badge>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="flex flex-1 flex-col justify-between space-y-4">
+                            {room.student_interview_date && room.student_interview_time && (
                               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <span className="font-medium">Your interview:</span>
                                 <span className="flex items-center gap-1">
@@ -490,100 +617,55 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                                 </span>
                               </div>
                             )}
-                        </div>
-
-                        {/* Actions */}
-                        <div className="mt-4 flex items-center gap-2">
-                          {/* <Button asChild className="flex-1">
-                            <Link href={`/room/${room.room_code}`}>
-                              <Eye className="mr-2 h-4 w-4" /> Enter Room
-                            </Link>
-                          </Button> */}
-
-                          {role === "student" ? (
-                            canStudentEnter(room) ? (
-                              //student can enter
-                              <Button asChild className="flex-1">
-                                <Link href={`/room/${room.room_code}`}>
-                                  <Eye className="mr-2 h-4 w-4" /> Enter Room
-                                </Link>
+                            <div className="mt-4 flex items-center gap-2">
+                              {canStudentEnter(room) ? (
+                                <Button asChild className="flex-1">
+                                  <Link href={`/room/${room.room_code}`}>
+                                    <Eye className="mr-2 h-4 w-4" /> Enter Room
+                                  </Link>
+                                </Button>
+                              ) : (
+                                <Button disabled className="flex-1 opacity-50">
+                                  <Eye className="mr-2 h-4 w-4" /> Not Available Yet
+                                </Button>
+                              )}
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                onClick={() => copyRoomLink(room.room_code)}
+                              >
+                                <Copy className="h-4 w-4" />
                               </Button>
-                            ) : (
-                              // student cannot enter yet
-                              <Button disabled className="flex-1 opacity-50">
-                                <Eye className="mr-2 h-4 w-4" />{" "}
-                                {room.pivot?.is_absent
-                                  ? "Absent"
-                                  : room.pivot?.interview_done
-                                    ? "Completed"
-                                    : "Not Available Yet"}
-                              </Button>
-                            )
-                          ) : (
-                            // instructors/admins always can enter
-                            <Button asChild className="flex-1">
-                              <Link href={`/room/${room.room_code}`}>
-                                <Eye className="mr-2 h-4 w-4" /> Enter Room
-                              </Link>
-                            </Button>
-                          )}
-
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => copyRoomLink(room.room_code)}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          {role !== "student" && (
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={() => deleteRoom(room.room_code, room.name)}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <motion.div variants={fadeIn} className="py-16 text-center">
-                <div className="mx-auto max-w-md">
-                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                    <Wind className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
                   </div>
-                  <h3 className="mb-2 text-xl font-semibold">It's quiet in here...</h3>
-                  <p className="mb-6 text-muted-foreground">
-                    {role === "student"
-                      ? "No rooms have been assigned to you yet."
-                      : "Create your first interview room to get started."}
-                  </p>
-                  {/* ✅ Students can’t create rooms */}
-                  {role !== "student" && (
-                    <Button onClick={() => setShowCreateForm(true)}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Create Your First Room
-                    </Button>
-                  )}
-                </div>
-              </motion.div>
-            )}
+                </>
+              )}
 
-            {/* STUDENT VIEW */}
-            {role === "student" && (
-              <>
-                {/* Upcoming */}
-                {upcomingRooms.length > 0 && (
-                  <>
-                    <h2 className="mt-12 mb-4 text-2xl font-semibold">Upcoming Interviews</h2>
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                      {upcomingRooms.map((room) => (
+              {/* Past */}
+              {pastRooms.length > 0 && (
+                <>
+                  <h2 className="mt-12 mb-4 text-2xl font-semibold">Past Interviews</h2>
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {pastRooms.map((room) => {
+                      const pivot = room.pivot;
+                      let statusText = "";
+                      let statusBadge: "destructive" | "secondary" = "secondary";
+
+                      if (pivot?.is_absent) {
+                        statusText = "Absent";
+                        statusBadge = "destructive"; // red badge
+                      } else if (pivot?.interview_done) {
+                        statusText = "Completed";
+                        statusBadge = "secondary"; // gray badge
+                      }
+
+                      return (
                         <motion.div key={room.id} variants={fadeIn} whileHover={{ y: -5 }}>
-                          <Card className="flex h-full flex-col overflow-hidden transition-all hover:border-primary/50">
+                          <Card className="flex h-full flex-col overflow-hidden opacity-70 transition-all hover:border-primary/50">
                             <CardHeader>
                               <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1">
@@ -592,147 +674,55 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                                 </div>
                                 <Badge
                                   variant="outline"
-                                  className="border-green-500 text-green-500"
+                                  className={`border ${statusBadge === "destructive" ? "border-red-500 text-red-500" : "border-gray-400 text-gray-500"}`}
                                 >
-                                  Upcoming
+                                  {statusText}
                                 </Badge>
                               </div>
                             </CardHeader>
                             <CardContent className="flex flex-1 flex-col justify-between space-y-4">
-                              {room.student_interview_date && room.student_interview_time && (
+                              <div className="space-y-3">
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                  <span className="font-medium">Your interview:</span>
-                                  <span className="flex items-center gap-1">
-                                    📅{" "}
-                                    {new Date(room.student_interview_date).toLocaleDateString(
-                                      undefined,
-                                      {
-                                        weekday: "short",
-                                        year: "numeric",
-                                        month: "short",
-                                        day: "numeric",
-                                      },
-                                    )}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    ⏰{" "}
-                                    {new Date(
-                                      `${room.student_interview_date}T${room.student_interview_time}`,
-                                    ).toLocaleTimeString(undefined, {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                      hour12: true,
-                                    })}
-                                  </span>
+                                  <span className="font-medium">Your interview was:</span>
+                                  {room.student_interview_date && room.student_interview_time && (
+                                    <>
+                                      <span className="flex items-center gap-1">
+                                        📅{" "}
+                                        {new Date(room.student_interview_date).toLocaleDateString(
+                                          undefined,
+                                          {
+                                            weekday: "short",
+                                            year: "numeric",
+                                            month: "short",
+                                            day: "numeric",
+                                          },
+                                        )}
+                                      </span>
+                                      <span className="flex items-center gap-1">
+                                        ⏰{" "}
+                                        {new Date(
+                                          `${room.student_interview_date}T${room.student_interview_time}`,
+                                        ).toLocaleTimeString(undefined, {
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                          hour12: true,
+                                        })}
+                                      </span>
+                                    </>
+                                  )}
                                 </div>
-                              )}
-                              <div className="mt-4 flex items-center gap-2">
-                                {canStudentEnter(room) ? (
-                                  <Button asChild className="flex-1">
-                                    <Link href={`/room/${room.room_code}`}>
-                                      <Eye className="mr-2 h-4 w-4" /> Enter Room
-                                    </Link>
-                                  </Button>
-                                ) : (
-                                  <Button disabled className="flex-1 opacity-50">
-                                    <Eye className="mr-2 h-4 w-4" /> Not Available Yet
-                                  </Button>
-                                )}
-                                <Button
-                                  size="icon"
-                                  variant="outline"
-                                  onClick={() => copyRoomLink(room.room_code)}
-                                >
-                                  <Copy className="h-4 w-4" />
-                                </Button>
                               </div>
                             </CardContent>
                           </Card>
                         </motion.div>
-                      ))}
-                    </div>
-                  </>
-                )}
-
-                {/* Past */}
-                {pastRooms.length > 0 && (
-                  <>
-                    <h2 className="mt-12 mb-4 text-2xl font-semibold">Past Interviews</h2>
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                      {pastRooms.map((room) => {
-                        const pivot = room.pivot;
-                        let statusText = "";
-                        let statusBadge: "destructive" | "secondary" = "secondary";
-
-                        if (pivot?.is_absent) {
-                          statusText = "Absent";
-                          statusBadge = "destructive"; // red badge
-                        } else if (pivot?.interview_done) {
-                          statusText = "Completed";
-                          statusBadge = "secondary"; // gray badge
-                        }
-
-                        return (
-                          <motion.div key={room.id} variants={fadeIn} whileHover={{ y: -5 }}>
-                            <Card className="flex h-full flex-col overflow-hidden opacity-70 transition-all hover:border-primary/50">
-                              <CardHeader>
-                                <div className="flex items-start justify-between gap-4">
-                                  <div className="flex-1">
-                                    <CardTitle className="text-lg">{room.name}</CardTitle>
-                                    <CardDescription>Code: {room.room_code}</CardDescription>
-                                  </div>
-                                  <Badge
-                                    variant="outline"
-                                    className={`border ${statusBadge === "destructive" ? "border-red-500 text-red-500" : "border-gray-400 text-gray-500"}`}
-                                  >
-                                    {statusText}
-                                  </Badge>
-                                </div>
-                              </CardHeader>
-                              <CardContent className="flex flex-1 flex-col justify-between space-y-4">
-                                <div className="space-y-3">
-                                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <span className="font-medium">Your interview was:</span>
-                                    {room.student_interview_date && room.student_interview_time && (
-                                      <>
-                                        <span className="flex items-center gap-1">
-                                          📅{" "}
-                                          {new Date(room.student_interview_date).toLocaleDateString(
-                                            undefined,
-                                            {
-                                              weekday: "short",
-                                              year: "numeric",
-                                              month: "short",
-                                              day: "numeric",
-                                            },
-                                          )}
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                          ⏰{" "}
-                                          {new Date(
-                                            `${room.student_interview_date}T${room.student_interview_time}`,
-                                          ).toLocaleTimeString(undefined, {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                            hour12: true,
-                                          })}
-                                        </span>
-                                      </>
-                                    )}
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </motion.div>
-        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </motion.div>
 
         {/* Confirmation Dialog */}
         <ConfirmationDialog

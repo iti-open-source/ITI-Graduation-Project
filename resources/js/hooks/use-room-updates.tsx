@@ -1,6 +1,4 @@
-import { router } from "@inertiajs/react";
-import Pusher from "pusher-js";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface User {
   id: number;
@@ -39,52 +37,39 @@ interface RoomStatusUpdateData {
 
 export function useRoomUpdates(roomCode: string, initialRoom: Room) {
   const [room, setRoom] = useState<Room>(initialRoom);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(true);
+  const intervalRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // Initialize Pusher
-    const pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY || "your-pusher-key", {
-      cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER || "us2",
-      forceTLS: true,
-    });
+    let aborted = false;
 
-    const channel = pusher.subscribe(`room.${roomCode}`);
-
-    // Handle queue updates
-    channel.bind("queue-updated", (data: QueueUpdateData & { sessionCode?: string }) => {
-      console.log("Queue updated:", data);
-      setRoom(data.room);
-
-      // If user was accepted, redirect to session page
-      if (data.action === "accepted" && data.user) {
-        const code = data.sessionCode || roomCode;
-        router.visit(`/session/${code}`);
+    const fetchState = async () => {
+      try {
+        const res = await fetch(`/api/room/${roomCode}/state`, {
+          headers: { Accept: "application/json" },
+          credentials: "same-origin",
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        if (!aborted && json?.room) {
+          setRoom(json.room);
+          setIsConnected(true);
+        }
+      } catch (e) {
+        if (!aborted) setIsConnected(false);
       }
-    });
+    };
 
-    // Handle room status updates
-    channel.bind("room-status-updated", (data: RoomStatusUpdateData) => {
-      console.log("Room status updated:", data);
-      setRoom(data.room);
-    });
-
-    // Handle connection status
-    pusher.connection.bind("connected", () => {
-      setIsConnected(true);
-    });
-
-    pusher.connection.bind("disconnected", () => {
-      setIsConnected(false);
-    });
+    // initial fetch immediately
+    fetchState();
+    // poll every 2s
+    intervalRef.current = window.setInterval(fetchState, 2000);
 
     return () => {
-      channel.unbind_all();
-      pusher.disconnect();
+      aborted = true;
+      if (intervalRef.current) window.clearInterval(intervalRef.current);
     };
   }, [roomCode]);
 
-  return {
-    room,
-    isConnected,
-  };
+  return { room, isConnected };
 }

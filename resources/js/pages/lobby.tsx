@@ -557,13 +557,13 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
               ))}
             </div>
           ) : (
-            <motion.div variants={fadeIn} className="py-16 text-center">
+            <motion.div variants={fadeIn} className="py-4 text-center">
               <div className="mx-auto max-w-md">
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                   <Wind className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <h3 className="mb-2 text-xl font-semibold">It's quiet in here...</h3>
-                <p className="mb-6 text-muted-foreground">
+                <p className="mb-2 text-muted-foreground">
                   {role === "student"
                     ? "No rooms have been assigned to you yet."
                     : "Create your first interview room to get started."}

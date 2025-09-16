@@ -508,42 +508,77 @@ export default function Profile() {
                   <div className="space-y-4">
                     {previous
                       .slice((prevPage - 1) * PREV_PER_PAGE, prevPage * PREV_PER_PAGE)
-                      .map((it) => (
-                        <div key={it.session_id} className="rounded-lg border p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <h4 className="font-medium">{it.room_name}</h4>
-                                <Badge variant="secondary">Ended</Badge>
+                      .map((it) => {
+                        const r = typeof it.rating === "number" ? it.rating : null;
+                        const ratingBadgeClass =
+                          r === null
+                            ? "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                            : r >= 8
+                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                              : r >= 5
+                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300";
+                        const leftBorderClass =
+                          r === null
+                            ? "border-l-gray-300 dark:border-l-gray-700"
+                            : r >= 8
+                              ? "border-l-green-500"
+                              : r >= 5
+                                ? "border-l-yellow-500"
+                                : "border-l-red-500";
+                        const endedAtStr = it.ended_at
+                          ? new Date(it.ended_at as any).toLocaleString()
+                          : null;
+                        return (
+                          <div
+                            key={it.session_id}
+                            className={`rounded-xl border border-l-4 border-[var(--color-border)] bg-card/60 p-5 shadow-sm ring-1 ring-transparent transition hover:shadow-md ${leftBorderClass}`}
+                          >
+                            <div className="mb-3 flex items-start justify-between gap-3">
+                              <div>
+                                <div className="mb-1 flex items-center gap-2">
+                                  <h4 className="text-base font-semibold tracking-tight text-[var(--color-text)]">
+                                    {it.room_name}
+                                  </h4>
+                                  <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                                    Ended
+                                  </Badge>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  Instructor: {it.instructor_name}
+                                </p>
+                                {endedAtStr && (
+                                  <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                                    <Clock className="h-3 w-3" />
+                                    <span>{endedAtStr}</span>
+                                  </div>
+                                )}
                               </div>
-                              <p className="text-sm text-muted-foreground">
-                                Instructor: {it.instructor_name}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Session: {it.session_code}
-                              </p>
+                              <div className="shrink-0">
+                                <span
+                                  className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${ratingBadgeClass}`}
+                                >
+                                  {r === null ? "No Rating" : `Rating: ${r}/10`}
+                                </span>
+                              </div>
                             </div>
-                            {typeof it.rating === "number" && (
-                              <div className="text-right">
-                                <div className="text-sm font-semibold">Rating: {it.rating}/10</div>
+
+                            {it.comments && (
+                              <div className="mt-3 rounded-lg border border-[var(--color-border)] bg-muted/30 p-3 text-sm">
+                                <div className="mb-1 font-medium">Feedback</div>
+                                <p className="whitespace-pre-wrap text-muted-foreground">
+                                  {it.comments}
+                                </p>
+                              </div>
+                            )}
+                            {!it.comments && (
+                              <div className="mt-3 text-sm text-muted-foreground">
+                                No feedback provided
                               </div>
                             )}
                           </div>
-                          {it.comments && (
-                            <div className="mt-3 rounded-md border bg-muted/30 p-3 text-sm">
-                              <div className="mb-1 font-medium">Feedback</div>
-                              <p className="whitespace-pre-wrap text-muted-foreground">
-                                {it.comments}
-                              </p>
-                            </div>
-                          )}
-                          {!it.comments && typeof it.rating !== "number" && (
-                            <div className="mt-3 text-sm text-muted-foreground">
-                              No feedback provided.
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                        );
+                      })}
                     {/* Pagination Controls */}
                     {previous.length > PREV_PER_PAGE && (
                       <div className="flex items-center justify-between border-t pt-4">

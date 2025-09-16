@@ -81,7 +81,7 @@ export default function Creator({
   const { auth } = usePage<SharedData>().props;
   const { room, isConnected } = useRoomUpdates(initialRoom.room_code, initialRoom);
 
-  const [showAssignModal, setShowAssignModal] = useState(false);
+  // const [showAssignModal, setShowAssignModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -103,7 +103,7 @@ export default function Creator({
   const [assigned, setAssigned] = useState<AssignedStudent[]>(initialAssigned as AssignedStudent[]);
 
   const [updatingStudent, setUpdatingStudent] = useState(false);
-  const [studentToUpdate, setStudentToUpdate] = useState<AssignedStudent | null>(null);
+  // const [studentToUpdate, setStudentToUpdate] = useState<AssignedStudent | null>(null);
 
   // Pagination state
   const [assignedCurrentPage, setAssignedCurrentPage] = useState(1);

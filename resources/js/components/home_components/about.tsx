@@ -135,13 +135,14 @@ export default function About() {
           {/* CTA */}
           {/* <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-5">
             <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
-              🎯 Start improving today
+              <Target className="h-4 w-4" />
+              Start improving today
             </div>
             <Button
               size="lg"
               className="bg-gradient-to-r from-blue-500 to-blue-700 text-white shadow-lg rounded-xl px-8 py-6 text-lg font-medium"
             >
-              Try a Mock Interview →
+              Try a Mock Interview <ArrowRight className="ml-2 h-4 w-4 inline" />
             </Button>
           </div> */}
         </div>

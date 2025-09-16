@@ -7,7 +7,20 @@ import { Label } from "@/components/ui/label";
 import AppLayout from "@/layouts/app-layout";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
-import { Calendar, Clock, Copy, Eye, Plus, Trash2, Users, Wind } from "lucide-react";
+import {
+  Calendar,
+  Check,
+  Clock,
+  Copy,
+  Eye,
+  GraduationCap,
+  Plus,
+  Search,
+  Trash2,
+  Users,
+  Wind,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 
 // It's good practice to define types in a separate file, but here's a quick reference
@@ -237,13 +250,16 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                       <Label className="mb-3 block text-lg font-semibold">Assign Students</Label>
 
                       {/* Search Input */}
-                      <Input
-                        type="text"
-                        placeholder="🔍 Search by name or email..."
-                        className="mb-4"
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        value={searchQuery}
-                      />
+                      <div className="relative mb-4">
+                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          type="text"
+                          placeholder="Search by name or email..."
+                          className="pl-10"
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          value={searchQuery}
+                        />
+                      </div>
 
                       {/* Searchable Students (only role === "student") */}
                       <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
@@ -277,7 +293,8 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                                 </span>
                                 {selectedStudents.includes(student.id) && (
                                   <Badge variant="secondary" className="px-2 py-0.5">
-                                    ✓ Selected
+                                    <Check className="mr-1 inline h-3 w-3" />
+                                    Selected
                                   </Badge>
                                 )}
                               </div>
@@ -293,7 +310,8 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                       {selectedStudents.length > 0 && (
                         <div className="mt-6 space-y-4 rounded-lg border bg-card p-4 shadow-sm">
                           <Label className="mb-2 block text-base font-semibold text-foreground">
-                            🎓 Selected Students
+                            <GraduationCap className="mr-1 inline h-4 w-4" />
+                            Selected Students
                           </Label>
 
                           {paginatedSelected.map((id) => {
@@ -313,7 +331,7 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                                     setSelectedStudents((prev) => prev.filter((s) => s !== id))
                                   }
                                 >
-                                  ✕
+                                  <X className="h-3 w-3" />
                                 </Button>
 
                                 {/* Student Info */}
@@ -471,7 +489,7 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <span className="font-medium">Your interview:</span>
                               <span className="flex items-center gap-1">
-                                📅{" "}
+                                <Calendar className="h-3 w-3" />
                                 {new Date(room.student_interview_date).toLocaleDateString(
                                   undefined,
                                   {
@@ -483,7 +501,7 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                                 )}
                               </span>
                               <span className="flex items-center gap-1">
-                                ⏰{" "}
+                                <Clock className="h-3 w-3" />
                                 {new Date(
                                   `${room.student_interview_date}T${room.student_interview_time}`,
                                 ).toLocaleTimeString(undefined, {
@@ -568,7 +586,7 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                     ? "No rooms have been assigned to you yet."
                     : "Create your first interview room to get started."}
                 </p>
-                {/* ✅ Students can’t create rooms */}
+                {/* Students can't create rooms */}
                 {role !== "student" && (
                   <Button onClick={() => setShowCreateForm(true)}>
                     <Plus className="mr-2 h-4 w-4" />
@@ -606,7 +624,7 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <span className="font-medium">Your interview:</span>
                                 <span className="flex items-center gap-1">
-                                  📅{" "}
+                                  <Calendar className="h-3 w-3" />
                                   {new Date(room.student_interview_date).toLocaleDateString(
                                     undefined,
                                     {
@@ -618,7 +636,7 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                                   )}
                                 </span>
                                 <span className="flex items-center gap-1">
-                                  ⏰{" "}
+                                  <Clock className="h-3 w-3" />
                                   {new Date(
                                     `${room.student_interview_date}T${room.student_interview_time}`,
                                   ).toLocaleTimeString(undefined, {

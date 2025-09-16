@@ -10,8 +10,11 @@ import { Head, Link, router, usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
+  Calendar,
+  Check,
   ChevronLeft,
   ChevronRight,
+  Clock,
   Copy,
   Edit2,
   Trash2,
@@ -21,6 +24,7 @@ import {
   UserPlus,
   Users,
   UserX,
+  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -833,7 +837,7 @@ export default function Creator({
                                 <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
                                   Interview:
                                   <span className="flex items-center gap-1">
-                                    📅{" "}
+                                    <Calendar className="h-3 w-3" />
                                     {new Date(student.interview_date).toLocaleDateString(
                                       undefined,
                                       {
@@ -845,7 +849,7 @@ export default function Creator({
                                     )}
                                   </span>
                                   <span className="flex items-center gap-1">
-                                    ⏰{" "}
+                                    <Clock className="h-3 w-3" />
                                     {new Date(
                                       `${student.interview_date}T${student.interview_time}`,
                                     ).toLocaleTimeString(undefined, {
@@ -1026,7 +1030,7 @@ export default function Creator({
                       onClick={() => setShowAddModal(false)}
                       className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                     >
-                      ✕
+                      <X className="h-4 w-4" />
                     </button>
                   </div>
                   <div className="space-y-4">
@@ -1079,7 +1083,7 @@ export default function Creator({
                       onClick={() => setShowEditModal(false)}
                       className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                     >
-                      ✕
+                      <X className="h-4 w-4" />
                     </button>
                   </div>
 
@@ -1263,7 +1267,7 @@ export default function Creator({
                               <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
                                 Interview:
                                 <span className="flex items-center gap-1">
-                                  📅{" "}
+                                  <Calendar className="h-3 w-3" />
                                   {new Date(student.interview_date).toLocaleDateString(undefined, {
                                     weekday: "short",
                                     year: "numeric",
@@ -1272,7 +1276,7 @@ export default function Creator({
                                   })}
                                 </span>
                                 <span className="flex items-center gap-1">
-                                  ⏰{" "}
+                                  <Clock className="h-3 w-3" />
                                   {new Date(
                                     `${student.interview_date}T${student.interview_time}`,
                                   ).toLocaleTimeString(undefined, {
@@ -1302,7 +1306,8 @@ export default function Creator({
                                 {student.interview_done ? (
                                   <>
                                     <span className="block group-hover:hidden">
-                                      ✅Interview Done
+                                      <Check className="mr-1 inline h-3 w-3" />
+                                      Interview Done
                                     </span>
                                     <span className="hidden group-hover:block">Undo Done</span>
                                   </>

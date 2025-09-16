@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { Check } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 
@@ -86,7 +87,7 @@ export default function Pricing() {
                 <ul className="mt-4 space-y-2 text-gray-700 dark:text-gray-300">
                   {plan.features.map((f, idx) => (
                     <li key={idx} className="flex items-center gap-2">
-                      <span className="text-blue-500">✔</span> {f}
+                      <Check className="h-4 w-4 text-blue-500" /> {f}
                     </li>
                   ))}
                 </ul>

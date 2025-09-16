@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link, usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
+import { BookOpen, ChevronDown, Rocket, Sparkles, Target } from "lucide-react";
 import "swiper/css";
 import "swiper/css/navigation";
 export default function Hero() {
@@ -9,7 +10,7 @@ export default function Hero() {
   // };
 
   const { auth, assignedRooms } = usePage().props as {
-    auth: { user?: { role: string } };
+    auth?: { user?: { role: string } };
     assignedRooms?: number[];
   };
 
@@ -67,7 +68,10 @@ export default function Hero() {
                 size="lg"
                 className="py-6 text-xl shadow-lg transition hover:scale-105"
               >
-                <Link href="/login">✨ Get Started</Link>
+                <Link href="/login">
+                  <Sparkles className="mr-2 inline h-5 w-5" />
+                  Get Started
+                </Link>
               </Button>
             </motion.div>
           )}
@@ -75,7 +79,10 @@ export default function Hero() {
           {(userRole === "instructor" || userRole === "admin") && (
             <motion.div variants={fadeIn}>
               <Button asChild className="py-6 text-xl shadow-lg transition hover:scale-105">
-                <Link href="/lobby">🚀 Create a Room</Link>
+                <Link href="/lobby">
+                  <Rocket className="mr-2 inline h-5 w-5" />
+                  Create a Room
+                </Link>
               </Button>
             </motion.div>
           )}
@@ -89,7 +96,10 @@ export default function Hero() {
                 asChild
                 className="border-border text-foreground backdrop-blur-md transition hover:scale-105"
               >
-                <Link href="/lobby">🎯 Join Random Room</Link>
+                <Link href="/lobby">
+                  <Target className="mr-2 h-5 w-5 inline" />
+                  Join Random Room
+                </Link>
               </Button>
             </motion.div>
           )}  */}
@@ -104,7 +114,10 @@ export default function Hero() {
                     size="lg"
                     className="py-6 text-xl shadow-lg transition hover:scale-105"
                   >
-                    <Link href="/lobby">📚 Join Room</Link>
+                    <Link href="/lobby">
+                      <BookOpen className="mr-2 inline h-5 w-5" />
+                      Join Room
+                    </Link>
                   </Button>
                 </motion.div>
               </>
@@ -116,7 +129,10 @@ export default function Hero() {
                   asChild
                   className="border-border text-foreground backdrop-blur-md transition hover:scale-105"
                 >
-                  <Link href="/">🎯 Welcom To MockMate</Link>
+                  <Link href="/">
+                    <Target className="mr-2 inline h-5 w-5" />
+                    Welcome To MockMate
+                  </Link>
                 </Button>
               </motion.div>
             ))}
@@ -125,7 +141,7 @@ export default function Hero() {
 
       {/* Scroll indicator */}
       <div className="absolute bottom-6 flex w-full justify-center">
-        <span className="animate-bounce text-2xl">⬇</span>
+        <ChevronDown className="h-8 w-8 animate-bounce" />
       </div>
     </header>
   );

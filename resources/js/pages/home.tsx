@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import CustomLayout from "@/layouts/custom-layout";
 import { Link, usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
+import { Mail } from "lucide-react";
 import "swiper/css";
 import "swiper/css/navigation";
 
@@ -87,7 +88,7 @@ export default function Home() {
               {[
                 {
                   name: "Sarah L.",
-                  feedback: "This platform helped me ace my interviews with confidence. The AI feedback is 🔥",
+                  feedback: "This platform helped me ace my interviews with confidence. The AI feedback is amazing!",
                 },
                 {
                   name: "James K.",
@@ -178,7 +179,8 @@ export default function Home() {
               rel="noopener noreferrer"
               className="animate-float inline-block rounded-2xl bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 px-10 py-4 font-semibold text-white shadow-xl transition hover:from-blue-700 hover:to-sky-600 hover:shadow-blue-400/40"
             >
-              📩 support@mockmate.com
+              <Mail className="mr-2 inline h-4 w-4" />
+              support@mockmate.com
             </a>
           </motion.div>
 

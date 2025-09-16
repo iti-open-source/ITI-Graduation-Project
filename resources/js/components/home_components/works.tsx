@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { BarChart3, Calendar, Handshake } from "lucide-react";
 
 export default function Works() {
   return (
@@ -39,53 +40,58 @@ export default function Works() {
               {
                 step: "Schedule Interviews",
                 desc: "Organize structured interview sessions with customizable templates and flexible scheduling.",
-                icon: "📅",
+                icon: Calendar,
               },
               {
                 step: "Collaborate in Real-Time",
                 desc: "Engage in coding sessions, whiteboard discussions, or structured Q&A within interactive rooms.",
-                icon: "🤝",
+                icon: Handshake,
               },
               {
                 step: "Get Actionable Insights",
                 desc: "Receive instant AI-powered feedback and performance analytics for continuous improvement.",
-                icon: "📊",
+                icon: BarChart3,
               },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                className={`md:flex md:items-center md:gap-8 ${
-                  i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
-                }`}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: i * 0.1 }}
-              >
-                <div className="md:w-1/2">
-                  <div className="flex items-center justify-center md:justify-end">
-                    <div className="flex flex-col items-center text-center md:text-right">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 text-3xl text-white shadow-lg">
-                        {item.icon}
+            ].map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <motion.div
+                  key={i}
+                  className={`md:flex md:items-center md:gap-8 ${
+                    i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
+                  }`}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: i * 0.1 }}
+                >
+                  <div className="md:w-1/2">
+                    <div className="flex items-center justify-center md:justify-end">
+                      <div className="flex flex-col items-center text-center md:text-right">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg">
+                          <Icon className="h-8 w-8" />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="mt-6 md:mt-0 md:w-1/2">
-                  <div className="rounded-3xl bg-white p-8 shadow-lg transition hover:shadow-xl dark:bg-slate-900">
-                    <div className="mb-2 flex items-center gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 text-sm font-bold text-white">
-                        {i + 1}
-                      </span>
-                      <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
-                        {item.step}
-                      </h3>
+                  <div className="mt-6 md:mt-0 md:w-1/2">
+                    <div className="rounded-3xl bg-white p-8 shadow-lg transition hover:shadow-xl dark:bg-slate-900">
+                      <div className="mb-2 flex items-center gap-3">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 text-sm font-bold text-white">
+                          {i + 1}
+                        </span>
+                        <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
+                          {item.step}
+                        </h3>
+                      </div>
+                      <p className="leading-relaxed text-gray-600 dark:text-gray-300">
+                        {item.desc}
+                      </p>
                     </div>
-                    <p className="leading-relaxed text-gray-600 dark:text-gray-300">{item.desc}</p>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </div>

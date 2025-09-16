@@ -20,7 +20,7 @@ interface LoginProps {
 
 export default function Login({ status, canResetPassword }: LoginProps) {
   return (
-    <AuthLayout title="Welcome Back 👋" description="Log in to access your account">
+    <AuthLayout title="Welcome Back" description="Log in to access your account">
       <Head title="Log in" />
 
       <Form

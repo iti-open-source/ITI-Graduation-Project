@@ -1,6 +1,7 @@
 // resources/js/Components/FlashMessageHandler.jsx
 
 import { usePage } from "@inertiajs/react";
+import { Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function FlashMessage() {
@@ -65,15 +66,16 @@ export default function FlashMessage() {
     error: "bg-gradient-to-r from-red-500 to-red-600 border-l-4 border-red-300",
   };
 
-  const iconClasses = {
-    success: "✓",
-    error: "✕",
+  const iconComponents = {
+    success: <Check className="h-4 w-4" />,
+    error: <X className="h-4 w-4" />,
   };
 
   return (
     <div className={`${baseClasses} ${typeClasses[type]}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
+          {iconComponents[type]}
           <span className="leading-relaxed font-medium">{message}</span>
         </div>
         <button
@@ -81,11 +83,7 @@ export default function FlashMessage() {
           className="bg-opacity-20 hover:bg-opacity-30 ml-4 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-white transition-all duration-200 hover:scale-110"
           aria-label="Close notification"
         >
-          <span
-            className={`text-lg font-bold ${type === "success" ? "text-green-600" : "text-red-600"}`}
-          >
-            ×
-          </span>
+          <X className={`h-4 w-4 ${type === "success" ? "text-green-600" : "text-red-600"}`} />
         </button>
       </div>
 

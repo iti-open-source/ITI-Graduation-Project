@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Bot, Brain, ChartBar } from "lucide-react";
+import { ArrowRight, Bot, Brain, ChartBar } from "lucide-react";
 import { useState } from "react";
 const services = [
   {
@@ -205,7 +205,7 @@ export default function Services() {
                     }}
                     transition={{ duration: 0.6, ease: "easeInOut" }}
                   >
-                    <span className="text-xl font-bold">→</span>
+                    <ArrowRight className="h-5 w-5" />
                   </motion.div>
                 </div>
 

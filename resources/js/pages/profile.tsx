@@ -4,7 +4,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem, type SharedData } from "@/types";
 import { Head, Link, usePage } from "@inertiajs/react";
-import { Building2, Calendar, CalendarDays, Clock, Edit, ExternalLink, Users } from "lucide-react";
+import {
+  Building2,
+  Calendar,
+  CalendarDays,
+  Clock,
+  Edit,
+  ExternalLink,
+  Users,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -631,7 +640,7 @@ export default function Profile() {
                       </p>
                     </div>
                     <Button variant="ghost" size="sm" onClick={() => setFeedbackOpen(false)}>
-                      ✕
+                      <X className="h-4 w-4" />
                     </Button>
                   </div>
                   <div className="space-y-3">

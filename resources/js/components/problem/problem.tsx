@@ -5,6 +5,7 @@ import {
   useMutation,
   useStorage,
 } from "@liveblocks/react";
+import { FileText } from "lucide-react";
 import { useState } from "react";
 
 interface ProblemProps {
@@ -125,7 +126,7 @@ function ProblemInner({ isCreator }: { isCreator: boolean }) {
         ) : (
           <div className="flex h-full items-center justify-center p-6 text-[var(--color-text-secondary)]">
             <div className="text-center">
-              <div className="mb-2 text-4xl">📝</div>
+              <FileText className="mx-auto mb-2 h-12 w-12 text-[var(--color-text-secondary)]" />
               <p className="text-sm">No problem loaded</p>
               {isCreator && (
                 <p className="mt-1 text-xs">Use the form above to load a LeetCode problem</p>

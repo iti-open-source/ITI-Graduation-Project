@@ -75,15 +75,15 @@ export default function Features() {
               </p>
               <div className="mt-2 flex -space-x-2 sm:mt-3">
                 <img
-                  src="/images/session1.jpg"
+                  src="https://www.digitalglad.com/wp-content/uploads/2024/02/Book-Mock-Interview-With-DigitalGlad.jpg"
                   className="h-6 w-6 rounded-full border-2 border-white sm:h-8 sm:w-8"
                 />
                 <img
-                  src="/images/session2.jpg"
+                  src="https://miro.medium.com/v2/resize:fit:875/1*bp8lGZWCx1W4__WHUqBAUA.jpeg"
                   className="h-6 w-6 rounded-full border-2 border-white sm:h-8 sm:w-8"
                 />
                 <img
-                  src="/images/session3.jpg"
+                  src="//readyfortakeoffbook.com/cdn/shop/files/Pilot_Mock_Interview_Product_-_Ready_For_Take-Off_Book.webp?v=1749141471&width=2160"
                   className="h-6 w-6 rounded-full border-2 border-white sm:h-8 sm:w-8"
                 />
               </div>

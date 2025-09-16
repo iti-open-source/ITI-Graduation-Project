@@ -22,6 +22,7 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('dashboard', ProfileController::class)->name('dashboard');
+    Route::get('api/dashboard/state', [ProfileController::class, 'state'])->name('dashboard.state');
 
     // Admin routes
     Route::prefix('admin')->name('admin.')->middleware('admin.only')->group(function () {
@@ -43,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('lobby', [RoomController::class, 'lobby'])->name('lobby')->middleware('check.role');
     Route::post('rooms', [RoomController::class, 'create'])->name('room.create')->middleware(['instructor.only']);
     Route::get('room/{roomCode}', [RoomController::class, 'show'])->name('room.show')->middleware('room.access');
+    Route::get('api/room/{roomCode}/state', [RoomController::class, 'state'])->name('room.state');
     Route::post('room/{roomCode}/join', [RoomController::class, 'join'])->name('room.join');
     Route::post('room/{roomCode}/disconnect', [RoomController::class, 'disconnect'])->name('room.disconnect');
     Route::post('room/{roomCode}/leave', [RoomController::class, 'leave'])->name('room.leave');
@@ -64,6 +66,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('session/{sessionCode}', [SessionController::class, 'room'])->name('session.room');
     Route::post('session/{sessionCode}/signal', [SessionController::class, 'signal'])->name('session.signal');
     Route::post('session/{sessionCode}/terminate', [SessionController::class, 'terminate'])->name('session.terminate');
+    Route::get('api/session/{sessionCode}/state', [SessionController::class, 'state'])->name('session.state');
     Route::post('session/{sessionCode}/evaluate', [SessionController::class, 'evaluate'])->name('session.evaluate');
 
     // AI Chat routes

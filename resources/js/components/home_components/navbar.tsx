@@ -68,7 +68,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
     ...((isAuthenticated && user?.role === "admin") || user?.role === "instructor"
       ? [{ href: "/dashboard", label: "Dashboard" }]
       : user?.role === "student"
-        ? [{ href: "/dashboard", label: "Profile" }]
+        ? [{ href: "/lobby", label: "My Rooms" }]
         : []),
   ];
 
@@ -82,19 +82,38 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
           </Link>
 
           <div className="hidden items-center gap-6 md:flex">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`relative inline-block transition ${
-                  shouldHighlight && activeSection === link.href.replace("/#", "")
-                     ? "font-semibold text-primary after:w-full"
-  : "text-foreground after:w-0"
-                } after:absolute after:-bottom-1 after:left-0 after:h-[3px] after:bg-blue-500 after:transition-all after:duration-500 after:content-['']`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isSection = link.href.startsWith("/#");
+              let isActive = false;
+
+              if (!currentUrl.startsWith("/lobby")) {
+                if (isSection) {
+                  const sectionId = link.href.replace("/#", "");
+                  isActive = activeSection === sectionId;
+                }
+              }
+              if (!isSection) {
+                isActive = currentUrl === link.href;
+              }
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`relative inline-block transition ${isActive
+                      ? "font-semibold text-primary after:w-full"
+                      : "text-foreground after:w-0"
+                    } after:absolute after:-bottom-1 after:left-0 after:h-[3px] after:bg-blue-500 after:transition-all after:duration-500 after:content-['']`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+
+
+
+
+
           </div>
 
           <div className="flex items-center gap-4">
@@ -106,11 +125,10 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
                 <Button variant={currentUrl.startsWith("/login") ? "default" : "ghost"} asChild>
                   <Link
                     href="/login"
-                    className={`${
-                      currentUrl.startsWith("/login")
-                        ? "bg-primary text-white hover:bg-primary/90 dark:text-black"
-                        : "border:black border text-foreground dark:text-foreground"
-                    }`}
+                    className={`${currentUrl.startsWith("/login")
+                      ? "bg-primary text-white hover:bg-primary/90 dark:text-black"
+                      : "border:black border text-foreground dark:text-foreground"
+                      }`}
                   >
                     Login
                   </Link>
@@ -123,11 +141,10 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
                 >
                   <Link
                     href="/register"
-                    className={`${
-                      currentUrl.startsWith("/register")
-                        ? "bg-primary text-white hover:bg-primary/90 dark:text-black"
-                        : "text-foreground dark:text-foreground"
-                    }`}
+                    className={`${currentUrl.startsWith("/register")
+                      ? "bg-primary text-white hover:bg-primary/90 dark:text-black"
+                      : "text-foreground dark:text-foreground"
+                      }`}
                   >
                     Register
                   </Link>

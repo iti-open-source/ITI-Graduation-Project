@@ -101,31 +101,49 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
     );
   };
 
-  const upcomingRooms = role === "student"
-    ? userRooms.filter(r => !r.pivot?.interview_done)
-    : userRooms;
+const now = new Date();
 
-  const pastRooms = role === "student"
-    ? userRooms.filter(r => r.pivot && r.pivot.interview_done)
-    : [];
-  console.log("userRooms from backend", userRooms);
+const upcomingRooms = role === "student"
+  ? userRooms.filter(r => {
+      const interviewDate = r.student_interview_date && r.student_interview_time
+        ? new Date(`${r.student_interview_date}T${r.student_interview_time}`)
+        : null;
+
+      return (
+        interviewDate &&
+        interviewDate > now &&
+        !r.pivot?.interview_done &&
+        !r.pivot?.absent
+      );
+    })
+  : userRooms;
+
+
+ const pastRooms = role === "student"
+  ? userRooms.filter(r => r.pivot && (r.pivot.interview_done || r.pivot.is_absent))
+  : [];
+
+
 
 
 
   function canStudentEnter(room: Room) {
-    if (!room.student_interview_date || !room.student_interview_time) return false;
+  const pivot = room.pivot;
 
-    const interviewDateTime = new Date(
-      `${room.student_interview_date}T${room.student_interview_time}`
-    );
-    const now = new Date();
+  // Can't enter if no pivot info, or if interview is done, or student was absent
+  if (!pivot || pivot.interview_done || pivot.is_absent) return false;
 
-    // end window = interview start + 10 minutes (adjust as you like)
-    const endWindow = new Date(interviewDateTime.getTime() + 10 * 60 * 1000);
+  if (!room.student_interview_date || !room.student_interview_time) return false;
 
-    // they can enter only between start time and end window
-    return now >= interviewDateTime && now <= endWindow;
-  }
+  const interviewDateTime = new Date(
+    `${room.student_interview_date}T${room.student_interview_time}`
+  );
+  const now = new Date();
+
+  // Only allow entering if interview time has arrived
+  return now >= interviewDateTime;
+}
+
 
 
   const copyRoomLink = (roomCode: string) => {
@@ -499,9 +517,14 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                               </Button>
                             ) : (
                               // student cannot enter yet
-                              <Button disabled className="flex-1 opacity-50">
-                                <Eye className="mr-2 h-4 w-4" /> Not Available Yet
-                              </Button>
+                               <Button disabled className="flex-1 opacity-50">
+    <Eye className="mr-2 h-4 w-4" />{" "}
+    {room.pivot?.is_absent
+      ? "Absent"
+      : room.pivot?.interview_done
+      ? "Completed"
+      : "Not Available Yet"}
+  </Button>
                             )
                           ) : (
                             // instructors/admins always can enter
@@ -639,57 +662,64 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
       <>
         <h2 className="mb-4 mt-12 text-2xl font-semibold">Past Interviews</h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {pastRooms.map((room) => (
-            <motion.div key={room.id} variants={fadeIn} whileHover={{ y: -5 }}>
-              <Card className="flex h-full flex-col overflow-hidden transition-all hover:border-primary/50 opacity-70">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">{room.name}</CardTitle>
-                      <CardDescription>Code: {room.room_code}</CardDescription>
-                    </div>
-                    <Badge variant="outline" className="border-gray-400 text-gray-500">
-                      Done
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex flex-1 flex-col justify-between space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span className="font-medium">Your interview was:</span>
-                      <span className="flex items-center gap-1">
-                        📅{" "}
-                        {new Date(room.student_interview_date).toLocaleDateString(undefined, {
-                          weekday: "short",
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        ⏰{" "}
-                        {new Date(`${room.student_interview_date}T${room.student_interview_time}`).toLocaleTimeString(undefined, {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: true,
-                        })}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Users className="h-4 w-4" />
-                      <span>Interview completed</span>
-                    </div>
-                  </div>
+          {pastRooms.map((room) => {
+  const pivot = room.pivot;
+  let statusText = "";
+  let statusBadge: "destructive" | "secondary" = "secondary";
 
-                  <div className="mt-4 flex items-center gap-2">
-                    <Button disabled className="flex-1">
-                      <Eye className="mr-2 h-4 w-4" /> Interview Completed
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+  if (pivot?.is_absent) {
+    statusText = "Absent";
+    statusBadge = "destructive"; // red badge
+  } else if (pivot?.interview_done) {
+    statusText = "Completed";
+    statusBadge = "secondary"; // gray badge
+  }
+
+  return (
+    <motion.div key={room.id} variants={fadeIn} whileHover={{ y: -5 }}>
+      <Card className="flex h-full flex-col overflow-hidden transition-all hover:border-primary/50 opacity-70">
+        <CardHeader>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <CardTitle className="text-lg">{room.name}</CardTitle>
+              <CardDescription>Code: {room.room_code}</CardDescription>
+            </div>
+            <Badge variant="outline" className={`border ${statusBadge === "destructive" ? "border-red-500 text-red-500" : "border-gray-400 text-gray-500"}`}>
+              {statusText}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-1 flex-col justify-between space-y-4">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="font-medium">Your interview was:</span>
+              {room.student_interview_date && room.student_interview_time && (
+                <>
+                  <span className="flex items-center gap-1">
+                    📅 {new Date(room.student_interview_date).toLocaleDateString(undefined, {
+                      weekday: "short",
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    ⏰ {new Date(`${room.student_interview_date}T${room.student_interview_time}`).toLocaleTimeString(undefined, {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+})}
+
         </div>
       </>
     )}

@@ -121,6 +121,12 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
       ? userRooms.filter((r) => r.pivot && (r.pivot.interview_done || r.pivot.is_absent))
       : [];
 
+  // Hide completed/absent rooms for students in the main grid
+  const visibleRooms =
+    role === "student"
+      ? userRooms.filter((r) => !(r.pivot?.interview_done || r.pivot?.is_absent))
+      : userRooms;
+
   function canStudentEnter(room: Room) {
     const pivot = room.pivot;
 
@@ -411,9 +417,9 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
           )}
 
           {/* Rooms Grid */}
-          {userRooms.length > 0 ? (
+          {visibleRooms.length > 0 ? (
             <div className="mb-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {userRooms.map((room) => (
+              {visibleRooms.map((room) => (
                 <motion.div key={room.id} variants={fadeIn} whileHover={{ y: -5 }}>
                   <Card className="flex h-full flex-col overflow-hidden transition-all hover:border-primary/50">
                     <CardHeader>
@@ -436,24 +442,28 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                     </CardHeader>
                     <CardContent className="flex flex-1 flex-col justify-between space-y-4">
                       <div className="space-y-3">
-                        {/* Info Tags */}
-                        {room.current_participant ? (
-                          <div className="flex items-center gap-2 text-sm text-accent-foreground">
-                            <Users className="h-4 w-4 text-blue-500" />
-                            <span>In call with: {room.current_participant.name}</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Users className="h-4 w-4" />
-                            <span>Room is empty</span>
-                          </div>
+                        {/* Info Tags - hidden for students */}
+                        {role !== "student" && (
+                          <>
+                            {room.current_participant ? (
+                              <div className="flex items-center gap-2 text-sm text-accent-foreground">
+                                <Users className="h-4 w-4 text-blue-500" />
+                                <span>In call with: {room.current_participant.name}</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Users className="h-4 w-4" />
+                                <span>Room is empty</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Users className="h-4 w-4" />
+                              <span>
+                                {room.queue_count} user{room.queue_count !== 1 ? "s" : ""} in queue
+                              </span>
+                            </div>
+                          </>
                         )}
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Users className="h-4 w-4" />
-                          <span>
-                            {room.queue_count} user{room.queue_count !== 1 ? "s" : ""} in queue
-                          </span>
-                        </div>
                         {/* Show interview schedule if student */}
                         {role === "student" &&
                           room.student_interview_date &&
@@ -522,13 +532,15 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                           </Button>
                         )}
 
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => copyRoomLink(room.room_code)}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
+                        {role !== "student" && (
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => copyRoomLink(room.room_code)}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        )}
                         {role !== "student" && (
                           <Button
                             size="icon"
@@ -629,13 +641,16 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                                   <Eye className="mr-2 h-4 w-4" /> Not Available Yet
                                 </Button>
                               )}
-                              <Button
-                                size="icon"
-                                variant="outline"
-                                onClick={() => copyRoomLink(room.room_code)}
-                              >
-                                <Copy className="h-4 w-4" />
-                              </Button>
+                              {/* Copy button hidden for students */}
+                              {role !== "student" && (
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  onClick={() => copyRoomLink(room.room_code)}
+                                >
+                                  <Copy className="h-4 w-4" />
+                                </Button>
+                              )}
                             </div>
                           </CardContent>
                         </Card>

@@ -2,7 +2,7 @@ import { AppContent } from "@/components/app-content";
 import { AppShell } from "@/components/app-shell";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppSidebarHeader } from "@/components/app-sidebar-header";
-import {  type BreadcrumbItem } from "@/types";
+import { type BreadcrumbItem } from "@/types";
 // import { usePage } from "@inertiajs/react";
 import { type PropsWithChildren } from "react";
 
@@ -12,7 +12,7 @@ export default function AppSidebarLayout({
 }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {
   // const { auth } = usePage<SharedData>().props;
 
-  // const isStudent = auth.user?.role === "student"; 
+  // const isStudent = auth.user?.role === "student";
   return (
     <AppShell variant="sidebar">
       <AppSidebar />

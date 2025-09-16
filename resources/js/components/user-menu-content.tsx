@@ -10,7 +10,14 @@ import { logout } from "@/routes";
 import { edit } from "@/routes/profile";
 import { type User } from "@/types";
 import { Link, router } from "@inertiajs/react";
-import { LogOut, PanelsRightBottom, Rocket, Settings, ShieldMinus, User as  UserIcon, Users, UsersIcon } from "lucide-react";
+import {
+  LogOut,
+  PanelsRightBottom,
+  Settings,
+  User as UserIcon,
+  Users,
+  UsersIcon,
+} from "lucide-react";
 
 interface UserMenuContentProps {
   user: User;
@@ -35,25 +42,24 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
           href: "/lobby",
           icon: Users,
         };
-    const secondMenuItem =
+  const secondMenuItem =
     user.role === "student"
       ? {
           title: "Profile",
           href: "/dashboard",
           icon: UserIcon,
         }
-      : user.role === "admin"?{
-          title: "Dashboard",
-          href: "/admin",
-          icon: UserIcon,
-        }:
-
-        {
-          title: "Dashboard",
-          href: "/dashboard",
-          icon: UsersIcon,
-        }
-        ;
+      : user.role === "admin"
+        ? {
+            title: "Dashboard",
+            href: "/admin",
+            icon: UserIcon,
+          }
+        : {
+            title: "Dashboard",
+            href: "/dashboard",
+            icon: UsersIcon,
+          };
   return (
     <>
       <DropdownMenuLabel className="p-0 font-normal">

@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, BookOpen, Code, HelpCircle, ChevronDown, Trash2 } from "lucide-react";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { BookOpen, Bot, Code, Loader2, Send, Trash2, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import remarkGfm from "remark-gfm";
 
 interface Message {
   id: string;
@@ -26,13 +26,12 @@ interface AIProvider {
 }
 
 interface QuestionRequest {
-  type: 'interview' | 'leetcode';
+  type: "interview" | "leetcode";
   topic: string;
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: "easy" | "medium" | "hard";
 }
 
 export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
-  
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -41,9 +40,9 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
   const [isLoadingProvider, setIsLoadingProvider] = useState(true);
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [questionRequest, setQuestionRequest] = useState<QuestionRequest>({
-    type: 'interview',
-    topic: '',
-    difficulty: 'medium'
+    type: "interview",
+    topic: "",
+    difficulty: "medium",
   });
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
@@ -75,7 +74,8 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
       try {
         const response = await fetch(`/api/ai-chat/${roomCode}/history`, {
           headers: {
-            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            "X-CSRF-TOKEN":
+              document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
           },
         });
 
@@ -103,9 +103,10 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
   useEffect(() => {
     const loadProvider = async () => {
       try {
-        const response = await fetch('/api/ai-chat/provider', {
+        const response = await fetch("/api/ai-chat/provider", {
           headers: {
-            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            "X-CSRF-TOKEN":
+              document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
           },
         });
 
@@ -130,11 +131,11 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: `Generate ${questionRequest.type === 'interview' ? 'interview questions' : 'LeetCode problem recommendations'} for topic: "${questionRequest.topic}" with ${questionRequest.difficulty} difficulty level.`,
+      content: `Generate ${questionRequest.type === "interview" ? "interview questions" : "LeetCode problem recommendations"} for topic: "${questionRequest.topic}" with ${questionRequest.difficulty} difficulty level.`,
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
 
     // Create a placeholder for the streaming response
     const assistantMessageId = (Date.now() + 1).toString();
@@ -145,14 +146,15 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, assistantMessage]);
+    setMessages((prev) => [...prev, assistantMessage]);
 
     try {
       const response = await fetch(`/api/ai-chat/${roomCode}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+          "X-CSRF-TOKEN":
+            document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
         },
         body: JSON.stringify({
           message: userMessage.content,
@@ -171,68 +173,73 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
       }
 
       const decoder = new TextDecoder();
-      let buffer = '';
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
-        
+
         if (done) break;
-        
+
         const chunk = decoder.decode(value, { stream: true });
         buffer += chunk;
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
+          if (line.startsWith("data: ")) {
             try {
               const data = JSON.parse(line.slice(6));
-              
-              if (data.type === 'chunk') {
+
+              if (data.type === "chunk") {
                 // Break down the chunk into smaller pieces for better streaming effect
-                const words = data.content.split(' ');
-                
+                const words = data.content.split(" ");
+
                 for (let i = 0; i < words.length; i++) {
-                  const word = words[i] + (i < words.length - 1 ? ' ' : '');
-                  
+                  const word = words[i] + (i < words.length - 1 ? " " : "");
+
                   // Update the message with the current word
-                  setMessages(prev => prev.map(msg => 
-                    msg.id === assistantMessageId 
-                      ? { ...msg, content: msg.content + word }
-                      : msg
-                  ));
-                  
+                  setMessages((prev) =>
+                    prev.map((msg) =>
+                      msg.id === assistantMessageId ? { ...msg, content: msg.content + word } : msg,
+                    ),
+                  );
+
                   // Add delay between words for typing effect
-                  await new Promise(resolve => setTimeout(resolve, 50));
+                  await new Promise((resolve) => setTimeout(resolve, 50));
                 }
-              } else if (data.type === 'done') {
+              } else if (data.type === "done") {
                 // Streaming is complete
                 break;
-              } else if (data.type === 'error') {
+              } else if (data.type === "error") {
                 // Handle error
-                setMessages(prev => prev.map(msg => 
-                  msg.id === assistantMessageId 
-                    ? { ...msg, content: data.content }
-                    : msg
-                ));
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === assistantMessageId ? { ...msg, content: data.content } : msg,
+                  ),
+                );
                 break;
               }
             } catch (e) {
-              console.error('Error parsing SSE data:', e);
+              console.error("Error parsing SSE data:", e);
             }
           }
         }
       }
 
       setShowQuestionForm(false);
-      setQuestionRequest({ type: 'interview', topic: '', difficulty: 'medium' });
+      setQuestionRequest({ type: "interview", topic: "", difficulty: "medium" });
     } catch (error) {
       console.error("Error generating questions:", error);
-      setMessages(prev => prev.map(msg => 
-        msg.id === assistantMessageId 
-          ? { ...msg, content: "Sorry, I encountered an error generating questions. Please try again." }
-          : msg
-      ));
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === assistantMessageId
+            ? {
+                ...msg,
+                content: "Sorry, I encountered an error generating questions. Please try again.",
+              }
+            : msg,
+        ),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -242,9 +249,10 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
     setIsClearing(true);
     try {
       const response = await fetch(`/api/ai-chat/${roomCode}/clear`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+          "X-CSRF-TOKEN":
+            document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
         },
       });
 
@@ -252,10 +260,10 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
         setMessages([]);
         setShowClearDialog(false);
       } else {
-        console.error('Failed to clear chat');
+        console.error("Failed to clear chat");
       }
     } catch (error) {
-      console.error('Error clearing chat:', error);
+      console.error("Error clearing chat:", error);
     } finally {
       setIsClearing(false);
     }
@@ -271,7 +279,7 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
 
@@ -284,14 +292,15 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, assistantMessage]);
+    setMessages((prev) => [...prev, assistantMessage]);
 
     try {
       const response = await fetch(`/api/ai-chat/${roomCode}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+          "X-CSRF-TOKEN":
+            document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
         },
         body: JSON.stringify({
           message: userMessage.content,
@@ -311,65 +320,67 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
       }
 
       const decoder = new TextDecoder();
-      let buffer = '';
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
-        
+
         if (done) break;
-        
+
         const chunk = decoder.decode(value, { stream: true });
         buffer += chunk;
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
+          if (line.startsWith("data: ")) {
             try {
               const data = JSON.parse(line.slice(6));
-              
-              if (data.type === 'chunk') {
+
+              if (data.type === "chunk") {
                 // Break down the chunk into smaller pieces for better streaming effect
-                const words = data.content.split(' ');
-                
+                const words = data.content.split(" ");
+
                 for (let i = 0; i < words.length; i++) {
-                  const word = words[i] + (i < words.length - 1 ? ' ' : '');
-                  
+                  const word = words[i] + (i < words.length - 1 ? " " : "");
+
                   // Update the message with the current word
-                  setMessages(prev => prev.map(msg => 
-                    msg.id === assistantMessageId 
-                      ? { ...msg, content: msg.content + word }
-                      : msg
-                  ));
-                  
+                  setMessages((prev) =>
+                    prev.map((msg) =>
+                      msg.id === assistantMessageId ? { ...msg, content: msg.content + word } : msg,
+                    ),
+                  );
+
                   // Add delay between words for typing effect
-                  await new Promise(resolve => setTimeout(resolve, 50));
+                  await new Promise((resolve) => setTimeout(resolve, 50));
                 }
-              } else if (data.type === 'done') {
+              } else if (data.type === "done") {
                 // Streaming is complete
                 break;
-              } else if (data.type === 'error') {
+              } else if (data.type === "error") {
                 // Handle error
-                setMessages(prev => prev.map(msg => 
-                  msg.id === assistantMessageId 
-                    ? { ...msg, content: data.content }
-                    : msg
-                ));
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === assistantMessageId ? { ...msg, content: data.content } : msg,
+                  ),
+                );
                 break;
               }
             } catch (e) {
-              console.error('Error parsing SSE data:', e);
+              console.error("Error parsing SSE data:", e);
             }
           }
         }
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      setMessages(prev => prev.map(msg => 
-        msg.id === assistantMessageId 
-          ? { ...msg, content: "Sorry, I encountered an error. Please try again." }
-          : msg
-      ));
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === assistantMessageId
+            ? { ...msg, content: "Sorry, I encountered an error. Please try again." }
+            : msg,
+        ),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -397,7 +408,7 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
         <p className="text-xs text-gray-500 dark:text-gray-400">
           Get help with interview questions and guidance
         </p>
-        
+
         {/* Quick Action Buttons */}
         <div className="mt-3 flex flex-wrap gap-2">
           <button
@@ -409,7 +420,7 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
           </button>
           <button
             onClick={() => {
-              setQuestionRequest(prev => ({ ...prev, type: 'leetcode' }));
+              setQuestionRequest((prev) => ({ ...prev, type: "leetcode" }));
               setShowQuestionForm(true);
             }}
             className="flex items-center space-x-1 rounded-lg bg-green-100 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-800"
@@ -421,12 +432,12 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
       </div>
 
       {/* Chat Header with Clear Button */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-2 dark:border-gray-700">
         <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">AI Assistant</h3>
         {messages.length > 0 && (
           <button
             onClick={() => setShowClearDialog(true)}
-            className="flex items-center space-x-1 text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+            className="flex items-center space-x-1 text-xs text-red-600 transition-colors hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
             title="Clear chat history"
           >
             <Trash2 className="h-3 w-3" />
@@ -436,18 +447,20 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {isLoadingHistory ? (
           <div className="text-center text-gray-500 dark:text-gray-400">
-            <Loader2 className="mx-auto h-8 w-8 mb-4 animate-spin text-gray-300" />
+            <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-gray-300" />
             <p className="text-sm">Loading chat history...</p>
           </div>
         ) : messages.length === 0 ? (
           <div className="text-center text-gray-500 dark:text-gray-400">
-            <Bot className="mx-auto h-12 w-12 mb-4 text-gray-300" />
+            <Bot className="mx-auto mb-4 h-12 w-12 text-gray-300" />
             <p className="text-sm">Ask me anything about the interview!</p>
-            <p className="text-xs mt-1">I can help with questions, provide guidance, or suggest topics to discuss.</p>
-            
+            <p className="mt-1 text-xs">
+              I can help with questions, provide guidance, or suggest topics to discuss.
+            </p>
+
             {/* Configuration Help */}
             {!isLoadingProvider && provider && !provider.configured && (
               <div className="mt-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-left dark:border-yellow-800 dark:bg-yellow-900">
@@ -457,9 +470,23 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
                 <p className="mt-2 text-xs text-yellow-700 dark:text-yellow-300">
                   To use the AI assistant, you need to configure Google Gemini:
                 </p>
-                <ol className="mt-2 space-y-1 text-xs text-yellow-700 dark:text-yellow-300 list-decimal list-inside">
-                  <li>Get a free API key from <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer" className="underline">Google AI Studio</a></li>
-                  <li>Add <code className="bg-yellow-100 px-1 rounded">GEMINI_API_KEY=your_key_here</code> to your .env file</li>
+                <ol className="mt-2 list-inside list-decimal space-y-1 text-xs text-yellow-700 dark:text-yellow-300">
+                  <li>
+                    Get a free API key from{" "}
+                    <a
+                      href="https://aistudio.google.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      Google AI Studio
+                    </a>
+                  </li>
+                  <li>
+                    Add{" "}
+                    <code className="rounded bg-yellow-100 px-1">GEMINI_API_KEY=your_key_here</code>{" "}
+                    to your .env file
+                  </li>
                   <li>Restart your application</li>
                 </ol>
                 <p className="mt-2 text-xs text-yellow-700 dark:text-yellow-300">
@@ -469,46 +496,45 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
             )}
           </div>
         ) : null}
-        
+
         {messages.map((message) => {
           return (
             <div
               key={message.id}
               className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
             >
-            <div
-              className={`max-w-xs lg:max-w-2xl px-4 py-2 rounded-lg ${
-                message.role === "user"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
-              }`}
-            >
+              <div
+                className={`max-w-xs rounded-lg px-4 py-2 lg:max-w-2xl ${
+                  message.role === "user"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
+                }`}
+              >
                 <div className="flex items-start space-x-2">
-                  {message.role === "assistant" && (
-                    <Bot className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  )}
-                  {message.role === "user" && (
-                    <User className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  )}
+                  {message.role === "assistant" && <Bot className="mt-0.5 h-4 w-4 flex-shrink-0" />}
+                  {message.role === "user" && <User className="mt-0.5 h-4 w-4 flex-shrink-0" />}
                   <div className="flex-1">
                     {message.role === "assistant" ? (
-                      <div className="text-sm prose prose-sm max-w-none dark:prose-invert break-words">
-                        <ReactMarkdown 
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-sm break-words">
+                        <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           components={{
                             // Custom styling for code blocks
                             code: ({ node, inline, className, children, ...props }: any) => {
-                              const match = /language-(\w+)/.exec(className || '');
-                              const language = match ? match[1] : '';
-                              
+                              const match = /language-(\w+)/.exec(className || "");
+                              const language = match ? match[1] : "";
+
                               if (inline) {
                                 return (
-                                  <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm" {...props}>
+                                  <code
+                                    className="rounded bg-gray-100 px-1 py-0.5 text-sm dark:bg-gray-800"
+                                    {...props}
+                                  >
                                     {children}
                                   </code>
                                 );
                               }
-                              
+
                               return (
                                 <SyntaxHighlighter
                                   style={oneDark}
@@ -517,60 +543,64 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
                                   className="rounded-lg"
                                   customStyle={{
                                     margin: 0,
-                                    background: 'var(--color-card-bg)',
-                                    whiteSpace: 'pre-wrap',
-                                    wordWrap: 'break-word',
-                                    overflowWrap: 'break-word',
+                                    background: "var(--color-card-bg)",
+                                    whiteSpace: "pre-wrap",
+                                    wordWrap: "break-word",
+                                    overflowWrap: "break-word",
                                   }}
                                   wrapLines={true}
                                   wrapLongLines={true}
                                 >
-                                  {String(children).replace(/\n$/, '')}
+                                  {String(children).replace(/\n$/, "")}
                                 </SyntaxHighlighter>
                               );
                             },
                             // Custom styling for lists
                             ul: ({ children }) => (
-                              <ul className="list-disc list-inside space-y-1">{children}</ul>
+                              <ul className="list-inside list-disc space-y-1">{children}</ul>
                             ),
                             ol: ({ children }) => (
-                              <ol className="list-decimal list-inside space-y-1">{children}</ol>
+                              <ol className="list-inside list-decimal space-y-1">{children}</ol>
                             ),
                             // Custom styling for headings
                             h1: ({ children }) => (
-                              <h1 className="text-lg font-bold mb-2 break-words">{children}</h1>
+                              <h1 className="mb-2 text-lg font-bold break-words">{children}</h1>
                             ),
                             h2: ({ children }) => (
-                              <h2 className="text-base font-semibold mb-2 break-words">{children}</h2>
+                              <h2 className="mb-2 text-base font-semibold break-words">
+                                {children}
+                              </h2>
                             ),
                             h3: ({ children }) => (
-                              <h3 className="text-sm font-medium mb-1 break-words">{children}</h3>
+                              <h3 className="mb-1 text-sm font-medium break-words">{children}</h3>
                             ),
                             // Custom styling for paragraphs
                             p: ({ children }) => (
-                              <p className="mb-2 last:mb-0 break-words overflow-wrap-anywhere">{children}</p>
+                              <p className="overflow-wrap-anywhere mb-2 break-words last:mb-0">
+                                {children}
+                              </p>
                             ),
                             // Custom styling for blockquotes
                             blockquote: ({ children }) => (
-                              <blockquote className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic break-words">
+                              <blockquote className="border-l-4 border-gray-300 pl-4 break-words italic dark:border-gray-600">
                                 {children}
                               </blockquote>
                             ),
                             // Custom styling for tables
                             table: ({ children }) => (
                               <div className="w-full">
-                                <table className="w-full border-collapse border border-gray-300 dark:border-gray-600 table-fixed">
+                                <table className="w-full table-fixed border-collapse border border-gray-300 dark:border-gray-600">
                                   {children}
                                 </table>
                               </div>
                             ),
                             th: ({ children }) => (
-                              <th className="border border-gray-300 dark:border-gray-600 px-2 py-1 bg-gray-100 dark:bg-gray-800 text-left break-words">
+                              <th className="border border-gray-300 bg-gray-100 px-2 py-1 text-left break-words dark:border-gray-600 dark:bg-gray-800">
                                 {children}
                               </th>
                             ),
                             td: ({ children }) => (
-                              <td className="border border-gray-300 dark:border-gray-600 px-2 py-1 break-words">
+                              <td className="border border-gray-300 px-2 py-1 break-words dark:border-gray-600">
                                 {children}
                               </td>
                             ),
@@ -578,16 +608,16 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
                         >
                           {message.content}
                         </ReactMarkdown>
-                        {isLoading && message.id === messages[messages.length - 1]?.id && message.content === "" && (
-                          <span className="inline-block w-2 h-4 bg-gray-400 animate-pulse ml-1"></span>
-                        )}
+                        {isLoading &&
+                          message.id === messages[messages.length - 1]?.id &&
+                          message.content === "" && (
+                            <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-gray-400"></span>
+                          )}
                       </div>
                     ) : (
-                      <p className="text-sm whitespace-pre-wrap">
-                        {message.content}
-                      </p>
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     )}
-                    <p className="text-xs opacity-70 mt-1">
+                    <p className="mt-1 text-xs opacity-70">
                       {message.timestamp.toLocaleTimeString()}
                     </p>
                   </div>
@@ -596,10 +626,10 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
             </div>
           );
         })}
-        
+
         {isLoading && messages.length > 0 && messages[messages.length - 1]?.content === "" && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-lg">
+            <div className="rounded-lg bg-gray-100 px-4 py-2 dark:bg-gray-700">
               <div className="flex items-center space-x-2">
                 <Bot className="h-4 w-4" />
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -608,7 +638,7 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
             </div>
           </div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -617,36 +647,38 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
         <div className="border-t border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900">
           <div className="mb-3">
             <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-              {questionRequest.type === 'interview' ? 'Generate Interview Questions' : 'Get LeetCode Problems'}
+              {questionRequest.type === "interview"
+                ? "Generate Interview Questions"
+                : "Get LeetCode Problems"}
             </h4>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Specify the topic and difficulty level
             </p>
           </div>
-          
+
           <div className="space-y-3">
             {/* Question Type */}
             <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Type
               </label>
               <div className="flex space-x-2">
                 <button
-                  onClick={() => setQuestionRequest(prev => ({ ...prev, type: 'interview' }))}
-                  className={`px-3 py-1.5 text-xs rounded-lg ${
-                    questionRequest.type === 'interview'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                  onClick={() => setQuestionRequest((prev) => ({ ...prev, type: "interview" }))}
+                  className={`rounded-lg px-3 py-1.5 text-xs ${
+                    questionRequest.type === "interview"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                   }`}
                 >
                   Interview Questions
                 </button>
                 <button
-                  onClick={() => setQuestionRequest(prev => ({ ...prev, type: 'leetcode' }))}
-                  className={`px-3 py-1.5 text-xs rounded-lg ${
-                    questionRequest.type === 'leetcode'
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                  onClick={() => setQuestionRequest((prev) => ({ ...prev, type: "leetcode" }))}
+                  className={`rounded-lg px-3 py-1.5 text-xs ${
+                    questionRequest.type === "leetcode"
+                      ? "bg-green-500 text-white"
+                      : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                   }`}
                 >
                   LeetCode Problems
@@ -656,36 +688,36 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
 
             {/* Topic Input */}
             <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Topic
               </label>
               <input
                 type="text"
                 value={questionRequest.topic}
-                onChange={(e) => setQuestionRequest(prev => ({ ...prev, topic: e.target.value }))}
+                onChange={(e) => setQuestionRequest((prev) => ({ ...prev, topic: e.target.value }))}
                 placeholder="e.g., React, JavaScript, Data Structures, Algorithms..."
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-400"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-400"
               />
             </div>
 
             {/* Difficulty Level */}
             <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Difficulty Level
               </label>
               <div className="flex space-x-2">
-                {(['easy', 'medium', 'hard'] as const).map((level) => (
+                {(["easy", "medium", "hard"] as const).map((level) => (
                   <button
                     key={level}
-                    onClick={() => setQuestionRequest(prev => ({ ...prev, difficulty: level }))}
-                    className={`px-3 py-1.5 text-xs rounded-lg capitalize ${
+                    onClick={() => setQuestionRequest((prev) => ({ ...prev, difficulty: level }))}
+                    className={`rounded-lg px-3 py-1.5 text-xs capitalize ${
                       questionRequest.difficulty === level
-                        ? level === 'easy'
-                          ? 'bg-green-500 text-white'
-                          : level === 'medium'
-                          ? 'bg-yellow-500 text-white'
-                          : 'bg-red-500 text-white'
-                        : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                        ? level === "easy"
+                          ? "bg-green-500 text-white"
+                          : level === "medium"
+                            ? "bg-yellow-500 text-white"
+                            : "bg-red-500 text-white"
+                        : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                     }`}
                   >
                     {level}
@@ -699,7 +731,7 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
               <button
                 onClick={generateQuestions}
                 disabled={!questionRequest.topic.trim() || isLoading}
-                className="flex-1 rounded-lg bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed dark:bg-blue-600 dark:hover:bg-blue-700 dark:disabled:bg-gray-600"
+                className="flex-1 rounded-lg bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:disabled:bg-gray-600"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center space-x-2">
@@ -707,7 +739,7 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
                     <span>Generating...</span>
                   </div>
                 ) : (
-                  `Generate ${questionRequest.type === 'interview' ? 'Questions' : 'Problems'}`
+                  `Generate ${questionRequest.type === "interview" ? "Questions" : "Problems"}`
                 )}
               </button>
               <button
@@ -730,13 +762,13 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask about interview questions, topics, or guidance..."
-            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-400"
+            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-400"
             disabled={isLoading}
           />
           <button
             onClick={sendMessage}
             disabled={!input.trim() || isLoading}
-            className="rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed dark:bg-blue-600 dark:hover:bg-blue-700 dark:disabled:bg-gray-600"
+            className="rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:disabled:bg-gray-600"
           >
             <Send className="h-4 w-4" />
           </button>

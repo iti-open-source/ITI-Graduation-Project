@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
 import { Head, Link, router } from "@inertiajs/react";
@@ -17,7 +18,7 @@ import {
   UserCheck,
   UserX,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -56,6 +57,9 @@ interface Props {
 }
 
 export default function UserDetail({ user, flash }: UserDetailProps & Props) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   useEffect(() => {
     if (flash?.success) {
       toast.success(flash.success);
@@ -98,8 +102,27 @@ export default function UserDetail({ user, flash }: UserDetailProps & Props) {
   };
 
   const handleDeleteUser = () => {
-    if (confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
-      router.delete(`/admin/users/${user.id}`);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    setIsDeleting(true);
+    try {
+      router.delete(`/admin/users/${user.id}`, {
+        onSuccess: () => {
+          setShowDeleteDialog(false);
+          toast.success("User deleted successfully");
+        },
+        onError: () => {
+          toast.error("Failed to delete user");
+        },
+        onFinish: () => {
+          setIsDeleting(false);
+        },
+      });
+    } catch (error) {
+      toast.error("Failed to delete user");
+      setIsDeleting(false);
     }
   };
 
@@ -360,6 +383,19 @@ export default function UserDetail({ user, flash }: UserDetailProps & Props) {
           </Card>
         </div>
       </div>
+
+      {/* Delete User Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={confirmDeleteUser}
+        title="Delete User"
+        description={`Are you sure you want to delete ${user.name}? This action cannot be undone and will permanently remove the user from the system.`}
+        confirmText="Delete User"
+        cancelText="Cancel"
+        variant="destructive"
+        isLoading={isDeleting}
+      />
     </AppLayout>
   );
 }

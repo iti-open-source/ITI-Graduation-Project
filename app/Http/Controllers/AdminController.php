@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Room;
+use App\Models\LobbySession;
+use App\Models\InterviewEvaluation;
+use App\Models\AIChatMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -14,13 +18,78 @@ class AdminController extends Controller
     {
         $users = User::latest()->paginate(10);
         
+        // Calculate meaningful statistics
+        $totalUsers = User::count();
+        $verifiedUsers = User::whereNotNull('email_verified_at')->count();
+        $unverifiedUsers = User::whereNull('email_verified_at')->count();
+        $recentUsers = User::where('created_at', '>=', now()->subDays(7))->count();
+        
+        // Role-based statistics
+        $adminUsers = User::where('role', 'admin')->count();
+        $instructorUsers = User::where('role', 'instructor')->count();
+        $studentUsers = User::where('role', 'student')->count();
+        $unassignedUsers = User::whereNull('role')->count();
+        
+        // Room statistics
+        $totalRooms = Room::count();
+        $activeRooms = Room::where('is_active', true)->count();
+        $roomsThisWeek = Room::where('created_at', '>=', now()->subDays(7))->count();
+        
+        // Session statistics
+        $totalSessions = LobbySession::count();
+        $completedSessions = LobbySession::where('status', 'ended')->count();
+        $activeSessions = LobbySession::where('status', 'active')->count();
+        $sessionsThisWeek = LobbySession::where('created_at', '>=', now()->subDays(7))->count();
+        
+        // AI Chat statistics
+        $totalAIMessages = AIChatMessage::count();
+        $aiMessagesThisWeek = AIChatMessage::where('created_at', '>=', now()->subDays(7))->count();
+        
+        // Growth calculations
+        $usersLastWeek = User::where('created_at', '>=', now()->subDays(14))
+            ->where('created_at', '<', now()->subDays(7))
+            ->count();
+        $userGrowthRate = $usersLastWeek > 0 ? round((($recentUsers - $usersLastWeek) / $usersLastWeek) * 100, 1) : 0;
+        
+        $sessionsLastWeek = LobbySession::where('created_at', '>=', now()->subDays(14))
+            ->where('created_at', '<', now()->subDays(7))
+            ->count();
+        $sessionGrowthRate = $sessionsLastWeek > 0 ? round((($sessionsThisWeek - $sessionsLastWeek) / $sessionsLastWeek) * 100, 1) : 0;
+        
         return Inertia::render('admin/dashboard', [
             'users' => $users,
             'stats' => [
-                'totalUsers' => User::count(),
-                'verifiedUsers' => User::whereNotNull('email_verified_at')->count(),
-                'unverifiedUsers' => User::whereNull('email_verified_at')->count(),
-                'recentUsers' => User::where('created_at', '>=', now()->subDays(7))->count(),
+                // User statistics
+                'totalUsers' => $totalUsers,
+                'verifiedUsers' => $verifiedUsers,
+                'unverifiedUsers' => $unverifiedUsers,
+                'recentUsers' => $recentUsers,
+                'userGrowthRate' => $userGrowthRate,
+                
+                // Role statistics
+                'adminUsers' => $adminUsers,
+                'instructorUsers' => $instructorUsers,
+                'studentUsers' => $studentUsers,
+                'unassignedUsers' => $unassignedUsers,
+                
+                // Room statistics
+                'totalRooms' => $totalRooms,
+                'activeRooms' => $activeRooms,
+                'roomsThisWeek' => $roomsThisWeek,
+                
+                // Session statistics
+                'totalSessions' => $totalSessions,
+                'completedSessions' => $completedSessions,
+                'activeSessions' => $activeSessions,
+                'sessionsThisWeek' => $sessionsThisWeek,
+                'sessionGrowthRate' => $sessionGrowthRate,
+                
+                // AI Chat statistics
+                'totalAIMessages' => $totalAIMessages,
+                'aiMessagesThisWeek' => $aiMessagesThisWeek,
+                
+                // Verification rate
+                'verificationRate' => $totalUsers > 0 ? round(($verifiedUsers / $totalUsers) * 100, 1) : 0,
             ]
         ]);
     }

@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Input } from "@/components/ui/input";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
@@ -66,6 +67,9 @@ interface Props {
 export default function UsersPage({ users, flash }: UsersPageProps & Props) {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (flash?.success) {
@@ -110,9 +114,32 @@ export default function UsersPage({ users, flash }: UsersPageProps & Props) {
     });
   };
 
-  const handleDeleteUser = (userId: number) => {
-    if (confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
-      router.delete(`/admin/users/${userId}`);
+  const handleDeleteUser = (user: User) => {
+    setUserToDelete(user);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      router.delete(`/admin/users/${userToDelete.id}`, {
+        onSuccess: () => {
+          setShowDeleteDialog(false);
+          setUserToDelete(null);
+          toast.success("User deleted successfully");
+        },
+        onError: () => {
+          toast.error("Failed to delete user");
+        },
+        onFinish: () => {
+          setIsDeleting(false);
+        },
+      });
+    } catch (error) {
+      toast.error("Failed to delete user");
+      setIsDeleting(false);
     }
   };
 
@@ -350,7 +377,7 @@ export default function UsersPage({ users, flash }: UsersPageProps & Props) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDeleteUser(user.id)}
+                      onClick={() => handleDeleteUser(user)}
                       className="text-red-600 hover:text-red-700"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -384,6 +411,19 @@ export default function UsersPage({ users, flash }: UsersPageProps & Props) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete User Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={confirmDeleteUser}
+        title="Delete User"
+        description={`Are you sure you want to delete ${userToDelete?.name}? This action cannot be undone and will permanently remove the user from the system.`}
+        confirmText="Delete User"
+        cancelText="Cancel"
+        variant="destructive"
+        isLoading={isDeleting}
+      />
     </AppLayout>
   );
 }

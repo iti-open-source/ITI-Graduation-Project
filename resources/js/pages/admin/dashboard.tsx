@@ -50,10 +50,37 @@ interface AdminDashboardProps {
     total: number;
   };
   stats: {
+    // User statistics
     totalUsers: number;
     verifiedUsers: number;
     unverifiedUsers: number;
     recentUsers: number;
+    userGrowthRate: number;
+
+    // Role statistics
+    adminUsers: number;
+    instructorUsers: number;
+    studentUsers: number;
+    unassignedUsers: number;
+
+    // Room statistics
+    totalRooms: number;
+    activeRooms: number;
+    roomsThisWeek: number;
+
+    // Session statistics
+    totalSessions: number;
+    completedSessions: number;
+    activeSessions: number;
+    sessionsThisWeek: number;
+    sessionGrowthRate: number;
+
+    // AI Chat statistics
+    totalAIMessages: number;
+    aiMessagesThisWeek: number;
+
+    // Verification rate
+    verificationRate: number;
   };
 }
 
@@ -138,7 +165,17 @@ export default function AdminDashboard({ users, stats, flash }: AdminDashboardPr
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalUsers}</div>
-              <p className="text-xs text-muted-foreground">+{stats.recentUsers} new this week</p>
+              <p className="text-xs text-muted-foreground">
+                +{stats.recentUsers} new this week
+                {stats.userGrowthRate !== 0 && (
+                  <span
+                    className={`ml-1 ${stats.userGrowthRate > 0 ? "text-green-600" : "text-red-600"}`}
+                  >
+                    ({stats.userGrowthRate > 0 ? "+" : ""}
+                    {stats.userGrowthRate}%)
+                  </span>
+                )}
+              </p>
             </CardContent>
           </Card>
 
@@ -150,30 +187,87 @@ export default function AdminDashboard({ users, stats, flash }: AdminDashboardPr
             <CardContent>
               <div className="text-2xl font-bold">{stats.verifiedUsers}</div>
               <p className="text-xs text-muted-foreground">
-                {Math.round((stats.verifiedUsers / stats.totalUsers) * 100)}% verification rate
+                {stats.verificationRate}% verification rate
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Unverified Users</CardTitle>
-              <UserX className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Active Rooms</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.unverifiedUsers}</div>
-              <p className="text-xs text-muted-foreground">Pending verification</p>
+              <div className="text-2xl font-bold">{stats.activeRooms}</div>
+              <p className="text-xs text-muted-foreground">{stats.totalRooms} total rooms</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Recent Signups</CardTitle>
+              <CardTitle className="text-sm font-medium">Completed Sessions</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.recentUsers}</div>
-              <p className="text-xs text-muted-foreground">Last 7 days</p>
+              <div className="text-2xl font-bold">{stats.completedSessions}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.sessionsThisWeek} this week
+                {stats.sessionGrowthRate !== 0 && (
+                  <span
+                    className={`ml-1 ${stats.sessionGrowthRate > 0 ? "text-green-600" : "text-red-600"}`}
+                  >
+                    ({stats.sessionGrowthRate > 0 ? "+" : ""}
+                    {stats.sessionGrowthRate}%)
+                  </span>
+                )}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Role Statistics */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Administrators</CardTitle>
+              <Shield className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.adminUsers}</div>
+              <p className="text-xs text-muted-foreground">System administrators</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Instructors</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.instructorUsers}</div>
+              <p className="text-xs text-muted-foreground">Interview instructors</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Students</CardTitle>
+              <UserCheck className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.studentUsers}</div>
+              <p className="text-xs text-muted-foreground">Interview candidates</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Unassigned</CardTitle>
+              <UserX className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.unassignedUsers}</div>
+              <p className="text-xs text-muted-foreground">Pending role assignment</p>
             </CardContent>
           </Card>
         </div>
@@ -287,39 +381,28 @@ export default function AdminDashboard({ users, stats, flash }: AdminDashboardPr
         <Card>
           <CardHeader>
             <CardTitle>System Overview</CardTitle>
-            <CardDescription>Platform statistics and health metrics</CardDescription>
+            <CardDescription>Platform activity and engagement metrics</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <div className="flex items-center gap-3 rounded-lg border p-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
-                  <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Active Users</p>
-                  <p className="text-2xl font-bold">{stats.verifiedUsers}</p>
+                  <p className="text-sm font-medium">Active Sessions</p>
+                  <p className="text-2xl font-bold">{stats.activeSessions}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 rounded-lg border p-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-                  <UserCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <Calendar className="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Verified Rate</p>
-                  <p className="text-2xl font-bold">
-                    {Math.round((stats.verifiedUsers / stats.totalUsers) * 100)}%
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 rounded-lg border p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900">
-                  <Calendar className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">This Week</p>
-                  <p className="text-2xl font-bold">{stats.recentUsers}</p>
+                  <p className="text-sm font-medium">New Rooms</p>
+                  <p className="text-2xl font-bold">{stats.roomsThisWeek}</p>
+                  <p className="text-xs text-muted-foreground">This week</p>
                 </div>
               </div>
 
@@ -328,8 +411,29 @@ export default function AdminDashboard({ users, stats, flash }: AdminDashboardPr
                   <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Growth</p>
-                  <p className="text-2xl font-bold">+12%</p>
+                  <p className="text-sm font-medium">AI Messages</p>
+                  <p className="text-2xl font-bold">{stats.totalAIMessages}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.aiMessagesThisWeek} this week
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-lg border p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900">
+                  <UserCheck className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Session Completion</p>
+                  <p className="text-2xl font-bold">
+                    {stats.totalSessions > 0
+                      ? Math.round((stats.completedSessions / stats.totalSessions) * 100)
+                      : 0}
+                    %
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.completedSessions} of {stats.totalSessions}
+                  </p>
                 </div>
               </div>
             </div>

@@ -65,16 +65,7 @@ interface ProfilePageProps extends SharedData {
 }
 
 export default function Profile() {
-  const { auth, data } = usePage<ProfilePageProps>().props;
-  const { userRooms = [] } = data;
-  const upcomingInterviews = data.upcomingInterviews || {
-    data: [],
-    current_page: 1,
-    last_page: 1,
-    per_page: 2,
-    total: 0,
-  };
-  console.log("Upcoming Interviews:", upcomingInterviews);
+  const { auth, userRooms = [], upcomingInterviews = [] } = usePage<ProfilePageProps>().props;
   const [editingRoomId, setEditingRoomId] = useState<number | null>(null);
   const [editingRoomName, setEditingRoomName] = useState("");
 
@@ -130,8 +121,10 @@ export default function Profile() {
   //   return new Date() < interviewTime;
   // };
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr?: string | null) => {
+    if (!dateStr) return "TBD";
     const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "TBD";
     return date.toLocaleDateString("en-US", {
       weekday: "short",
       year: "numeric",
@@ -140,10 +133,14 @@ export default function Profile() {
     });
   };
 
-  const formatTime = (timeStr: string) => {
-    const [hours, minutes] = timeStr.split(":");
+  const formatTime = (timeStr?: string | null) => {
+    if (!timeStr) return "TBD";
+    const parts = timeStr.split(":");
+    if (parts.length < 2) return "TBD";
+    const [hours, minutes] = parts;
     const date = new Date();
     date.setHours(parseInt(hours), parseInt(minutes));
+    if (isNaN(date.getTime())) return "TBD";
     return date.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
@@ -204,8 +201,10 @@ export default function Profile() {
     return buttonToRender;
   };
 
-  const isUpcoming = (dateStr: string, timeStr: string) => {
+  const isUpcoming = (dateStr?: string | null, timeStr?: string | null) => {
+    if (!dateStr || !timeStr) return true; // if not set, treat as upcoming (not joinable)
     const interviewDateTime = new Date(`${dateStr}T${timeStr}`);
+    if (isNaN(interviewDateTime.getTime())) return true;
     return interviewDateTime > new Date();
   };
 
@@ -517,7 +516,7 @@ export default function Profile() {
               </CardContent>
             </Card>
 
-            {/* Previous Interviews Placeholder */}
+            {/* Previous Interviews with Feedback */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -527,13 +526,54 @@ export default function Profile() {
                 <CardDescription>Your completed interview and feedback history</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="py-8 text-center">
-                  <Calendar className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                  <h3 className="mb-2 text-lg font-semibold">Goodluck, Adel!</h3>
-                  <p className="text-muted-foreground">
-                    Interview history and feedback for each should appear here after AI analysis.
-                  </p>
-                </div>
+                {previousInterviews.length > 0 ? (
+                  <div className="space-y-4">
+                    {previousInterviews.map((it) => (
+                      <div key={it.session_id} className="rounded-lg border p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium">{it.room_name}</h4>
+                              <Badge variant="secondary">Ended</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              Instructor: {it.instructor_name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Session: {it.session_code}
+                            </p>
+                          </div>
+                          {typeof it.rating === "number" && (
+                            <div className="text-right">
+                              <div className="text-sm font-semibold">Rating: {it.rating}/10</div>
+                            </div>
+                          )}
+                        </div>
+                        {it.comments && (
+                          <div className="mt-3 rounded-md border bg-muted/30 p-3 text-sm">
+                            <div className="mb-1 font-medium">Feedback</div>
+                            <p className="whitespace-pre-wrap text-muted-foreground">
+                              {it.comments}
+                            </p>
+                          </div>
+                        )}
+                        {!it.comments && typeof it.rating !== "number" && (
+                          <div className="mt-3 text-sm text-muted-foreground">
+                            No feedback provided.
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-8 text-center">
+                    <Calendar className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                    <h3 className="mb-2 text-lg font-semibold">No previous interviews yet</h3>
+                    <p className="text-muted-foreground">
+                      Once interviews are completed, they will appear here.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </>

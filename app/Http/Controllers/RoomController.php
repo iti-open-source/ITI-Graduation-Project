@@ -586,6 +586,7 @@ class RoomController extends Controller
     public function toggleInterviewDone(Room $room, User $student)
     {
         $pivot = $room->assignedStudents()->where('user_id', $student->id)->firstOrFail()->pivot;
+        // $newValue = !$pivot->interview_done;
 
         if ($pivot->is_absent && $pivot->interview_done) {
             return response()->json([
@@ -602,7 +603,7 @@ class RoomController extends Controller
                 'message' => 'Invalid interview date/time format.',
             ], 400);
         }
-        if ($interviewDateTime->isFuture()) {
+        if ( !$interviewDateTime->isFuture()) {
             return response()->json([
                 'success' => false,
                 'message' => 'You cannot mark the interview as done before its scheduled date and time.',
@@ -647,7 +648,7 @@ class RoomController extends Controller
             ], 400);
         }
 
-        if ($interviewDateTime->isFuture()) {
+        if (!$interviewDateTime->isFuture()) {
             return response()->json([
                 'success' => false,
                 'message' => 'You cannot mark the student as absent before the scheduled interview date and time.',

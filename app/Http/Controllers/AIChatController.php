@@ -169,4 +169,33 @@ class AIChatController extends Controller
             'success' => true,
         ]);
     }
+
+    public function clearChat(string $roomCode)
+    {
+        $session = LobbySession::where('session_code', $roomCode)->firstOrFail();
+        $userId = Auth::id();
+
+        // Only allow the creator (interviewer) to clear chat
+        if ($userId !== (int) $session->creator_id) {
+            abort(403, 'Only the interviewer can clear chat history');
+        }
+
+        try {
+            // Delete all messages for this session
+            $deletedCount = AIChatMessage::forSession($roomCode)->delete();
+
+            return response()->json([
+                'message' => 'Chat history cleared successfully',
+                'deleted_count' => $deletedCount,
+                'success' => true,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Clear Chat Error: ' . $e->getMessage());
+            
+            return response()->json([
+                'message' => 'Failed to clear chat history',
+                'success' => false,
+            ], 500);
+        }
+    }
 }

@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, BookOpen, Code, HelpCircle, ChevronDown } from "lucide-react";
+import { Send, Bot, User, Loader2, BookOpen, Code, HelpCircle, ChevronDown, Trash2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 interface Message {
   id: string;
@@ -44,6 +45,8 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
     topic: '',
     difficulty: 'medium'
   });
+  const [showClearDialog, setShowClearDialog] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Only show for creators (interviewers)
@@ -52,12 +55,19 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
   }
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Only scroll if not currently loading to prevent interference
+    if (!isLoading) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, isLoading]);
+  // Disable auto-scroll during streaming to prevent interference with manual scrolling
+  // This prevents the frequent state updates from causing scroll interference
+
+  // Auto-scroll disabled - users can manually scroll
+  // useEffect(() => {
+  //   scrollToBottom();
+  // }, [messages, isLoading]);
 
   // Load chat history on mount
   useEffect(() => {
@@ -116,9 +126,6 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
   const generateQuestions = async () => {
     if (!questionRequest.topic.trim()) return;
 
-    console.log('AI Chatbot - Generate Questions - Room Code:', roomCode);
-    console.log('AI Chatbot - Question Request:', questionRequest);
-
     setIsLoading(true);
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -141,13 +148,6 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
     setMessages(prev => [...prev, assistantMessage]);
 
     try {
-      console.log('Sending question generation request to:', `/api/ai-chat/${roomCode}`);
-      console.log('Question request data:', {
-        message: userMessage.content,
-        history: messages.slice(-10),
-        stream: true,
-      });
-
       const response = await fetch(`/api/ai-chat/${roomCode}`, {
         method: "POST",
         headers: {
@@ -160,10 +160,6 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
           stream: true, // Enable streaming
         }),
       });
-
-      console.log('Question response status:', response.status);
-      console.log('Question response headers:', Object.fromEntries(response.headers.entries()));
-
       if (!response.ok) {
         throw new Error("Failed to get AI response");
       }
@@ -174,7 +170,6 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
         throw new Error("No response body");
       }
 
-      console.log('Starting to read streaming response...');
       const decoder = new TextDecoder();
       let buffer = '';
 
@@ -243,11 +238,31 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
     }
   };
 
+  const clearChat = async () => {
+    setIsClearing(true);
+    try {
+      const response = await fetch(`/api/ai-chat/${roomCode}/clear`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        },
+      });
+
+      if (response.ok) {
+        setMessages([]);
+        setShowClearDialog(false);
+      } else {
+        console.error('Failed to clear chat');
+      }
+    } catch (error) {
+      console.error('Error clearing chat:', error);
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
-
-    console.log('AI Chatbot - Room Code:', roomCode);
-    console.log('AI Chatbot - Input:', input.trim());
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -272,13 +287,6 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
     setMessages(prev => [...prev, assistantMessage]);
 
     try {
-      console.log('Sending request to:', `/api/ai-chat/${roomCode}`);
-      console.log('Request data:', {
-        message: userMessage.content,
-        history: messages.slice(-10),
-        stream: true,
-      });
-
       const response = await fetch(`/api/ai-chat/${roomCode}`, {
         method: "POST",
         headers: {
@@ -292,9 +300,6 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
         }),
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
       if (!response.ok) {
         throw new Error("Failed to get AI response");
       }
@@ -305,7 +310,6 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
         throw new Error("No response body");
       }
 
-      console.log('Starting to read streaming response...');
       const decoder = new TextDecoder();
       let buffer = '';
 
@@ -389,23 +393,6 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
               AI Interview Assistant
             </h3>
           </div>
-          {!isLoadingProvider && provider && (
-            <div className="flex items-center space-x-2">
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                {provider.name}
-              </span>
-              {provider.free && (
-                <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-800 dark:bg-green-900 dark:text-green-200">
-                  Free
-                </span>
-              )}
-              {!provider.configured && (
-                <span className="rounded-full bg-red-100 px-2 py-1 text-xs text-red-800 dark:bg-red-900 dark:text-red-200">
-                  Not Configured
-                </span>
-              )}
-            </div>
-          )}
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400">
           Get help with interview questions and guidance
@@ -431,6 +418,21 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
             <span>LeetCode Problems</span>
           </button>
         </div>
+      </div>
+
+      {/* Chat Header with Clear Button */}
+      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">AI Assistant</h3>
+        {messages.length > 0 && (
+          <button
+            onClick={() => setShowClearDialog(true)}
+            className="flex items-center space-x-1 text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+            title="Clear chat history"
+          >
+            <Trash2 className="h-3 w-3" />
+            <span>Clear Chat</span>
+          </button>
+        )}
       </div>
 
       {/* Messages */}
@@ -469,7 +471,6 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
         ) : null}
         
         {messages.map((message) => {
-          console.log('Rendering message:', message.id, message.role, message.content.substring(0, 50) + '...');
           return (
             <div
               key={message.id}
@@ -496,7 +497,7 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
                           remarkPlugins={[remarkGfm]}
                           components={{
                             // Custom styling for code blocks
-                            code: ({ node, inline, className, children, ...props }) => {
+                            code: ({ node, inline, className, children, ...props }: any) => {
                               const match = /language-(\w+)/.exec(className || '');
                               const language = match ? match[1] : '';
                               
@@ -741,6 +742,19 @@ export default function AIChatbot({ roomCode, isCreator }: AIChatbotProps) {
           </button>
         </div>
       </div>
+
+      {/* Clear Chat Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showClearDialog}
+        onOpenChange={setShowClearDialog}
+        onConfirm={clearChat}
+        title="Clear Chat History"
+        description="Are you sure you want to clear the chat history? This action cannot be undone and will permanently delete all messages in this conversation."
+        confirmText="Clear Chat"
+        cancelText="Cancel"
+        variant="destructive"
+        isLoading={isClearing}
+      />
     </div>
   );
 }

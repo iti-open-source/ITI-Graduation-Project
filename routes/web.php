@@ -72,6 +72,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // AI Chat routes
     Route::post('api/ai-chat/{roomCode}', [AIChatController::class, 'chat'])->name('ai.chat');
     Route::get('api/ai-chat/{roomCode}/history', [AIChatController::class, 'getHistory'])->name('ai.chat.history');
+    Route::delete('api/ai-chat/{roomCode}/clear', [AIChatController::class, 'clearChat'])->name('ai.chat.clear');
     Route::get('api/ai-chat/provider', [AIChatController::class, 'getProviderInfo'])->name('ai.chat.provider');
 
     // WebRTC API routes

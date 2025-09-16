@@ -6,8 +6,7 @@ import Whiteboard from "@/components/whiteboard/collaborative-whiteboard";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
 import { Head, usePage } from "@inertiajs/react";
-import Pusher from "pusher-js";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface PageProps {
   roomCode: string;
@@ -28,34 +27,33 @@ export default function SessionRoom(props: PageProps) {
   const [comments, setComments] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const { csrf_token, pusherKey, pusherCluster } = usePage().props as any;
+  const { csrf_token } = usePage().props as any;
 
-  // Listen for session termination and redirect appropriately
+  // Poll session status; when ended, redirect appropriately
+  const pollRef = useRef<number | null>(null);
   useEffect(() => {
-    if (!pusherKey) return;
-
-    const pusher = new Pusher(pusherKey, {
-      cluster: pusherCluster || "mt1",
-      forceTLS: true,
-    });
-
-    const channel = pusher.subscribe(`session.room.${roomCode}`);
-    const handler = (payload: any) => {
-      if (payload?.type === "terminated") {
-        // Interviewer likely already redirected on submit; ensure guest goes to dashboard
-        if (!isCreator) {
-          window.location.href = "/dashboard";
+    let aborted = false;
+    const checkState = async () => {
+      try {
+        const res = await fetch(`/api/session/${roomCode}/state`, {
+          headers: { Accept: "application/json" },
+          credentials: "same-origin",
+        });
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!aborted && json?.status === "ended") {
+          if (isCreator) window.location.href = "/lobby";
+          else window.location.href = "/dashboard";
         }
-      }
+      } catch {}
     };
-    channel.bind("room-session-signaling", handler);
-
+    checkState();
+    pollRef.current = window.setInterval(checkState, 2000);
     return () => {
-      channel.unbind("room-session-signaling", handler);
-      pusher.unsubscribe(`session.room.${roomCode}`);
-      pusher.disconnect();
+      aborted = true;
+      if (pollRef.current) window.clearInterval(pollRef.current);
     };
-  }, [roomCode, isCreator, pusherKey, pusherCluster]);
+  }, [roomCode, isCreator]);
 
   // Handle video call connection
   const handleVideoConnected = () => {

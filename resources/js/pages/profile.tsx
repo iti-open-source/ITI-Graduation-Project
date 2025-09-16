@@ -68,15 +68,33 @@ export default function Profile() {
   const { auth, userRooms = [], upcomingInterviews = [] } = usePage<ProfilePageProps>().props;
   const [editingRoomId, setEditingRoomId] = useState<number | null>(null);
   const [editingRoomName, setEditingRoomName] = useState("");
+  const [upcoming, setUpcoming] = useState(upcomingInterviews);
+  const [previous, setPrevious] = useState(previousInterviews);
+  const pollRef = useRef<number | null>(null);
 
-  // Pagination handler
-  const handlePageChange = (url: string | null) => {
-    if (!url) return;
-    router.get(url, {
-      preserveState: true,
-      preserveScroll: true,
-    });
-  };
+  useEffect(() => {
+    let aborted = false;
+    const fetchState = async () => {
+      try {
+        const res = await fetch("/api/dashboard/state", {
+          headers: { Accept: "application/json" },
+          credentials: "same-origin",
+        });
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!aborted) {
+          setUpcoming(json.upcomingInterviews || []);
+          setPrevious(json.previousInterviews || []);
+        }
+      } catch {}
+    };
+    fetchState();
+    pollRef.current = window.setInterval(fetchState, 5000);
+    return () => {
+      aborted = true;
+      if (pollRef.current) window.clearInterval(pollRef.current);
+    };
+  }, []);
 
   // Redirect admins away from this page
   if (auth.user.role === "admin") {
@@ -432,6 +450,7 @@ export default function Profile() {
               </CardHeader>
               <CardContent>
                 {upcomingInterviews.data.length > 0 ? (
+                {upcoming.length > 0 ? (
                   <div className="space-y-4">
                     {upcomingInterviews.data.map((interview) => (
                       <div
@@ -526,9 +545,9 @@ export default function Profile() {
                 <CardDescription>Your completed interview and feedback history</CardDescription>
               </CardHeader>
               <CardContent>
-                {previousInterviews.length > 0 ? (
+                {previous.length > 0 ? (
                   <div className="space-y-4">
-                    {previousInterviews.map((it) => (
+                    {previous.map((it) => (
                       <div key={it.session_id} className="rounded-lg border p-4">
                         <div className="flex items-center justify-between">
                           <div className="space-y-1">

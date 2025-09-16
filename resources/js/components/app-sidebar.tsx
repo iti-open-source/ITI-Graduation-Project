@@ -27,7 +27,7 @@ export function AppSidebar() {
             icon: LayoutGrid,
           },
           {
-            title: "Lobby",
+            title: "Rooms",
             href: "/lobby",
             icon: PanelsRightBottom,
           },
@@ -61,12 +61,12 @@ export function AppSidebar() {
     ...(auth.user?.role === "student"
       ? [
           {
-            title: "Profile",
+            title: "Dashboard",
             href: "/dashboard",
             icon: User,
           },
           {
-            title: "Lobby",
+            title: "Rooms",
             href: "/lobby",
             icon: PanelsRightBottom,
           },

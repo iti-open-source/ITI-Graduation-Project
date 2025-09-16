@@ -64,6 +64,15 @@ export default function Profile() {
   const [upcoming, setUpcoming] = useState<UpcomingInterview[]>(upcomingInterviews || []);
   const [previous, setPrevious] = useState<PreviousInterviewItem[]>(previousInterviews || []);
   const pollRef = useRef<number | null>(null);
+  // Pagination for previous interviews
+  const [prevPage, setPrevPage] = useState(1);
+  const PREV_PER_PAGE = 5;
+
+  // Ensure current page is valid when data updates
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(previous.length / PREV_PER_PAGE));
+    if (prevPage > totalPages) setPrevPage(totalPages);
+  }, [previous.length, prevPage]);
 
   useEffect(() => {
     let aborted = false;
@@ -485,7 +494,7 @@ export default function Profile() {
               </CardContent>
             </Card>
 
-            {/* Previous Interviews with Feedback */}
+            {/* Previous Interviews with Feedback (with pagination) */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -497,42 +506,73 @@ export default function Profile() {
               <CardContent>
                 {previous.length > 0 ? (
                   <div className="space-y-4">
-                    {previous.map((it) => (
-                      <div key={it.session_id} className="rounded-lg border p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-medium">{it.room_name}</h4>
-                              <Badge variant="secondary">Ended</Badge>
+                    {previous
+                      .slice((prevPage - 1) * PREV_PER_PAGE, prevPage * PREV_PER_PAGE)
+                      .map((it) => (
+                        <div key={it.session_id} className="rounded-lg border p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-medium">{it.room_name}</h4>
+                                <Badge variant="secondary">Ended</Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                Instructor: {it.instructor_name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Session: {it.session_code}
+                              </p>
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                              Instructor: {it.instructor_name}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Session: {it.session_code}
-                            </p>
+                            {typeof it.rating === "number" && (
+                              <div className="text-right">
+                                <div className="text-sm font-semibold">Rating: {it.rating}/10</div>
+                              </div>
+                            )}
                           </div>
-                          {typeof it.rating === "number" && (
-                            <div className="text-right">
-                              <div className="text-sm font-semibold">Rating: {it.rating}/10</div>
+                          {it.comments && (
+                            <div className="mt-3 rounded-md border bg-muted/30 p-3 text-sm">
+                              <div className="mb-1 font-medium">Feedback</div>
+                              <p className="whitespace-pre-wrap text-muted-foreground">
+                                {it.comments}
+                              </p>
+                            </div>
+                          )}
+                          {!it.comments && typeof it.rating !== "number" && (
+                            <div className="mt-3 text-sm text-muted-foreground">
+                              No feedback provided.
                             </div>
                           )}
                         </div>
-                        {it.comments && (
-                          <div className="mt-3 rounded-md border bg-muted/30 p-3 text-sm">
-                            <div className="mb-1 font-medium">Feedback</div>
-                            <p className="whitespace-pre-wrap text-muted-foreground">
-                              {it.comments}
-                            </p>
-                          </div>
-                        )}
-                        {!it.comments && typeof it.rating !== "number" && (
-                          <div className="mt-3 text-sm text-muted-foreground">
-                            No feedback provided.
-                          </div>
-                        )}
+                      ))}
+                    {/* Pagination Controls */}
+                    {previous.length > PREV_PER_PAGE && (
+                      <div className="flex items-center justify-between border-t pt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={prevPage === 1}
+                          onClick={() => setPrevPage((p) => Math.max(1, p - 1))}
+                        >
+                          Previous
+                        </Button>
+                        <span className="text-sm text-muted-foreground">
+                          Page {prevPage} of{" "}
+                          {Math.max(1, Math.ceil(previous.length / PREV_PER_PAGE))}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={prevPage >= Math.ceil(previous.length / PREV_PER_PAGE)}
+                          onClick={() =>
+                            setPrevPage((p) =>
+                              Math.min(Math.ceil(previous.length / PREV_PER_PAGE), p + 1),
+                            )
+                          }
+                        >
+                          Next
+                        </Button>
                       </div>
-                    ))}
+                    )}
                   </div>
                 ) : (
                   <div className="py-8 text-center">

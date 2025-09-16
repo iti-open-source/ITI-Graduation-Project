@@ -13,24 +13,12 @@ import {
 // import { dashboard } from "@/routes";
 import { SharedData, type NavItem } from "@/types";
 import { Link, usePage } from "@inertiajs/react";
-import { LayoutGrid, PanelsRightBottom, Settings, Shield, ShieldAlert, ShieldCheck, User } from "lucide-react";
+import { LayoutGrid, PanelsRightBottom, Settings, Shield, User } from "lucide-react";
 import AppLogo from "./app-logo";
 
 export function AppSidebar() {
   const { auth } = usePage<SharedData>().props;
   const mainNavItems: NavItem[] = [
-    // {
-    //   title: "Dashboard",
-    //   href: dashboard(),
-    //   icon: LayoutGrid,
-    // },
-    //   {
-    //     title: "Admin",
-    //     href: "/admin",
-    //     icon: Shield,
-    //   },
-    // ];
-
     ...(auth.user?.role === "instructor"
       ? [
           {
@@ -39,14 +27,14 @@ export function AppSidebar() {
             icon: LayoutGrid,
           },
           {
-            title: "Settings",
-            href: "/settings",
-            icon: Settings,
-          },
-          {
             title: "Lobby",
             href: "/lobby",
             icon: PanelsRightBottom,
+          },
+          {
+            title: "Settings",
+            href: "/settings",
+            icon: Settings,
           },
         ]
       : []),
@@ -58,14 +46,14 @@ export function AppSidebar() {
             icon: Shield,
           },
           {
-            title: "Settings",
-            href: "/settings",
-            icon: Settings,
-          },
-          {
             title: "Lobby",
             href: "/lobby",
             icon: PanelsRightBottom,
+          },
+          {
+            title: "Settings",
+            href: "/settings",
+            icon: Settings,
           },
         ]
       : []),
@@ -78,14 +66,17 @@ export function AppSidebar() {
             icon: User,
           },
           {
+            title: "Lobby",
+            href: "/lobby",
+            icon: PanelsRightBottom,
+          },
+          {
             title: "Settings",
             href: "/settings",
             icon: Settings,
           },
         ]
       : []),
-     
-
   ];
 
   return (

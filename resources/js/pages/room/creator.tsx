@@ -138,10 +138,10 @@ export default function Creator({
   // assign handler
   const handleAssign = async () => {
     if (!selectedStudent) return;
-      if (!interviewDate || !interviewTime) {
-    toast.error("Please select both interview date and time before assigning.");
-    return;
-  }
+    if (!interviewDate || !interviewTime) {
+      toast.error("Please select both interview date and time before assigning.");
+      return;
+    }
     setAssigning(true);
 
 
@@ -280,7 +280,7 @@ export default function Creator({
 
       const json = await res.json();
       if (json.success) {
-        
+
         setAssigned((prev) =>
           prev.map((s) =>
             s.id === studentId ? { ...s, interview_done: !s.interview_done } : s
@@ -301,86 +301,86 @@ export default function Creator({
 
 
 
-   const [markingAbsentIds, setMarkingAbsentIds] = useState<number[]>([]);
+  const [markingAbsentIds, setMarkingAbsentIds] = useState<number[]>([]);
   const [studentToMarkAbsent, setStudentToMarkAbsent] = useState<any | null>(null);
 
-const handleToggleStudentAbsent = async (roomId: number, student: any) => {
-  const studentId = student.id;
-  setMarkingAbsentIds((prev) => [...prev, studentId]);
+  const handleToggleStudentAbsent = async (roomId: number, student: any) => {
+    const studentId = student.id;
+    setMarkingAbsentIds((prev) => [...prev, studentId]);
 
-  try {
-    const res = await fetch(`/rooms/${roomId}/students/${studentId}/toggle-absent`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "X-CSRF-TOKEN": getCsrf(),
-      },
-    });
+    try {
+      const res = await fetch(`/rooms/${roomId}/students/${studentId}/toggle-absent`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-CSRF-TOKEN": getCsrf(),
+        },
+      });
 
-    const json = await res.json();
-    if (json.success) {
-  setAssigned((prev) =>
-    prev.map((s) => {
-      if (s.id === studentId) {
-        return {
-          ...s,
-           is_absent: json.is_absent, 
-            interview_done: json.interview_done, 
-        };
+      const json = await res.json();
+      if (json.success) {
+        setAssigned((prev) =>
+          prev.map((s) => {
+            if (s.id === studentId) {
+              return {
+                ...s,
+                is_absent: json.is_absent,
+                interview_done: json.interview_done,
+              };
+            }
+            return s;
+          })
+        );
+        toast.success(
+          json.message ||
+          (json.is_absent
+            ? "Student marked absent and interview done"
+            : "Student marked as present again (interview undone)")
+        );
       }
-      return s;
-    })
-  );
-  toast.success(
-    json.message ||
-      (json.is_absent
-        ? "Student marked absent and interview done"
-        : "Student marked as present again (interview undone)")
-  );
-}
-else {
-      toast.error(json.message || "Could not update attendance status");
+      else {
+        toast.error(json.message || "Could not update attendance status");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not update attendance status");
+    } finally {
+      setMarkingAbsentIds((prev) => prev.filter((id) => id !== studentId));
+      setStudentToMarkAbsent(null);
     }
-  } catch (err) {
-    console.error(err);
-    toast.error("Could not update attendance status");
-  } finally {
-    setMarkingAbsentIds((prev) => prev.filter((id) => id !== studentId));
-    setStudentToMarkAbsent(null);
-  }
-};
+  };
 
 
   // Disable button if:
   // 1. Student is absent
   // 2. Interview time has not arrived yet (for marking done)
-function disableMarkDone(student: AssignedStudent): boolean {
-  if (!student) return true;
+  function disableMarkDone(student: AssignedStudent): boolean {
+    if (!student) return true;
 
-  const now = new Date();
-  const interviewDateTime = student.interview_date && student.interview_time
-    ? new Date(`${student.interview_date}T${student.interview_time}`)
-    : null;
+    const now = new Date();
+    const interviewDateTime = student.interview_date && student.interview_time
+      ? new Date(`${student.interview_date}T${student.interview_time}`)
+      : null;
 
-  return markingDoneIds.includes(student.id) 
-      || student.is_absent 
+    return markingDoneIds.includes(student.id)
+      || student.is_absent
       || (!!interviewDateTime && now < interviewDateTime);
-}
-function disableMarkAbsent(student: AssignedStudent): boolean {
-  if (!student) return true;
+  }
+  function disableMarkAbsent(student: AssignedStudent): boolean {
+    if (!student) return true;
 
-  const now = new Date();
-  const interviewDateTime = student.interview_date && student.interview_time
-    ? new Date(`${student.interview_date}T${student.interview_time}`)
-    : null;
+    const now = new Date();
+    const interviewDateTime = student.interview_date && student.interview_time
+      ? new Date(`${student.interview_date}T${student.interview_time}`)
+      : null;
 
-  // Disable if interview is done or interview time hasn't come yet
-  return ( student.interview_done && student.is_absent ===false ) || (!!interviewDateTime && now < interviewDateTime);
-}
+    // Disable if interview is done or interview time hasn't come yet
+    return (student.interview_done && student.is_absent === false) || (!!interviewDateTime && now < interviewDateTime);
+  }
 
 
- 
+
 
   // Pagination component
   const PaginationControls = ({
@@ -800,7 +800,7 @@ function disableMarkAbsent(student: AssignedStudent): boolean {
                     <>
                       <div className="space-y-3">
                         {getPaginatedItems(assigned, assignedCurrentPage).map((student) => (
-                          
+
                           <motion.div
                             key={student.id}
                             initial={{ opacity: 0, x: -20 }}
@@ -850,62 +850,61 @@ function disableMarkAbsent(student: AssignedStudent): boolean {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-        <div className="group">
-          <button
-            onClick={() => setStudentToMarkDone(student)}
-            disabled={disableMarkDone(student)}
-            className={`
+                              <div className="group">
+                                <button
+                                  onClick={() => setStudentToMarkDone(student)}
+                                  disabled={disableMarkDone(student)}
+                                  className={`
               rounded-md border px-3 py-1 text-sm font-medium transition-colors
               ${student.interview_done
-                ? 'border-yellow-300 text-yellow-600 hover:border-yellow-400 hover:bg-yellow-50 dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-900/20'
-                : 'border-green-300 text-green-600 hover:border-green-400 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20'}
+                                      ? 'border-yellow-300 text-yellow-600 hover:border-yellow-400 hover:bg-yellow-50 dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-900/20'
+                                      : 'border-green-300 text-green-600 hover:border-green-400 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20'}
               ${disableMarkDone(student) ? 'opacity-50 cursor-not-allowed' : ''}
             `}
-          >
-            {student.interview_done ? (
-              <>
-                <span className="block group-hover:hidden">✅Interview Done</span>
-                <span className="hidden group-hover:block">Undo Done</span>
-              </>
-            ) : (
-              'Mark Interview Done'
-            )}
-          </button>
-        </div>
-      </div>
+                                >
+                                  {student.interview_done ? (
+                                    <>
+                                      <span className="block group-hover:hidden">✅Interview Done</span>
+                                      <span className="hidden group-hover:block">Undo Done</span>
+                                    </>
+                                  ) : (
+                                    'Mark Interview Done'
+                                  )}
+                                </button>
+                              </div>
+                            </div>
 
-<div className="flex items-center gap-2">
-  <div className="group">
-    <button
-      onClick={() => setStudentToMarkAbsent(student)}
-      disabled={markingAbsentIds.includes(student.id) || disableMarkAbsent(student)}
-      className={`
+                            <div className="flex items-center gap-2">
+                              <div className="group">
+                                <button
+                                  onClick={() => setStudentToMarkAbsent(student)}
+                                  disabled={markingAbsentIds.includes(student.id) || disableMarkAbsent(student)}
+                                  className={`
         relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold shadow-md transition-all
-        ${
-          student.is_absent
-            ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white hover:from-yellow-500 hover:to-yellow-600 dark:from-yellow-500 dark:to-yellow-600 dark:hover:from-yellow-600 dark:hover:to-yellow-700'
-            : 'bg-gradient-to-r from-green-400 to-green-500 text-white hover:from-green-500 hover:to-green-600 dark:from-green-500 dark:to-green-600 dark:hover:from-green-600 dark:hover:to-green-700'
-        }
+        ${student.is_absent
+                                      ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white hover:from-yellow-500 hover:to-yellow-600 dark:from-yellow-500 dark:to-yellow-600 dark:hover:from-yellow-600 dark:hover:to-yellow-700'
+                                      : 'bg-gradient-to-r from-green-400 to-green-500 text-white hover:from-green-500 hover:to-green-600 dark:from-green-500 dark:to-green-600 dark:hover:from-green-600 dark:hover:to-green-700'
+                                    }
         disabled:opacity-50 disabled:cursor-not-allowed
       `}
-    >
-      {student.is_absent ? (
-        <>
-          <UserX className="h-4 w-4" />
-          <span className="block group-hover:hidden">Student Absent</span>
-          <span className="hidden group-hover:block flex items-center gap-1">
-            Undo Absent
-          </span>
-        </>
-      ) : (
-        <>
-          <UserX className="h-4 w-4" />
-          Mark as Absent
-        </>
-      )}
-    </button>
-  </div>
-</div>
+                                >
+                                  {student.is_absent ? (
+                                    <>
+                                      <UserX className="h-4 w-4" />
+                                      <span className="block group-hover:hidden">Student Absent</span>
+                                      <span className="hidden group-hover:block flex items-center gap-1">
+                                        Undo Absent
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <UserX className="h-4 w-4" />
+                                      Mark as Absent
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
 
 
 
@@ -1158,6 +1157,143 @@ function disableMarkAbsent(student: AssignedStudent): boolean {
             </motion.div>
 
           </div>
+
+
+          <motion.div variants={fadeIn} initial="hidden" animate="visible" className="space-y-6 lg:col-span-2">
+            {/* Section 1: Interview Done / Absent */}
+            <Card className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500 text-white">
+                    <Users className="h-5 w-5" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    Interviewed / Absent Students
+                    {assigned.filter(s => s.interview_done || s.is_absent).length > 0 && (
+                      <span className="ml-2 text-sm text-purple-600 dark:text-purple-400">
+                        ({assigned.filter(s => s.interview_done || s.is_absent).length})
+                      </span>
+                    )}
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {assigned.filter(s => s.interview_done || s.is_absent).length > 0 ? (
+                  <div className="space-y-3">
+                    {assigned
+                      .filter(s => s.interview_done || s.is_absent)
+                      .map((student) => (
+                        <motion.div
+                          key={student.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="flex items-center justify-between gap-4 rounded-lg border border-purple-900/40 bg-purple-200/20 p-4 transition-colors hover:bg-purple-300/30 dark:bg-purple-200/10 dark:hover:bg-purple-900/20"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarFallback className="bg-purple-50 font-semibold text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                                {student.name.charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0">
+                              <h4 className="truncate font-medium text-[var(--color-text)]">{student.name}</h4>
+                              <p className="truncate text-sm text-[var(--color-text-secondary)]">{student.email}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {student.is_absent ? (
+                              <span className="rounded-full bg-yellow-400 px-3 py-1 text-sm font-semibold text-white">
+                                Absent
+                              </span>
+                            ) : student.interview_done ? (
+                              <span className="rounded-full bg-green-500 px-3 py-1 text-sm font-semibold text-white">
+                                Interview Done
+                              </span>
+                            ) : null}
+                          </div>
+                        </motion.div>
+                      ))}
+                  </div>
+                ) : (
+                  <p className="text-[var(--color-text-secondary)]">No students have completed their interview or are absent yet.</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Section 2: Students to be Interviewed */}
+            <Card className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500 text-white">
+                    <Users className="h-5 w-5" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    Students To Be Interviewed
+                    {assigned.filter(s => !s.interview_done && !s.is_absent).length > 0 && (
+                      <span className="ml-2 text-sm text-blue-600 dark:text-blue-400">
+                        ({assigned.filter(s => !s.interview_done && !s.is_absent).length})
+                      </span>
+                    )}
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {assigned.filter(s => !s.interview_done && !s.is_absent).length > 0 ? (
+                  <div className="space-y-3">
+                    {assigned
+                      .filter(s => !s.interview_done && !s.is_absent)
+                      .map((student) => (
+                        <motion.div
+                          key={student.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="flex items-center justify-between gap-4 rounded-lg border border-blue-900/40 bg-blue-200/20 p-4 transition-colors hover:bg-blue-300/30 dark:bg-blue-200/10 dark:hover:bg-blue-900/20"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarFallback className="bg-blue-50 font-semibold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                                {student.name.charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0">
+                              <h4 className="truncate font-medium text-[var(--color-text)]">{student.name}</h4>
+                              <p className="truncate text-sm text-[var(--color-text-secondary)]">{student.email}</p>
+                              {student.interview_date && student.interview_time && (
+                                <p className="text-sm text-[var(--color-text-secondary)]">
+                                  Interview scheduled: {new Date(`${student.interview_date}T${student.interview_time}`).toLocaleString()}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {/* Buttons for Mark Done / Mark Absent */}
+                            <button
+                              onClick={() => setStudentToMarkDone(student)}
+                              disabled={disableMarkDone(student)}
+                              className="rounded-md border border-green-300 px-3 py-1 text-sm font-medium text-green-600 hover:bg-green-50"
+                            >
+                              Mark Done
+                            </button>
+
+                            <button
+                              onClick={() => setStudentToMarkAbsent(student)}
+                              disabled={markingAbsentIds.includes(student.id) || disableMarkAbsent(student)}
+                              className="rounded-md border border-yellow-300 px-3 py-1 text-sm font-medium text-yellow-600 hover:bg-yellow-50"
+                            >
+                              Mark Absent
+                            </button>
+                          </div>
+                        </motion.div>
+                      ))}
+                  </div>
+                ) : (
+                  <p className="text-[var(--color-text-secondary)]">No students left to be interviewed.</p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
 
           {/* Room Link Card */}
           <motion.div variants={fadeIn} initial="hidden" animate="visible" className="mt-8">

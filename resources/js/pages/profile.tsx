@@ -3,8 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem, type SharedData } from "@/types";
-import { Head, Link, usePage } from "@inertiajs/react";
-import { Building2, Calendar, CalendarDays, Clock, Edit, ExternalLink, Users } from "lucide-react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
+import {
+  Building2,
+  Calendar,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Edit,
+  ExternalLink,
+  Users,
+} from "lucide-react";
 import { useState } from "react";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -31,17 +41,51 @@ interface UpcomingInterview {
   interview_date: string;
   interview_time: string;
   instructor_name: string;
+  is_absent: boolean;
+  interview_done: boolean;
+}
+
+interface PaginatedInterviews {
+  data: UpcomingInterview[];
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  from?: number;
+  to?: number;
+  next_page_url?: string | null;
+  prev_page_url?: string | null;
 }
 
 interface ProfilePageProps extends SharedData {
-  userRooms?: Room[];
-  upcomingInterviews?: UpcomingInterview[];
+  data: {
+    userRooms?: Room[];
+    upcomingInterviews?: PaginatedInterviews;
+  };
 }
 
 export default function Profile() {
-  const { auth, userRooms = [], upcomingInterviews = [] } = usePage<ProfilePageProps>().props;
+  const { auth, data } = usePage<ProfilePageProps>().props;
+  const { userRooms = [] } = data;
+  const upcomingInterviews = data.upcomingInterviews || {
+    data: [],
+    current_page: 1,
+    last_page: 1,
+    per_page: 2,
+    total: 0,
+  };
+  console.log("Upcoming Interviews:", upcomingInterviews);
   const [editingRoomId, setEditingRoomId] = useState<number | null>(null);
   const [editingRoomName, setEditingRoomName] = useState("");
+
+  // Pagination handler
+  const handlePageChange = (url: string | null) => {
+    if (!url) return;
+    router.get(url, {
+      preserveState: true,
+      preserveScroll: true,
+    });
+  };
 
   // Redirect admins away from this page
   if (auth.user.role === "admin") {
@@ -82,9 +126,9 @@ export default function Profile() {
     setEditingRoomName("");
   };
 
-  const canJoin = (interviewTime: Date) => {
-    return new Date() < interviewTime;
-  };
+  // const canJoin = (interviewTime: Date) => {
+  //   return new Date() < interviewTime;
+  // };
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -107,11 +151,103 @@ export default function Profile() {
     });
   };
 
+  const StatusButton = (interview: UpcomingInterview): React.ReactElement => {
+    let buttonToRender;
+
+    if (interview.interview_done && !interview.is_absent) {
+      buttonToRender = (
+        <Button
+          size="sm"
+          disabled
+          variant="outline"
+          className="cursor-not-allowed border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300"
+        >
+          <Clock className="mr-2 h-4 w-4" />
+          Completed
+        </Button>
+      );
+    } else if (interview.is_absent) {
+      buttonToRender = (
+        <Button
+          size="sm"
+          disabled
+          variant="outline"
+          className="cursor-not-allowed border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300"
+        >
+          <Clock className="mr-2 h-4 w-4" />
+          Absent
+        </Button>
+      );
+    } else if (!isUpcoming(interview.interview_date, interview.interview_time)) {
+      buttonToRender = (
+        <Button asChild size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
+          <Link href={`/room/${interview.room_code}`}>
+            <ExternalLink className="mr-2 h-4 w-4" />
+            Join Interview
+          </Link>
+        </Button>
+      );
+    } else {
+      buttonToRender = (
+        <Button
+          size="sm"
+          disabled
+          variant="outline"
+          className="cursor-not-allowed border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
+        >
+          <Clock className="mr-2 h-4 w-4" />
+          Not yet Available
+        </Button>
+      );
+    }
+
+    return buttonToRender;
+  };
+
   const isUpcoming = (dateStr: string, timeStr: string) => {
     const interviewDateTime = new Date(`${dateStr}T${timeStr}`);
     return interviewDateTime > new Date();
   };
 
+  const InterviewBadge = (interview: UpcomingInterview): React.ReactNode => {
+    if (interview.interview_done && !interview.is_absent) {
+      return (
+        <Badge
+          variant="default"
+          className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+        >
+          Completed
+        </Badge>
+      );
+    } else if (interview.is_absent) {
+      return (
+        <Badge
+          variant="destructive"
+          className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+        >
+          Absent
+        </Badge>
+      );
+    } else if (!isUpcoming(interview.interview_date, interview.interview_time)) {
+      return (
+        <Badge
+          variant="default"
+          className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+        >
+          Available Now
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge
+          variant="secondary"
+          className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+        >
+          Scheduled
+        </Badge>
+      );
+    }
+  };
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Profile" />
@@ -296,9 +432,9 @@ export default function Profile() {
                 <CardDescription>Your scheduled interviews</CardDescription>
               </CardHeader>
               <CardContent>
-                {upcomingInterviews.length > 0 ? (
+                {upcomingInterviews.data.length > 0 ? (
                   <div className="space-y-4">
-                    {upcomingInterviews.map((interview) => (
+                    {upcomingInterviews.data.map((interview) => (
                       <div
                         key={interview.id}
                         className="flex items-center justify-between rounded-lg border p-4"
@@ -306,9 +442,7 @@ export default function Profile() {
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <h4 className="font-medium">{interview.room_name}</h4>
-                            <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                              Scheduled
-                            </Badge>
+                            {InterviewBadge(interview)}
                           </div>
                           <p className="text-sm text-muted-foreground">
                             Instructor: {interview.instructor_name}
@@ -328,28 +462,48 @@ export default function Profile() {
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {isUpcoming(interview.interview_date, interview.interview_time) ? (
-                            <Button
-                              size="sm"
-                              disabled
-                              variant="outline"
-                              className="cursor-not-allowed opacity-50"
-                            >
-                              <Clock className="mr-2 h-4 w-4" />
-                              Not Yet Available
-                            </Button>
-                          ) : (
-                            <Button asChild size="sm">
-                              <Link href={`/room/${interview.room_code}`}>
-                                <ExternalLink className="mr-2 h-4 w-4" />
-                                Join Interview
-                              </Link>
-                            </Button>
-                          )}
-                        </div>
+                        <div className="flex items-center gap-2">{StatusButton(interview)}</div>
                       </div>
                     ))}
+
+                    {/* Pagination Controls */}
+                    {upcomingInterviews.last_page > 1 && (
+                      <div className="mt-6 flex items-center justify-between border-t pt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={upcomingInterviews.current_page === 1}
+                          onClick={() => handlePageChange(upcomingInterviews.prev_page_url || null)}
+                          className="flex items-center gap-2"
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                          Previous
+                        </Button>
+
+                        <span className="text-sm text-muted-foreground">
+                          Page {upcomingInterviews.current_page} of {upcomingInterviews.last_page}
+                          {upcomingInterviews.total > 0 && (
+                            <span className="ml-2">
+                              ({upcomingInterviews.from}-{upcomingInterviews.to} of{" "}
+                              {upcomingInterviews.total})
+                            </span>
+                          )}
+                        </span>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={
+                            upcomingInterviews.current_page === upcomingInterviews.last_page
+                          }
+                          onClick={() => handlePageChange(upcomingInterviews.next_page_url || null)}
+                          className="flex items-center gap-2"
+                        >
+                          Next
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="py-8 text-center">

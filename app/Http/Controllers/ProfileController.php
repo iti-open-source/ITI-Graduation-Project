@@ -23,6 +23,7 @@ class ProfileController extends Controller
                 ->withCount('assignedStudents')
                 ->with(['assignedStudents:id,name,email'])
                 ->get()
+                ->sortBy('last_activity', SORT_REGULAR, true)
                 ->map(function ($room) {
                     return [
                         'id' => $room->id,
@@ -36,32 +37,31 @@ class ProfileController extends Controller
                 });
         } elseif ($user->role === 'student') {
             // Get rooms assigned to this student with interview details
-            $data['upcomingInterviews'] = $user->assignedRooms()
+            $paginatedRooms = $user->assignedRooms()
                 ->where('is_active', true)
                 ->with(['creator:id,name'])
-                ->get()
-                ->map(function ($room) use ($user) {
-                    // Get the pivot data for this student
-                    $pivotData = $room->assignedStudents()
-                        ->where('users.id', $user->id)
-                        ->withPivot('interview_date', 'interview_time')
-                        ->first();
+                ->paginate(3);
 
-                    return [
-                        'id' => $room->id,
-                        'room_name' => $room->name,
-                        'room_code' => $room->room_code,
-                        'interview_date' => $pivotData?->pivot?->interview_date,
-                        'interview_time' => $pivotData?->pivot?->interview_time,
-                        'instructor_name' => $room->creator?->name ?? 'Unknown',
-                    ];
-                })
-                // ->filter(function ($interview) {
-                //     // Only include interviews that have both date and time set
-                //     return $interview['interview_date'] && $interview['interview_time'];
-                // })
-                ->values();
+            // Transform the data while preserving pagination
+            $data['upcomingInterviews'] = $paginatedRooms->through(function ($room) use ($user, $paginatedRooms) {
+                // Get the pivot data for this student
+                $pivotData = $room->assignedStudents()
+                    ->where('users.id', $user->id)
+                    ->withPivot('interview_date', 'interview_time', 'is_absent', 'interview_done')
+                    ->first();
+
+                return [
+                    'id' => $room->id,
+                    'room_name' => $room->name,
+                    'room_code' => $room->room_code,
+                    'interview_date' => $pivotData?->pivot?->interview_date,
+                    'interview_time' => $pivotData?->pivot?->interview_time,
+                    'instructor_name' => $room->creator?->name ?? 'Unknown',
+                    'is_absent' => $pivotData?->pivot?->is_absent,
+                    'interview_done' => $pivotData?->pivot?->interview_done,
+                ];
+            });
         }
-        return Inertia::render('profile', $data);
+        return Inertia::render('profile', ['data' => Inertia::merge($data)]);
     }
 }

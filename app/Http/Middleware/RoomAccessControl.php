@@ -41,21 +41,8 @@ class RoomAccessControl
             return false;
         }
 
-        // finally, check if the current date and time is after the interview date and time
-        $assignedStudent = $room->assignedStudents()->where('users.id', $user->id)->withPivot('interview_date', 'interview_time')->first();
-
-        $interviewDate = $assignedStudent->pivot->interview_date;
-        $interviewTime = $assignedStudent->pivot->interview_time;
-
-        $interviewDateTime = Carbon::parse($interviewDate . ' ' . $interviewTime, 'Africa/Cairo')->format('Y-m-d H:i:s');
-
-        $currentDateTime = Carbon::now('Africa/Cairo')->format('Y-m-d H:i:s');
-
-        if ($currentDateTime < $interviewDateTime) {
-            return false;
-        }
-
-        // all checks passed, allow access
+        // Allow access to the room page for assigned students regardless of schedule.
+        // Timing constraints are enforced when joining the live session, not for viewing/queueing.
         return true;
     }
 }

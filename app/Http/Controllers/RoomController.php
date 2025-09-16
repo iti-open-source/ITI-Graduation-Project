@@ -188,7 +188,11 @@ class RoomController extends Controller
         }
 
 
-        // Do not redirect solely based on current_participant; rely on active session check only
+        // Prevent re-queuing if this student already completed the interview in this room
+        $pivot = $room->assignedStudents()->where('users.id', $user->id)->first();
+        if ($pivot && (bool) ($pivot->pivot?->interview_done)) {
+            return redirect()->route('dashboard');
+        }
 
         // Check if user is already in queue
         $queueEntry = $room->queue()->where('user_id', $user->id)->with('user')->first();

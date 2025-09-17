@@ -119,7 +119,7 @@ export default function SessionRoom(props: PageProps) {
           </div>
 
           {/* Right Side - Collaborative Tools (60% on desktop, full width on mobile) */}
-          <div className="flex w-full flex-col lg:min-w-0 lg:flex-1">
+          <div className="flex w-[100vh] flex-col lg:min-w-0 lg:flex-1">
             <div className="flex min-h-96 flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm lg:h-screen lg:max-h-[calc(100vh-8rem)]">
               {/* Tabs Header */}
               <div className="flex-shrink-0 border-b border-[var(--color-border)] px-4 py-3">
@@ -176,18 +176,18 @@ export default function SessionRoom(props: PageProps) {
 
               {/* Tab Content */}
               <div className="min-h-0 flex-1 overflow-auto lg:h-[calc(100vh-12rem)]">
-                <div className={activeTab === "editor" ? "block min-h-full" : "hidden"}>
+                <div className={activeTab === "editor" ? "block h-full" : "hidden"}>
                   <CollaborativeEditor id={`session-${roomCode}`} />
                 </div>
-                <div className={activeTab === "whiteboard" ? "block min-h-full" : "hidden"}>
+                <div className={activeTab === "whiteboard" ? "block h-full" : "hidden"}>
                   <Whiteboard roomCode={roomCode} />
                 </div>
                 {isCreator && (
-                  <div className={activeTab === "ai-chat" ? "block min-h-full" : "hidden"}>
+                  <div className={activeTab === "ai-chat" ? "block h-full" : "hidden"}>
                     <AIChatbot roomCode={roomCode} isCreator={isCreator} />
                   </div>
                 )}
-                <div className={activeTab === "problem" ? "block min-h-full" : "hidden"}>
+                <div className={activeTab === "problem" ? "block h-full" : "hidden"}>
                   <Problem isCreator={isCreator} roomId={`session-${roomCode}`} />
                 </div>
               </div>

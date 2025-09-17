@@ -89,7 +89,7 @@ export default function CollaborativeWhiteboard({ roomCode }: { roomCode?: strin
   };
 
   return (
-    <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{ flex: 1 }}>
         <Excalidraw
           excalidrawAPI={(api) => setExcalidrawAPI(api)}

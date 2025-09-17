@@ -47,8 +47,8 @@ class ProfileController extends Controller
                     'assignedStudentsCount' => $room->assigned_students_count,
                     'assignedStudents' => $room->assignedStudents,
                 ];
-            });
-
+            })
+            ->values();
         return $userRooms;
     }
 

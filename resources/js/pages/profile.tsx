@@ -68,6 +68,10 @@ export default function Profile() {
     upcomingInterviews = [],
     previousInterviews = [],
   } = usePage<ProfilePageProps>().props;
+
+  console.log(usePage<ProfilePageProps>().props);
+
+  console.log("User Rooms:", userRooms);
   const [editingRoomId, setEditingRoomId] = useState<number | null>(null);
   const [editingRoomName, setEditingRoomName] = useState("");
   const [upcoming, setUpcoming] = useState<UpcomingInterview[]>(upcomingInterviews || []);

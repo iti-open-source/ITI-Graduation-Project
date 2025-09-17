@@ -14,11 +14,11 @@ import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
 
-interface NavbarProps {
-  isLoggedIn?: boolean;
-}
+// interface NavbarProps {
+//   isLoggedIn?: boolean;
+// }
 
-export default function Navbar({ isLoggedIn }: NavbarProps) {
+export default function Navbar() {
   const page = usePage();
   const { auth } = page.props as any;
   const getInitials = useInitials();
@@ -28,7 +28,7 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
   const user = auth?.user;
   const isAuthenticated = !!user;
   const [activeSection, setActiveSection] = useState<string>("home");
-  const shouldHighlight = !currentUrl.startsWith("/login") && !currentUrl.startsWith("/register");
+  // const shouldHighlight = !currentUrl.startsWith("/login") && !currentUrl.startsWith("/register");
 
   useEffect(() => {
     const sections = document.querySelectorAll("section[id]");

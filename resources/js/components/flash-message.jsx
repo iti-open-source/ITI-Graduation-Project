@@ -75,7 +75,7 @@ export default function FlashMessage() {
     <div className={`${baseClasses} ${typeClasses[type]}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          {iconComponents[type]}
+          {/* {iconComponents[type]} */}
           <span className="leading-relaxed font-medium">{message}</span>
         </div>
         <button

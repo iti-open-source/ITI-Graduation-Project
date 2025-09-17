@@ -603,7 +603,7 @@ class RoomController extends Controller
                 'message' => 'Invalid interview date/time format.',
             ], 400);
         }
-        if (!$interviewDateTime->isFuture()) {
+        if ($interviewDateTime->isFuture()) {
             return response()->json([
                 'success' => false,
                 'message' => 'You cannot mark the interview as done before its scheduled date and time.',
@@ -648,7 +648,7 @@ class RoomController extends Controller
             ], 400);
         }
 
-        if (!$interviewDateTime->isFuture()) {
+        if ($interviewDateTime->isFuture()) {
             return response()->json([
                 'success' => false,
                 'message' => 'You cannot mark the student as absent before the scheduled interview date and time.',

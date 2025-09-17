@@ -31,13 +31,22 @@ interface User {
   role?: string;
 }
 
+interface Queue {
+  id: number;
+  room_id: number;
+  user_id: number;
+  user: User;
+  joined_at: string;
+  position: number;
+}
+
 interface Room {
   id: number;
   name: string;
   room_code: string;
   is_active: boolean;
   current_participant: User | null;
-  queue_count: number;
+  queue: Queue[];
   student_interview_date?: string | null;
   student_interview_time?: string | null;
   student_interview_done?: boolean;
@@ -53,6 +62,7 @@ interface LobbyProps {
 }
 
 export default function Lobby({ userRooms, students }: LobbyProps) {
+  console.log("User rooms: ", userRooms);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -129,10 +139,10 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
         })
       : userRooms;
 
-  const pastRooms =
-    role === "student"
-      ? userRooms.filter((r) => r.pivot && (r.pivot.interview_done || r.pivot.is_absent))
-      : [];
+  // const pastRooms =
+  //   role === "student"
+  //     ? userRooms.filter((r) => r.pivot && (r.pivot.interview_done || r.pivot.is_absent))
+  //     : [];
 
   // Hide completed/absent rooms for students in the main grid
   const visibleRooms =
@@ -477,7 +487,8 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <Users className="h-4 w-4" />
                               <span>
-                                {room.queue_count} user{room.queue_count !== 1 ? "s" : ""} in queue
+                                {room.queue.length} user{room.queue.length !== 1 ? "s" : ""} in
+                                queue
                               </span>
                             </div>
                           </>

@@ -70,7 +70,7 @@ class RoomController extends Controller
                 ->with(['currentParticipant', 'queue.user', 'assignedStudents'])
                 ->orderBy('last_activity', 'desc')
                 ->get();
-
+            // dd($userRooms);
             // Only instructors/admins need the list of students
             $students = \App\Models\User::where('role', 'student')->get();
         }
@@ -603,7 +603,7 @@ class RoomController extends Controller
                 'message' => 'Invalid interview date/time format.',
             ], 400);
         }
-        if ( !$interviewDateTime->isFuture()) {
+        if (!$interviewDateTime->isFuture()) {
             return response()->json([
                 'success' => false,
                 'message' => 'You cannot mark the interview as done before its scheduled date and time.',

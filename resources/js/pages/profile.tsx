@@ -103,7 +103,9 @@ export default function Profile() {
           setUpcoming((json.upcomingInterviews as UpcomingInterview[]) || []);
           setPrevious((json.previousInterviews as PreviousInterviewItem[]) || []);
         }
-      } catch {}
+      } catch (error) {
+        console.error("Error fetching dashboard state:", error);
+      }
     };
     fetchState();
     pollRef.current = window.setInterval(fetchState, 5000);
@@ -633,7 +635,7 @@ export default function Profile() {
             </Card>
             {feedbackOpen && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                <div className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5 shadow-xl">
+                <div className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-[var(--card)] p-5 shadow-xl">
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div>
                       <h3 className="text-lg font-semibold text-[var(--color-text)]">

@@ -302,7 +302,7 @@ export default function Profile() {
         {auth.user.role === "instructor" && (
           <>
             {/* Room Stats */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Rooms</CardTitle>
@@ -330,7 +330,7 @@ export default function Profile() {
                 </CardContent>
               </Card>
 
-              <Card>
+              {/* <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Average Students</CardTitle>
                   <Users className="h-4 w-4 text-muted-foreground" />
@@ -348,7 +348,7 @@ export default function Profile() {
                   </div>
                   <p className="text-xs text-muted-foreground">Per room</p>
                 </CardContent>
-              </Card>
+              </Card> */}
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -378,38 +378,41 @@ export default function Profile() {
                     {userRooms.map((room) => (
                       <div
                         key={room.id}
-                        className="flex items-center justify-between rounded-lg border p-4"
+                        className="flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div className="flex-1 space-y-1">
                           {editingRoomId === room.id ? (
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                               <input
                                 type="text"
                                 value={editingRoomName}
                                 onChange={(e) => setEditingRoomName(e.target.value)}
-                                className="rounded border px-2 py-1 text-lg font-medium"
+                                className="w-full rounded border px-2 py-1 text-lg font-medium sm:w-auto"
                                 autoFocus
                               />
-                              <Button size="sm" onClick={() => handleSaveRoomName(room.id)}>
-                                Save
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={handleCancelEdit}>
-                                Cancel
-                              </Button>
+                              <div className="flex gap-2">
+                                <Button size="sm" onClick={() => handleSaveRoomName(room.id)}>
+                                  Save
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={handleCancelEdit}>
+                                  Cancel
+                                </Button>
+                              </div>
                             </div>
                           ) : (
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                               <h4 className="text-lg font-medium">{room.name}</h4>
                               <Button
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => handleEditRoom(room)}
+                                className="self-start"
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
                             </div>
                           )}
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center sm:gap-4">
                             <span className="flex items-center gap-1">
                               <Building2 className="h-3 w-3" />
                               Code: {room.room_code}
@@ -418,13 +421,16 @@ export default function Profile() {
                               <Users className="h-3 w-3" />
                               {room.assignedStudentsCount || 0} students assigned
                             </span>
-                            <Badge variant={room.is_active ? "default" : "secondary"}>
+                            <Badge
+                              variant={room.is_active ? "default" : "secondary"}
+                              className="self-start"
+                            >
                               {room.is_active ? "Active" : "Inactive"}
                             </Badge>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button asChild variant="outline" size="sm">
+                          <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
                             <Link href={`/room/${room.room_code}`}>
                               <ExternalLink className="mr-2 h-4 w-4" />
                               Enter Room

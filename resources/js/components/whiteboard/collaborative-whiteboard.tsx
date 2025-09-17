@@ -14,7 +14,7 @@ export default function CollaborativeWhiteboard({ roomCode }: { roomCode?: strin
 
   // Initialize Socket.IO connection
   useEffect(() => {
-    const newSocket = io("http://localhost:3003", {
+    const newSocket = io("http://localhost:2053", {
       transports: ["websocket", "polling"],
       timeout: 5000,
       forceNew: true,

@@ -7,7 +7,7 @@ import { Server as SocketIO } from "socket.io";
 const ioDebug = debug("io");
 
 const app = express();
-const port = 3003;
+const port = 2053;
 
 // Enable CORS for all routes and origins
 app.use(

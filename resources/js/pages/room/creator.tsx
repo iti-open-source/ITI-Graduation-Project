@@ -820,24 +820,22 @@ export default function Creator({
                   <>
                     <div className="space-y-3">
                       {getPaginatedItems(assigned, assignedCurrentPage).map((student) => (
-                        <>
-                          <StudentCard
-                            key={student.id}
-                            student={student}
-                            markDoneDisabled={disableMarkDone(student)}
-                            markAbsentDisabled={disableMarkAbsent(student)}
-                            markDone={() => setStudentToMarkDone(student)}
-                            markAbsent={() => setStudentToMarkAbsent(student)}
-                            setSelectedStudent={setSelectedStudent}
-                            setShowEditModal={setShowEditModal}
-                            setUpdatingStudent={setUpdatingStudent}
-                            setStudentToRemove={setStudentToRemove}
-                            removingIds={removingIds}
-                            bgStyles="bg-purple-500/10 hover:bg-purple-500/20 dark:bg-purple-500/5 dark:hover:bg-purple-900/20"
-                            borderStyles="border-purple-600/40"
-                            avatarStyles="bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
-                          />
-                        </>
+                        <StudentCard
+                          key={student.id}
+                          student={student}
+                          markDoneDisabled={disableMarkDone(student)}
+                          markAbsentDisabled={disableMarkAbsent(student)}
+                          markDone={() => setStudentToMarkDone(student)}
+                          markAbsent={() => setStudentToMarkAbsent(student)}
+                          setSelectedStudent={setSelectedStudent}
+                          setShowEditModal={setShowEditModal}
+                          setUpdatingStudent={setUpdatingStudent}
+                          setStudentToRemove={setStudentToRemove}
+                          removingIds={removingIds}
+                          bgStyles="bg-purple-500/10 hover:bg-purple-500/20 dark:bg-purple-500/5 dark:hover:bg-purple-900/20"
+                          borderStyles="border-purple-600/40"
+                          avatarStyles="bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
+                        />
                       ))}
                     </div>
                     <PaginationControls

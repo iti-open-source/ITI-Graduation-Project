@@ -1,4 +1,5 @@
 import StudentCard from "@/components/room/student-card";
+import StudentModal from "@/components/room/student-modal";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,6 @@ import {
   UserCheck2,
   UserPlus,
   Users,
-  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -915,170 +915,56 @@ export default function Creator({
             </Card>
 
             {/* Add New Student Modal */}
-            {showAddModal && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                <div className="w-full max-w-lg rounded-lg bg-white p-4 shadow-lg sm:p-6 dark:bg-gray-800">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-base font-semibold text-gray-900 sm:text-lg dark:text-white">
-                      Assign New Student
-                    </h2>
-                    <button
-                      onClick={() => setShowAddModal(false)}
-                      className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <div className="space-y-4">
-                    <select
-                      className="w-full rounded-md border p-2 text-sm"
-                      value={selectedStudent}
-                      onChange={(e) => setSelectedStudent(Number(e.target.value) || "")}
-                    >
-                      <option value="" className="text-gray-800" disabled>
-                        Select a student
-                      </option>
-                      {unassigned.map((s) => (
-                        <option key={s.id} value={s.id} className="text-gray-800">
-                          {s.name} ({s.email})
-                        </option>
-                      ))}
-                    </select>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <input
-                        type="date"
-                        className="w-full rounded-md border p-2 text-sm"
-                        value={interviewDate}
-                        onChange={(e) => setInterviewDate(e.target.value)}
-                        placeholder="Interview Date"
-                      />
-
-                      <input
-                        type="time"
-                        className="w-full rounded-md border p-2 text-sm"
-                        value={interviewTime}
-                        onChange={(e) => setInterviewTime(e.target.value)}
-                        placeholder="Interview Time"
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                      <Button
-                        onClick={handleAssign}
-                        disabled={!selectedStudent || assigning}
-                        className="w-full sm:flex-1"
-                      >
-                        {assigning ? "Assigning..." : "Assign"}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowAddModal(false)}
-                        className="w-full sm:w-auto"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            <StudentModal
+              isOpen={showAddModal}
+              onClose={() => setShowAddModal(false)}
+              title="Assign New Student"
+              mode="add"
+              unassignedStudents={unassigned}
+              selectedStudentId={selectedStudent}
+              onStudentSelect={(value) => setSelectedStudent(Number(value) || "")}
+              interviewDate={interviewDate}
+              interviewTime={interviewTime}
+              onDateChange={setInterviewDate}
+              onTimeChange={setInterviewTime}
+              onSubmit={handleAssign}
+              isSubmitting={assigning}
+              submitButtonText="Assign"
+              isDisabled={!selectedStudent}
+            />
 
             {/* Edit Assigned Student Modal */}
-            {showEditModal && selectedStudent && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                <div className="w-full max-w-lg rounded-lg bg-white p-4 shadow-lg sm:p-6 dark:bg-gray-800">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-base font-semibold text-gray-900 sm:text-lg dark:text-white">
-                      Edit Interview Schedule
-                    </h2>
-                    <button
-                      onClick={() => setShowEditModal(false)}
-                      className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    {(() => {
-                      const student = assigned.find((s) => s.id === selectedStudent);
-                      if (!student) return null;
-
-                      return (
-                        <div className="flex flex-col gap-4">
-                          {/* Student info */}
-                          <div className="rounded-lg bg-gray-50 p-3 text-sm text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                            <p className="font-medium">{student.name}</p>
-                            <p className="truncate text-xs opacity-75">{student.email}</p>
-                          </div>
-
-                          {/* Interview date & time */}
-                          <div className="grid gap-4 sm:grid-cols-2">
-                            <div>
-                              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                                Interview Date
-                              </label>
-                              <input
-                                type="date"
-                                className="w-full rounded-md border p-2 text-sm"
-                                value={student.interview_date || ""}
-                                onChange={(e) => {
-                                  const updated = [...assigned];
-                                  const index = updated.findIndex((s) => s.id === student.id);
-                                  if (index > -1) updated[index].interview_date = e.target.value;
-                                  setAssigned(updated);
-                                }}
-                              />
-                            </div>
-                            <div>
-                              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                                Interview Time
-                              </label>
-                              <input
-                                type="time"
-                                className="w-full rounded-md border p-2 text-sm"
-                                value={student.interview_time || ""}
-                                onChange={(e) => {
-                                  const updated = [...assigned];
-                                  const index = updated.findIndex((s) => s.id === student.id);
-                                  if (index > -1) updated[index].interview_time = e.target.value;
-                                  setAssigned(updated);
-                                }}
-                              />
-                            </div>
-                          </div>
-
-                          {/* Update button */}
-                          <div className="flex flex-col gap-2 sm:flex-row">
-                            <Button
-                              onClick={() =>
-                                updateStudentInterview(
-                                  student.id,
-                                  student.interview_date || "",
-                                  student.interview_time || "",
-                                )
-                              }
-                              disabled={updatingStudent}
-                              className="w-full sm:flex-1"
-                            >
-                              {updatingStudent ? "Updating..." : "Update"}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              onClick={() => setShowEditModal(false)}
-                              className="w-full sm:w-auto"
-                            >
-                              Cancel
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </div>
-              </div>
-            )}
+            <StudentModal
+              isOpen={showEditModal && !!selectedStudent}
+              onClose={() => setShowEditModal(false)}
+              title="Edit Interview Schedule"
+              mode="edit"
+              student={assigned.find((s) => s.id === selectedStudent)}
+              interviewDate={assigned.find((s) => s.id === selectedStudent)?.interview_date || ""}
+              interviewTime={assigned.find((s) => s.id === selectedStudent)?.interview_time || ""}
+              onDateChange={() => {}}
+              onTimeChange={() => {}}
+              onStudentUpdate={(field, value) => {
+                const updated = [...assigned];
+                const index = updated.findIndex((s) => s.id === selectedStudent);
+                if (index > -1) {
+                  updated[index][field] = value;
+                  setAssigned(updated);
+                }
+              }}
+              onSubmit={() => {
+                const student = assigned.find((s) => s.id === selectedStudent);
+                if (student) {
+                  updateStudentInterview(
+                    student.id,
+                    student.interview_date || "",
+                    student.interview_time || "",
+                  );
+                }
+              }}
+              isSubmitting={updatingStudent}
+              submitButtonText="Update"
+            />
           </motion.div>
         </div>
 

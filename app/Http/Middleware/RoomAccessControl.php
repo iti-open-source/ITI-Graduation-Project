@@ -41,6 +41,17 @@ class RoomAccessControl
             return false;
         }
 
+
+        // The below code is for if we wanted to enforce timing constraints for students, just in case.
+
+        // finally, check if the current time is within the scheduled interview time
+        // $assignment = $user->assignedRooms()->where('room_code', $roomCode)->first();
+        // $interviewDate = Carbon::parse($assignment->pivot->interview_date . ' ' . $assignment->pivot->interview_time);
+        // $now = Carbon::now();
+        // if ($now->lt($interviewDate)) {
+        //     return false;
+        // }
+
         // Allow access to the room page for assigned students regardless of schedule.
         // Timing constraints are enforced when joining the live session, not for viewing/queueing.
         return true;

@@ -1221,15 +1221,15 @@ export default function Creator({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col gap-3 rounded-lg border border-gray-500/30 bg-[var(--background)] p-4">
-                <code className="font-mono text-xs break-all text-[var(--color-text)] sm:text-sm">
+              <div className="flex flex-col gap-3 rounded-lg border border-gray-500/30 bg-[var(--background)] p-4 sm:flex-row sm:items-center">
+                <code className="font-mono text-xs break-all text-[var(--color-text)] sm:flex-1 sm:text-sm">
                   {window.location.origin}/room/{room.room_code}
                 </code>
                 <Button
                   onClick={copyRoomLink}
                   size="sm"
                   variant="outline"
-                  className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+                  className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:bg-slate-100 hover:text-slate-900 sm:w-auto dark:hover:bg-slate-700 dark:hover:text-slate-100"
                 >
                   <Copy className="mr-2 h-4 w-4" />
                   {copied ? "Copied!" : "Copy"}

@@ -149,9 +149,13 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
               <div className="flex items-center gap-2">
                 <AppearanceToggleDropdown />
                 {/* Client Area button */}
-                <Button variant="outline" asChild>
-                  <Link href={user?.role === "student" ? "/lobby" : "/dashboard"}>Client Area</Link>
-                </Button>
+                {user.role != "admin" && (
+                  <Button variant="outline" asChild>
+                    <Link href={user?.role === "student" ? "/lobby" : "/dashboard"}>
+                      Client Area
+                    </Link>
+                  </Button>
+                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="size-10 rounded-full p-1 hover:bg-muted">

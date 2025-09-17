@@ -199,7 +199,7 @@ export default function SessionRoom(props: PageProps) {
       {/* Evaluate Modal */}
       {showEvaluateModal && isCreator && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-xl">
+          <div className="w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--card)] shadow-xl">
             <div className="border-b border-[var(--color-border)] px-5 py-4">
               <h3 className="text-base font-semibold text-[var(--color-text)]">
                 Evaluate Interview
@@ -267,7 +267,7 @@ export default function SessionRoom(props: PageProps) {
                     value={comments}
                     onChange={(e) => setComments(e.target.value)}
                     rows={5}
-                    className="w-full rounded-md border border-[var(--color-border)] bg-transparent p-2 text-sm text-[var(--color-text)] shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="w-full resize-none rounded-md border border-[var(--color-border)] bg-transparent p-2 text-sm text-[var(--color-text)] shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                     placeholder="Share feedback about the interviewee..."
                   />
                 </div>

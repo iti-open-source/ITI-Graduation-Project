@@ -1,3 +1,4 @@
+import StudentCard from "@/components/room/student-card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,20 +11,15 @@ import { Head, Link, router, usePage } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
-  Calendar,
-  Check,
   ChevronLeft,
   ChevronRight,
-  Clock,
   Copy,
-  Edit2,
   Trash2,
   // Undo2,
   User,
   UserCheck2,
   UserPlus,
   Users,
-  UserX,
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -541,11 +537,13 @@ export default function Creator({
             </Button>
           </div>
 
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h1 className="mb-2 text-4xl font-bold text-[var(--color-text)]">{room.name}</h1>
-              <div className="flex items-center gap-4">
-                <p className="text-[var(--color-text-secondary)]">
+              <h1 className="mb-2 text-2xl font-bold text-[var(--color-text)] sm:text-3xl lg:text-4xl">
+                {room.name}
+              </h1>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+                <p className="text-sm text-[var(--color-text-secondary)] sm:text-base">
                   Room Code:{" "}
                   <span className="font-mono font-semibold text-slate-600 dark:text-slate-300">
                     {room.room_code}
@@ -563,11 +561,12 @@ export default function Creator({
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
               <Button
                 onClick={copyRoomLink}
                 variant="outline"
-                className="border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+                size="sm"
+                className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:bg-slate-100 hover:text-slate-900 sm:w-auto dark:hover:bg-slate-700 dark:hover:text-slate-100"
               >
                 <Copy className="mr-2 h-4 w-4" />
                 {copied ? "Copied!" : "Copy Link"}
@@ -576,7 +575,8 @@ export default function Creator({
               <Button
                 onClick={() => setShowDeleteDialog(true)}
                 variant="outline"
-                className="border-red-300 bg-[var(--color-card-bg)] text-red-600 hover:bg-red-600 hover:text-white dark:border-red-700 dark:text-red-400 dark:hover:bg-red-700 dark:hover:text-white"
+                size="sm"
+                className="w-full border-red-300 bg-[var(--color-card-bg)] text-red-600 hover:bg-red-600 hover:text-white sm:w-auto dark:border-red-700 dark:text-red-400 dark:hover:bg-red-700 dark:hover:text-white"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete Room
@@ -603,22 +603,24 @@ export default function Creator({
           <motion.div variants={fadeIn} initial="hidden" animate="visible" className="space-y-6">
             <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
               <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500 text-white">
-                    <Users className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      Waiting Queue
-                      {room.queue_count > 0 && (
-                        <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
-                          {room.queue_count}
-                        </Badge>
-                      )}
+                <CardTitle className="flex flex-col gap-3 text-[var(--color-text)] sm:flex-row sm:items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500 text-white">
+                      <Users className="h-5 w-5" />
                     </div>
-                    <p className="text-sm font-normal text-[var(--color-text-secondary)]">
-                      Users waiting to join your room
-                    </p>
+                    <div>
+                      <div className="flex flex-row items-center gap-2">
+                        <span className="text-base font-semibold sm:text-lg">Waiting Queue</span>
+                        {room.queue_count > 0 && (
+                          <Badge className="w-fit bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                            {room.queue_count}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm font-normal text-[var(--color-text-secondary)]">
+                        Users waiting to join your room
+                      </p>
+                    </div>
                   </div>
                 </CardTitle>
               </CardHeader>
@@ -631,7 +633,7 @@ export default function Creator({
                           key={queueItem.id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          className="flex items-center gap-4 rounded-lg border border-gray-500/30 bg-blue-200/20 p-4 transition-colors hover:bg-blue-300/30 dark:bg-blue-200/10 dark:hover:bg-blue-900/20"
+                          className="flex flex-col gap-4 rounded-lg border border-gray-500/30 bg-blue-200/20 p-4 transition-colors hover:bg-blue-300/30 sm:flex-row sm:items-center dark:bg-blue-200/10 dark:hover:bg-blue-900/20"
                         >
                           <div className="flex flex-1 items-center gap-3">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-sm font-semibold text-white">
@@ -655,7 +657,7 @@ export default function Creator({
                           <Button
                             onClick={() => joinUser(queueItem.user.id)}
                             size="sm"
-                            className="border-0 bg-blue-500 text-white hover:bg-blue-600"
+                            className="w-full border-0 bg-blue-500 text-white hover:bg-blue-600 sm:w-auto"
                             disabled={false}
                           >
                             <UserPlus className="mr-2 h-4 w-4" />
@@ -692,27 +694,29 @@ export default function Creator({
           <motion.div variants={fadeIn} initial="hidden" animate="visible" className="space-y-6">
             <Card className="border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
               <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-[var(--color-text)]">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500 text-white">
-                    <Users className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      Active Sessions
-                      {(() => {
-                        const sessions = Array.isArray((room as any).sessions)
-                          ? (room as any).sessions.filter((s: any) => s.status === "active")
-                          : [];
-                        return sessions.length > 0 ? (
-                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                            {sessions.length}
-                          </Badge>
-                        ) : null;
-                      })()}
+                <CardTitle className="flex flex-col gap-3 text-[var(--color-text)] sm:flex-row sm:items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500 text-white">
+                      <Users className="h-5 w-5" />
                     </div>
-                    <p className="text-sm font-normal text-[var(--color-text-secondary)]">
-                      Ongoing sessions created from this lobby
-                    </p>
+                    <div>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+                        <span className="text-base font-semibold sm:text-lg">Active Sessions</span>
+                        {(() => {
+                          const sessions = Array.isArray((room as any).sessions)
+                            ? (room as any).sessions.filter((s: any) => s.status === "active")
+                            : [];
+                          return sessions.length > 0 ? (
+                            <Badge className="w-fit bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                              {sessions.length}
+                            </Badge>
+                          ) : null;
+                        })()}
+                      </div>
+                      <p className="text-sm font-normal text-[var(--color-text-secondary)]">
+                        Ongoing sessions created from this lobby
+                      </p>
+                    </div>
                   </div>
                 </CardTitle>
               </CardHeader>
@@ -786,17 +790,19 @@ export default function Creator({
           >
             <Card className="mb-5 w-full border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between gap-3 text-[var(--color-text)]">
-                  <div className="flex items-center gap-2">
+                <CardTitle className="flex flex-row items-center justify-between gap-3 text-[var(--color-text)]">
+                  <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500 text-white">
                       <Users className="h-5 w-5" />
                     </div>
-                    Assigned Students
-                    {assigned.length > 0 && (
-                      <span className="ml-2 text-sm text-purple-600 dark:text-purple-400">
-                        ({assigned.length})
-                      </span>
-                    )}
+                    <div className="flex flex-row items-center gap-2">
+                      <span className="text-base font-semibold sm:text-lg">Assigned Students</span>
+                      {assigned.length > 0 && (
+                        <Badge className="w-fit bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
+                          {assigned.length}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     {/* Trigger Add Student Modal */}
@@ -814,134 +820,24 @@ export default function Creator({
                   <>
                     <div className="space-y-3">
                       {getPaginatedItems(assigned, assignedCurrentPage).map((student) => (
-                        <motion.div
-                          key={student.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          className="flex items-center gap-4 rounded-lg border border-purple-900/40 bg-purple-200/20 p-4 transition-colors hover:bg-purple-300/30 dark:bg-purple-200/10 dark:hover:bg-purple-900/20"
-                        >
-                          <div className="flex flex-1 items-center gap-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarFallback className="bg-purple-50 font-semibold text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
-                                {student.name.charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="min-w-0 flex-1">
-                              <h4 className="truncate font-medium text-[var(--color-text)]">
-                                {student.name}
-                              </h4>
-                              <p className="truncate text-sm text-[var(--color-text-secondary)]">
-                                {student.email}
-                              </p>
-                              {student.interview_date && student.interview_time && (
-                                <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
-                                  Interview:
-                                  <span className="flex items-center gap-1">
-                                    <Calendar className="h-3 w-3" />
-                                    {new Date(student.interview_date).toLocaleDateString(
-                                      undefined,
-                                      {
-                                        weekday: "short",
-                                        year: "numeric",
-                                        month: "short",
-                                        day: "numeric",
-                                      },
-                                    )}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Clock className="h-3 w-3" />
-                                    {new Date(
-                                      `${student.interview_date}T${student.interview_time}`,
-                                    ).toLocaleTimeString(undefined, {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                      hour12: true,
-                                    })}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="group">
-                              <button
-                                onClick={() => setStudentToMarkDone(student)}
-                                disabled={disableMarkDone(student)}
-                                className={`rounded-md border px-3 py-1 text-sm font-medium transition-colors ${
-                                  student.interview_done
-                                    ? "border-yellow-300 text-yellow-600 hover:border-yellow-400 hover:bg-yellow-50 dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
-                                    : "border-green-300 text-green-600 hover:border-green-400 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20"
-                                } ${disableMarkDone(student) ? "cursor-not-allowed opacity-50" : ""} `}
-                              >
-                                {student.interview_done ? (
-                                  <>
-                                    <span className="block group-hover:hidden">Interview Done</span>
-                                    <span className="hidden group-hover:block">Undo Done</span>
-                                  </>
-                                ) : (
-                                  "Mark Interview Done"
-                                )}
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <div className="group">
-                              <button
-                                onClick={() => setStudentToMarkAbsent(student)}
-                                disabled={
-                                  markingAbsentIds.includes(student.id) ||
-                                  disableMarkAbsent(student)
-                                }
-                                className={`relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold shadow-md transition-all ${
-                                  student.is_absent
-                                    ? "bg-gradient-to-r from-yellow-400 to-yellow-500 text-white hover:from-yellow-500 hover:to-yellow-600 dark:from-yellow-500 dark:to-yellow-600 dark:hover:from-yellow-600 dark:hover:to-yellow-700"
-                                    : "bg-gradient-to-r from-green-400 to-green-500 text-white hover:from-green-500 hover:to-green-600 dark:from-green-500 dark:to-green-600 dark:hover:from-green-600 dark:hover:to-green-700"
-                                } disabled:cursor-not-allowed disabled:opacity-50`}
-                              >
-                                {student.is_absent ? (
-                                  <>
-                                    <UserX className="h-4 w-4" />
-                                    <span className="block group-hover:hidden">Student Absent</span>
-                                    <span className="flex hidden items-center gap-1 group-hover:block">
-                                      Undo Absent
-                                    </span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <UserX className="h-4 w-4" />
-                                    Mark as Absent
-                                  </>
-                                )}
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Edit button */}
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedStudent(student.id);
-                              setShowEditModal(true);
-                              // setEditSuccess(false);
-                              setUpdatingStudent(false);
-                            }}
-                            className="border-blue-300 text-blue-600 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 dark:border-blue-500 dark:text-blue-400 dark:hover:bg-blue-900/20"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => setStudentToRemove(student)}
-                            disabled={removingIds.includes(student.id)}
-                            className="border-red-300 text-red-600 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:border-red-500 dark:text-red-400 dark:hover:bg-red-900/20"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </motion.div>
+                        <>
+                          <StudentCard
+                            key={student.id}
+                            student={student}
+                            markDoneDisabled={disableMarkDone(student)}
+                            markAbsentDisabled={disableMarkAbsent(student)}
+                            markDone={() => setStudentToMarkDone(student)}
+                            markAbsent={() => setStudentToMarkAbsent(student)}
+                            setSelectedStudent={setSelectedStudent}
+                            setShowEditModal={setShowEditModal}
+                            setUpdatingStudent={setUpdatingStudent}
+                            setStudentToRemove={setStudentToRemove}
+                            removingIds={removingIds}
+                            bgStyles="bg-purple-500/10 hover:bg-purple-500/20 dark:bg-purple-500/5 dark:hover:bg-purple-900/20"
+                            borderStyles="border-purple-600/40"
+                            avatarStyles="bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
+                          />
+                        </>
                       ))}
                     </div>
                     <PaginationControls
@@ -1020,10 +916,10 @@ export default function Creator({
 
             {/* Add New Student Modal */}
             {showAddModal && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                <div className="w-full max-w-lg rounded-lg bg-white p-4 shadow-lg sm:p-6 dark:bg-gray-800">
                   <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h2 className="text-base font-semibold text-gray-900 sm:text-lg dark:text-white">
                       Assign New Student
                     </h2>
                     <button
@@ -1049,23 +945,40 @@ export default function Creator({
                       ))}
                     </select>
 
-                    <input
-                      type="date"
-                      className="w-full rounded-md border p-2 text-sm"
-                      value={interviewDate}
-                      onChange={(e) => setInterviewDate(e.target.value)}
-                    />
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <input
+                        type="date"
+                        className="w-full rounded-md border p-2 text-sm"
+                        value={interviewDate}
+                        onChange={(e) => setInterviewDate(e.target.value)}
+                        placeholder="Interview Date"
+                      />
 
-                    <input
-                      type="time"
-                      className="w-full rounded-md border p-2 text-sm"
-                      value={interviewTime}
-                      onChange={(e) => setInterviewTime(e.target.value)}
-                    />
+                      <input
+                        type="time"
+                        className="w-full rounded-md border p-2 text-sm"
+                        value={interviewTime}
+                        onChange={(e) => setInterviewTime(e.target.value)}
+                        placeholder="Interview Time"
+                      />
+                    </div>
 
-                    <Button onClick={handleAssign} disabled={!selectedStudent || assigning}>
-                      {assigning ? "Assigning..." : "Assign"}
-                    </Button>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Button
+                        onClick={handleAssign}
+                        disabled={!selectedStudent || assigning}
+                        className="w-full sm:flex-1"
+                      >
+                        {assigning ? "Assigning..." : "Assign"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowAddModal(false)}
+                        className="w-full sm:w-auto"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1073,10 +986,10 @@ export default function Creator({
 
             {/* Edit Assigned Student Modal */}
             {showEditModal && selectedStudent && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                <div className="w-full max-w-lg rounded-lg bg-white p-4 shadow-lg sm:p-6 dark:bg-gray-800">
                   <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h2 className="text-base font-semibold text-gray-900 sm:text-lg dark:text-white">
                       Edit Interview Schedule
                     </h2>
                     <button
@@ -1093,52 +1006,72 @@ export default function Creator({
                       if (!student) return null;
 
                       return (
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-4">
                           {/* Student info */}
-                          <div className="text-sm text-gray-700 dark:text-gray-300">
+                          <div className="rounded-lg bg-gray-50 p-3 text-sm text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                             <p className="font-medium">{student.name}</p>
-                            <p className="truncate">{student.email}</p>
+                            <p className="truncate text-xs opacity-75">{student.email}</p>
                           </div>
 
                           {/* Interview date & time */}
-                          <div className="flex gap-2">
-                            <input
-                              type="date"
-                              className="flex-1 rounded-md border p-2 text-sm"
-                              value={student.interview_date || ""}
-                              onChange={(e) => {
-                                const updated = [...assigned];
-                                const index = updated.findIndex((s) => s.id === student.id);
-                                if (index > -1) updated[index].interview_date = e.target.value;
-                                setAssigned(updated);
-                              }}
-                            />
-                            <input
-                              type="time"
-                              className="flex-1 rounded-md border p-2 text-sm"
-                              value={student.interview_time || ""}
-                              onChange={(e) => {
-                                const updated = [...assigned];
-                                const index = updated.findIndex((s) => s.id === student.id);
-                                if (index > -1) updated[index].interview_time = e.target.value;
-                                setAssigned(updated);
-                              }}
-                            />
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <div>
+                              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                                Interview Date
+                              </label>
+                              <input
+                                type="date"
+                                className="w-full rounded-md border p-2 text-sm"
+                                value={student.interview_date || ""}
+                                onChange={(e) => {
+                                  const updated = [...assigned];
+                                  const index = updated.findIndex((s) => s.id === student.id);
+                                  if (index > -1) updated[index].interview_date = e.target.value;
+                                  setAssigned(updated);
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                                Interview Time
+                              </label>
+                              <input
+                                type="time"
+                                className="w-full rounded-md border p-2 text-sm"
+                                value={student.interview_time || ""}
+                                onChange={(e) => {
+                                  const updated = [...assigned];
+                                  const index = updated.findIndex((s) => s.id === student.id);
+                                  if (index > -1) updated[index].interview_time = e.target.value;
+                                  setAssigned(updated);
+                                }}
+                              />
+                            </div>
                           </div>
 
                           {/* Update button */}
-                          <Button
-                            onClick={() =>
-                              updateStudentInterview(
-                                student.id,
-                                student.interview_date || "",
-                                student.interview_time || "",
-                              )
-                            }
-                            disabled={updatingStudent}
-                          >
-                            {updatingStudent ? "Updating..." : "Update"}
-                          </Button>
+                          <div className="flex flex-col gap-2 sm:flex-row">
+                            <Button
+                              onClick={() =>
+                                updateStudentInterview(
+                                  student.id,
+                                  student.interview_date || "",
+                                  student.interview_time || "",
+                                )
+                              }
+                              disabled={updatingStudent}
+                              className="w-full sm:flex-1"
+                            >
+                              {updatingStudent ? "Updating..." : "Update"}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => setShowEditModal(false)}
+                              className="w-full sm:w-auto"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
                         </div>
                       );
                     })()}
@@ -1231,9 +1164,9 @@ export default function Creator({
                 <div className="flex items-center gap-2">
                   Students To Be Interviewed
                   {assigned.filter((s) => !s.interview_done && !s.is_absent).length > 0 && (
-                    <span className="ml-2 text-sm text-pink-600 dark:text-pink-400">
-                      ({assigned.filter((s) => !s.interview_done && !s.is_absent).length})
-                    </span>
+                    <Badge className="w-fit bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400">
+                      {assigned.filter((s) => !s.interview_done && !s.is_absent).length}
+                    </Badge>
                   )}
                 </div>
               </CardTitle>
@@ -1244,137 +1177,22 @@ export default function Creator({
                   {assigned
                     .filter((s) => !s.interview_done && !s.is_absent)
                     .map((student) => (
-                      <motion.div
+                      <StudentCard
                         key={student.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center justify-between gap-4 rounded-lg border border-pink-900/40 bg-pink-200/20 p-4 transition-colors hover:bg-pink-300/30 dark:bg-pink-200/10 dark:hover:bg-pink-900/20"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarFallback className="bg-pink-50 font-semibold text-pink-600 dark:bg-pink-900/30 dark:text-pink-400">
-                              {student.name.charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="min-w-0">
-                            <h4 className="truncate font-medium text-[var(--color-text)]">
-                              {student.name}
-                            </h4>
-                            <p className="truncate text-sm text-[var(--color-text-secondary)]">
-                              {student.email}
-                            </p>
-                            {student.interview_date && student.interview_time && (
-                              <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
-                                Interview:
-                                <span className="flex items-center gap-1">
-                                  <Calendar className="h-3 w-3" />
-                                  {new Date(student.interview_date).toLocaleDateString(undefined, {
-                                    weekday: "short",
-                                    year: "numeric",
-                                    month: "short",
-                                    day: "numeric",
-                                  })}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />
-                                  {new Date(
-                                    `${student.interview_date}T${student.interview_time}`,
-                                  ).toLocaleTimeString(undefined, {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    hour12: true,
-                                  })}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          {/* Buttons for Mark Done / Mark Absent */}
-                          <div className="flex items-center gap-2">
-                            <div className="group">
-                              <button
-                                onClick={() => setStudentToMarkDone(student)}
-                                disabled={disableMarkDone(student)}
-                                className={`rounded-md border px-3 py-1 text-sm font-medium transition-colors ${
-                                  student.interview_done
-                                    ? "border-yellow-300 text-yellow-600 hover:border-yellow-400 hover:bg-yellow-50 dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
-                                    : "border-green-300 text-green-600 hover:border-green-400 hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-900/20"
-                                } ${disableMarkDone(student) ? "cursor-not-allowed opacity-50" : ""} `}
-                              >
-                                {student.interview_done ? (
-                                  <>
-                                    <span className="block group-hover:hidden">
-                                      <Check className="mr-1 inline h-3 w-3" />
-                                      Interview Done
-                                    </span>
-                                    <span className="hidden group-hover:block">Undo Done</span>
-                                  </>
-                                ) : (
-                                  "Mark Interview Done"
-                                )}
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <div className="group">
-                              <button
-                                onClick={() => setStudentToMarkAbsent(student)}
-                                disabled={
-                                  markingAbsentIds.includes(student.id) ||
-                                  disableMarkAbsent(student)
-                                }
-                                className={`relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold shadow-md transition-all ${
-                                  student.is_absent
-                                    ? "bg-gradient-to-r from-yellow-400 to-yellow-500 text-white hover:from-yellow-500 hover:to-yellow-600 dark:from-yellow-500 dark:to-yellow-600 dark:hover:from-yellow-600 dark:hover:to-yellow-700"
-                                    : "bg-gradient-to-r from-green-400 to-green-500 text-white hover:from-green-500 hover:to-green-600 dark:from-green-500 dark:to-green-600 dark:hover:from-green-600 dark:hover:to-green-700"
-                                } disabled:cursor-not-allowed disabled:opacity-50`}
-                              >
-                                {student.is_absent ? (
-                                  <>
-                                    <UserX className="h-4 w-4" />
-                                    <span className="block group-hover:hidden">Student Absent</span>
-                                    <span className="flex hidden items-center gap-1 group-hover:block">
-                                      Undo Absent
-                                    </span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <UserX className="h-4 w-4" />
-                                    Mark as Absent
-                                  </>
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                          {/* Edit button */}
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedStudent(student.id);
-                              setShowEditModal(true);
-                              // setEditSuccess(false);
-                              setUpdatingStudent(false);
-                            }}
-                            className="border-blue-300 text-blue-600 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 dark:border-blue-500 dark:text-blue-400 dark:hover:bg-blue-900/20"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => setStudentToRemove(student)}
-                            disabled={removingIds.includes(student.id)}
-                            className="border-red-300 text-red-600 hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:border-red-500 dark:text-red-400 dark:hover:bg-red-900/20"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </motion.div>
+                        student={student}
+                        markDoneDisabled={disableMarkDone(student)}
+                        markAbsentDisabled={disableMarkAbsent(student)}
+                        markDone={() => setStudentToMarkDone(student)}
+                        markAbsent={() => setStudentToMarkAbsent(student)}
+                        setSelectedStudent={setSelectedStudent}
+                        setShowEditModal={setShowEditModal}
+                        setUpdatingStudent={setUpdatingStudent}
+                        setStudentToRemove={setStudentToRemove}
+                        removingIds={removingIds}
+                        bgStyles="bg-pink-500/10 hover:bg-pink-500/20 dark:bg-pink-500/5 dark:hover:bg-pink-900/20"
+                        borderStyles="border-pink-600/40"
+                        avatarStyles="bg-pink-50 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400"
+                      />
                     ))}
                 </div>
               ) : (
@@ -1403,15 +1221,15 @@ export default function Creator({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col gap-3 rounded-lg border border-gray-500/30 bg-[var(--background)] p-4 sm:flex-row sm:items-center">
-                <code className="flex-1 font-mono text-sm break-all text-[var(--color-text)] sm:break-normal">
+              <div className="flex flex-col gap-3 rounded-lg border border-gray-500/30 bg-[var(--background)] p-4">
+                <code className="font-mono text-xs break-all text-[var(--color-text)] sm:text-sm">
                   {window.location.origin}/room/{room.room_code}
                 </code>
                 <Button
                   onClick={copyRoomLink}
                   size="sm"
                   variant="outline"
-                  className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:bg-slate-100 hover:text-slate-900 sm:w-auto dark:hover:bg-slate-700 dark:hover:text-slate-100"
+                  className="w-full border-[var(--color-border)] bg-[var(--color-card-bg)] text-[var(--color-text)] hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-slate-100"
                 >
                   <Copy className="mr-2 h-4 w-4" />
                   {copied ? "Copied!" : "Copy"}

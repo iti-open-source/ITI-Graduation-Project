@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,7 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Force HTTPS scheme for all URLs - always
+        URL::forceScheme('https');
+        
         Inertia::share([
             'auth.user' => fn() => Auth::user(),
             'roomsCount' => fn() => $this->getRoomsCount(),

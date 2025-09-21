@@ -123,7 +123,7 @@ export default function SessionRoom(props: PageProps) {
                 />
               </div>
 
-              {/* Transcription Panel */}
+              {/* AI Evaluation Panel */}
               <TranscriptionPanel
                 roomCode={roomCode}
                 isCreator={isCreator}

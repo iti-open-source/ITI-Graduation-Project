@@ -89,12 +89,12 @@ export default function TranscriptionPanel({
     };
   }, []);
 
-  // Auto-start transcription when component mounts
+  // Auto-start transcription when component mounts (only if no error)
   useEffect(() => {
-    if (isSupported && !isListening) {
+    if (isSupported && !isListening && !error) {
       startListening();
     }
-  }, [isSupported, isListening, startListening]);
+  }, [isSupported, isListening, startListening, error]);
 
   // Auto-pause when component unmounts
   useEffect(() => {
@@ -219,7 +219,7 @@ export default function TranscriptionPanel({
 
   return (
     <div className="border-t border-[var(--color-border)] bg-[var(--color-muted)]/30">
-      {/* Transcription Header */}
+      {/* AI Evaluation Header */}
       <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-2">
         <div className="flex items-center gap-2">
           <button
@@ -239,7 +239,7 @@ export default function TranscriptionPanel({
                 d="M19 9l-7 7-7-7"
               />
             </svg>
-            Live Transcription
+            AI Evaluation
           </button>
           {isListening && (
             <div className="flex items-center gap-1">
@@ -252,7 +252,7 @@ export default function TranscriptionPanel({
         <div className="flex items-center gap-2">
           {isExpanded && (
             <div className="text-xs text-[var(--color-text-muted)]">
-              {isListening ? "Recording automatically" : "Transcription paused"}
+              {isListening ? "AI analyzing conversation" : "AI evaluation paused"}
             </div>
           )}
         </div>
@@ -270,100 +270,44 @@ export default function TranscriptionPanel({
                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            {error}
+            {error.includes("aborted") || error.includes("Speech recognition error")
+              ? "AI evaluation unavailable - use Chrome/Edge for full features"
+              : error}
           </div>
         </div>
       )}
 
-      {/* Transcription Content */}
+      {/* AI Evaluation Content */}
       {isExpanded && (
-        <div className="max-h-48 overflow-hidden">
-          <div
-            id="transcript-container"
-            className="max-h-48 overflow-y-auto p-3"
-            onScroll={() => setAutoScroll(false)}
-          >
-            {transcriptEntries.length === 0 && !interimTranscript ? (
-              <div className="text-center text-sm text-[var(--color-text-muted)]">
-                {isListening
-                  ? "Listening for speech..."
-                  : "Transcription will start automatically when you speak"}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {transcriptEntries.map((entry) => (
-                  <div key={entry.id} className="group">
-                    <div className="flex items-start gap-2">
-                      <span className="mt-1 text-xs text-[var(--color-text-muted)]">
-                        {formatTime(entry.timestamp)}
-                      </span>
-                      <div className="flex-1">
-                        {entry.speaker && (
-                          <div className="mb-1 flex items-center gap-2">
-                            <span
-                              className={`text-xs font-medium ${
-                                entry.isMe
-                                  ? "text-blue-600 dark:text-blue-400"
-                                  : "text-green-600 dark:text-green-400"
-                              }`}
-                            >
-                              {entry.speaker}
-                            </span>
-                            {entry.isMe && <span className="text-xs text-blue-500">(You)</span>}
-                          </div>
-                        )}
-                        <p className="text-sm leading-relaxed text-[var(--color-text)]">
-                          {entry.text}
-                        </p>
-                        {entry.confidence && entry.confidence < 0.8 && (
-                          <span className="text-xs text-yellow-600 dark:text-yellow-400">
-                            Low confidence ({Math.round(entry.confidence * 100)}%)
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+        <div className="p-4">
+          <div className="text-center">
+            <div>
+              <p className="text-xs text-[var(--color-text-muted)]">
+                {error && (error.includes("aborted") || error.includes("Speech recognition error"))
+                  ? "Manual feedback only - use Chrome/Edge for full AI analysis"
+                  : isListening
+                    ? "AI is actively monitoring and analyzing your conversation"
+                    : "AI evaluation will begin automatically when you start speaking"}
+              </p>
+            </div>
 
-                {/* Interim transcript */}
-                {interimTranscript && (
-                  <div className="group">
-                    <div className="flex items-start gap-2">
-                      <span className="mt-1 text-xs text-[var(--color-text-muted)]">
-                        {formatTime(new Date())}
-                      </span>
-                      <div className="flex-1">
-                        <p className="text-sm leading-relaxed text-[var(--color-text-muted)] italic">
-                          {interimTranscript}
-                        </p>
-                        <span className="text-xs text-blue-600 dark:text-blue-400">
-                          Speaking...
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
+            {isListening && !error && (
+              <div className="space-y-2 text-xs text-[var(--color-text-muted)]">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
+                  <span>Conversation captured</span>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="h-2 w-2 animate-pulse rounded-full bg-blue-500"></div>
+                  <span>AI analysis in progress</span>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-gray-400"></div>
+                  <span>Detailed feedback available after interview</span>
+                </div>
               </div>
             )}
           </div>
-
-          {/* Auto-scroll indicator */}
-          {!autoScroll && transcriptEntries.length > 0 && (
-            <div className="border-t border-[var(--color-border)] p-2">
-              <button
-                onClick={() => {
-                  setAutoScroll(true);
-                  const transcriptContainer = document.getElementById("transcript-container");
-                  if (transcriptContainer) {
-                    transcriptContainer.scrollTop = transcriptContainer.scrollHeight;
-                  }
-                }}
-                className="w-full rounded-md bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700"
-              >
-                Scroll to latest
-              </button>
-            </div>
-          )}
         </div>
       )}
     </div>

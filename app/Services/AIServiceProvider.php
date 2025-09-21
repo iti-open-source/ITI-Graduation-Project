@@ -164,6 +164,80 @@ Keep responses concise, professional, and focused on interview-related topics. I
         return $prompt;
     }
 
+    public function generateInterviewFeedback(string $transcript, int $rating, string $comments = ''): string
+    {
+        $apiKey = $this->config['api_key'];
+        
+        if (!$apiKey) {
+            throw new \Exception('Google Gemini API key not configured');
+        }
+
+        $model = $this->config['model'] ?? 'gemini-1.5-flash';
+        
+        $prompt = $this->buildInterviewFeedbackPrompt($transcript, $rating, $comments);
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->withOptions([
+            'verify' => false, // Disable SSL verification for development
+        ])->timeout(60)->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
+            'contents' => [
+                [
+                    'parts' => [
+                        ['text' => $prompt]
+                    ]
+                ]
+            ],
+            'generationConfig' => [
+                'temperature' => 0.3, // Lower temperature for more consistent feedback
+                'maxOutputTokens' => 1000, // Allow longer feedback
+                'topP' => 0.8,
+                'topK' => 10,
+            ]
+        ]);
+
+        if (!$response->successful()) {
+            throw new \Exception('Google Gemini API request failed: ' . $response->body());
+        }
+
+        $data = $response->json();
+        
+        if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+            return $data['candidates'][0]['content']['parts'][0]['text'];
+        }
+
+        return 'Unable to generate AI feedback at this time.';
+    }
+
+    private function buildInterviewFeedbackPrompt(string $transcript, int $rating, string $comments = ''): string
+    {
+        return "You are an expert interview analyst. Please analyze the following interview transcript and provide comprehensive feedback on the interviewee's performance.
+
+INTERVIEW TRANSCRIPT:
+{$transcript}
+
+INTERVIEWER RATING: {$rating}/10
+INTERVIEWER COMMENTS: {$comments}
+
+Please provide detailed feedback covering:
+
+1. **Communication Skills**: How well did the interviewee communicate their thoughts, ask clarifying questions, and engage in the conversation?
+
+2. **Technical Knowledge**: Based on the discussion, assess the depth and accuracy of their technical understanding.
+
+3. **Problem-Solving Approach**: How did they approach problems or questions? Did they think through solutions systematically?
+
+4. **Professionalism**: Assess their demeanor, confidence, and professional behavior during the interview.
+
+5. **Areas of Strength**: What did the interviewee do well?
+
+6. **Areas for Improvement**: What could they improve on for future interviews?
+
+7. **Overall Assessment**: Provide a balanced summary of their performance and potential.
+
+Please be constructive, specific, and professional in your feedback. Focus on actionable insights that could help the interviewee improve.";
+    }
+
     public function getProviderInfo(): array
     {
         return [

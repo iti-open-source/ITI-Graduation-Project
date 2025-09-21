@@ -105,6 +105,7 @@ class ProfileController extends Controller
                 'u.name as instructor_name',
                 'ie.rating',
                 'ie.comments',
+                'ie.ai_feedback',
             ])
             ->get()
             ->map(function ($row) {
@@ -117,6 +118,7 @@ class ProfileController extends Controller
                     'ended_at' => $row->ended_at,
                     'rating' => $row->rating,
                     'comments' => $row->comments,
+                    'ai_feedback' => $row->ai_feedback,
                 ];
             });
 

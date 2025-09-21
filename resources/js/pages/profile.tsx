@@ -5,6 +5,7 @@ import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem, type SharedData } from "@/types";
 import { Head, Link, usePage } from "@inertiajs/react";
 import {
+  Bot,
   Building2,
   Calendar,
   CalendarDays,
@@ -53,6 +54,7 @@ interface PreviousInterviewItem {
   ended_at?: string | null;
   rating?: number | null;
   comments?: string | null;
+  ai_feedback?: string | null;
 }
 
 interface ProfilePageProps extends SharedData {
@@ -663,11 +665,22 @@ export default function Profile() {
                         : "No Rating"}
                     </div>
                     <div className="rounded-lg border border-[var(--color-border)] bg-muted/30 p-3 text-sm">
-                      <div className="mb-1 font-medium">Feedback</div>
+                      <div className="mb-1 font-medium">Instructor Feedback</div>
                       <p className="whitespace-pre-wrap text-muted-foreground">
                         {feedbackItem?.comments && feedbackItem?.comments.trim() !== ""
                           ? feedbackItem?.comments
                           : "No feedback provided"}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-blue-200 bg-blue-50/50 p-3 text-sm dark:border-blue-800 dark:bg-blue-950/20">
+                      <div className="mb-1 flex items-center gap-2 font-medium text-blue-700 dark:text-blue-300">
+                        <Bot className="h-4 w-4" />
+                        AI Performance Analysis
+                      </div>
+                      <p className="whitespace-pre-wrap text-blue-600 dark:text-blue-400">
+                        {feedbackItem?.ai_feedback && feedbackItem?.ai_feedback.trim() !== ""
+                          ? feedbackItem.ai_feedback
+                          : "AI hasn't provided feedback on this interview due to insufficient conversation data. This typically happens when the interview was very brief or had limited discussion."}
                       </p>
                     </div>
                   </div>

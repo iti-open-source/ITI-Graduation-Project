@@ -6,8 +6,10 @@ namespace App\Http\Controllers;
 use App\Models\LobbySession;
 use App\Models\InterviewEvaluation;
 use App\Models\SessionTranscript;
+use App\Services\AIServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class SessionController extends Controller
@@ -37,6 +39,22 @@ class SessionController extends Controller
         // Get merged transcript from all participants
         $mergedTranscript = SessionTranscript::getMergedTranscript($sessionCode);
         
+        // Generate AI feedback if transcript is available
+        $aiFeedback = null;
+        if (!empty($mergedTranscript)) {
+            try {
+                $aiService = new AIServiceProvider();
+                $aiFeedback = $aiService->generateInterviewFeedback(
+                    $mergedTranscript,
+                    $validated['rating'],
+                    $validated['comments'] ?? ''
+                );
+            } catch (\Exception $e) {
+                Log::error('Failed to generate AI feedback: ' . $e->getMessage());
+                // Continue without AI feedback if it fails
+            }
+        }
+        
         $evaluation = InterviewEvaluation::create([
             'lobby_session_id' => $session->id,
             'guest_id' => $session->guest_id,
@@ -44,6 +62,7 @@ class SessionController extends Controller
             'rating' => $validated['rating'],
             'comments' => $validated['comments'] ?? null,
             'transcript' => $mergedTranscript ?: ($validated['transcript'] ?? null),
+            'ai_feedback' => $aiFeedback,
         ]);
 
         // End the session as part of evaluation submission

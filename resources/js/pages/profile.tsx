@@ -643,7 +643,7 @@ export default function Profile() {
             </Card>
             {feedbackOpen && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                <div className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-[var(--card)] p-5 shadow-xl">
+                <div className="w-full max-w-lg max-h-[90vh] rounded-xl border border-[var(--color-border)] bg-[var(--card)] p-5 shadow-xl overflow-hidden flex flex-col">
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div>
                       <h3 className="text-lg font-semibold text-[var(--color-text)]">
@@ -657,7 +657,7 @@ export default function Profile() {
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="space-y-3">
+                  <div className="flex-1 overflow-y-auto space-y-3">
                     <div className="text-sm">
                       <span className="font-medium">Rating:</span>{" "}
                       {typeof feedbackItem?.rating === "number"
@@ -677,14 +677,16 @@ export default function Profile() {
                         <Bot className="h-4 w-4" />
                         AI Performance Analysis
                       </div>
-                      <p className="whitespace-pre-wrap text-blue-600 dark:text-blue-400">
-                        {feedbackItem?.ai_feedback && feedbackItem?.ai_feedback.trim() !== ""
-                          ? feedbackItem.ai_feedback
-                          : "AI hasn't provided feedback on this interview due to insufficient conversation data. This typically happens when the interview was very brief or had limited discussion."}
-                      </p>
+                      <div className="max-h-64 overflow-y-auto pr-2">
+                        <p className="whitespace-pre-wrap text-blue-600 dark:text-blue-400">
+                          {feedbackItem?.ai_feedback && feedbackItem?.ai_feedback.trim() !== ""
+                            ? feedbackItem.ai_feedback
+                            : "AI hasn't provided feedback on this interview due to insufficient conversation data. This typically happens when the interview was very brief or had limited discussion."}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  <div className="mt-4 flex justify-end">
+                  <div className="mt-4 flex justify-end border-t border-[var(--color-border)] pt-4">
                     <Button onClick={() => setFeedbackOpen(false)}>Close</Button>
                   </div>
                 </div>

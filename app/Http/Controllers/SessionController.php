@@ -39,20 +39,27 @@ class SessionController extends Controller
         // Get merged transcript from all participants
         $mergedTranscript = SessionTranscript::getMergedTranscript($sessionCode);
         
-        // Generate AI feedback if transcript is available
+        // Generate AI feedback - use transcript if available, otherwise use interviewer feedback
         $aiFeedback = null;
-        if (!empty($mergedTranscript)) {
-            try {
-                $aiService = new AIServiceProvider();
+        try {
+            $aiService = new AIServiceProvider();
+            if (!empty($mergedTranscript)) {
+                // Use transcript for AI analysis
                 $aiFeedback = $aiService->generateInterviewFeedback(
                     $mergedTranscript,
                     $validated['rating'],
                     $validated['comments'] ?? ''
                 );
-            } catch (\Exception $e) {
-                Log::error('Failed to generate AI feedback: ' . $e->getMessage());
-                // Continue without AI feedback if it fails
+            } else {
+                // Use interviewer's score and feedback for AI analysis
+                $aiFeedback = $aiService->generateFeedbackFromScore(
+                    $validated['rating'],
+                    $validated['comments'] ?? ''
+                );
             }
+        } catch (\Exception $e) {
+            Log::error('Failed to generate AI feedback: ' . $e->getMessage());
+            // Continue without AI feedback if it fails
         }
         
         $evaluation = InterviewEvaluation::create([
@@ -179,13 +186,22 @@ class SessionController extends Controller
         }
 
         $room = \App\Models\Room::find($session->room_id);
-        return response()->json([
+        
+        // Check if there are 2 participants in the room (creator + guest)
+        // Session is active and both creator and guest are present
+        $hasBothParticipants = $session->status === 'active' && 
+                               $session->creator_id && 
+                               $session->guest_id && 
+                               $session->creator_id != $session->guest_id;
+        
+         return response()->json([
             'exists' => true,
             'status' => $session->status,
             'started_at' => $session->started_at,
             'ended_at' => $session->ended_at,
             'room_id' => $session->room_id,
             'room_code' => $room?->room_code,
+            'has_both_participants' => $hasBothParticipants,
         ]);
     }
 

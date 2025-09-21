@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 interface TranscriptionPanelProps {
   roomCode: string;
   isCreator: boolean;
+  hasGuest: boolean;
   onTranscriptUpdate?: (transcript: string) => void;
 }
 
@@ -22,10 +23,10 @@ interface TranscriptEntry {
 export default function TranscriptionPanel({
   roomCode,
   isCreator,
+  hasGuest,
   onTranscriptUpdate,
 }: TranscriptionPanelProps) {
   const [transcriptEntries, setTranscriptEntries] = useState<TranscriptEntry[]>([]);
-  const [isExpanded, setIsExpanded] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
   const [isLoadingTranscripts, setIsLoadingTranscripts] = useState(false);
 
@@ -134,12 +135,12 @@ export default function TranscriptionPanel({
     };
   }, []);
 
-  // Auto-start transcription when component mounts (only if no error)
+  // Auto-start transcription when component mounts and guest is present (only if no error)
   useEffect(() => {
-    if (isSupported && !isListening && !error) {
+    if (isSupported && !isListening && !error && hasGuest) {
       startListening();
     }
-  }, [isSupported, isListening, startListening, error]);
+  }, [isSupported, isListening, startListening, error, hasGuest]);
 
   // Auto-pause when component unmounts
   useEffect(() => {
@@ -267,92 +268,20 @@ export default function TranscriptionPanel({
       {/* AI Evaluation Header */}
       <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-2">
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2 text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-text-hover)]"
-          >
-            <svg
-              className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
+          <div className="flex items-center gap-2 text-sm font-medium text-[var(--color-text)]">
             AI Evaluation
-          </button>
-          {isListening && (
+          </div>
+          {hasGuest && (
             <div className="flex items-center gap-1">
               <div className="h-2 w-2 animate-pulse rounded-full bg-red-500"></div>
               <span className="text-xs text-red-600 dark:text-red-400">Recording</span>
             </div>
           )}
         </div>
-
-        <div className="flex items-center gap-2">
-          {isExpanded && (
-            <div className="text-xs text-[var(--color-text-muted)]">
-              {isListening ? "AI analyzing conversation" : "AI evaluation paused"}
-            </div>
-          )}
+        <div className="text-xs text-[var(--color-text-muted)]">
+          {hasGuest ? "AI analyzing conversation" : "Waiting for guest to join"}
         </div>
       </div>
-
-      {/* Error Display */}
-      {error && (
-        <div className="border-b border-[var(--color-border)] bg-red-50 px-3 py-2 dark:bg-red-900/20">
-          <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            {getErrorMessage(error)}
-          </div>
-        </div>
-      )}
-
-      {/* AI Evaluation Content */}
-      {isExpanded && (
-        <div className="p-4">
-          <div className="text-center">
-            <div>
-              <p className="text-xs text-[var(--color-text-muted)]">
-                {error
-                  ? getDetailedErrorMessage(error)
-                  : isListening
-                    ? "AI is actively monitoring and analyzing your conversation"
-                    : "AI evaluation will begin automatically when you start speaking"}
-              </p>
-            </div>
-
-            {isListening && !error && (
-              <div className="space-y-2 text-xs text-[var(--color-text-muted)]">
-                <div className="flex items-center justify-center gap-2">
-                  <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
-                  <span>Conversation captured</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="h-2 w-2 animate-pulse rounded-full bg-blue-500"></div>
-                  <span>AI analysis in progress</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-gray-400"></div>
-                  <span>Detailed feedback available after interview</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

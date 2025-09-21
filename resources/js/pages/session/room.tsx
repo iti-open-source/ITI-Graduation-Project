@@ -28,6 +28,7 @@ export default function SessionRoom(props: PageProps) {
   const [comments, setComments] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [fullTranscript, setFullTranscript] = useState("");
+  const [hasGuest, setHasGuest] = useState(false);
 
   const { csrf_token } = usePage().props as any;
 
@@ -46,6 +47,10 @@ export default function SessionRoom(props: PageProps) {
         if (!aborted && json?.status === "ended") {
           if (isCreator && json?.room_code) window.location.href = `/room/${json.room_code}`;
           else window.location.href = "/dashboard";
+        }
+        // Check if both participants are present
+        if (!aborted && json?.exists) {
+          setHasGuest(json.has_both_participants || false);
         }
       } catch {}
     };
@@ -127,6 +132,7 @@ export default function SessionRoom(props: PageProps) {
               <TranscriptionPanel
                 roomCode={roomCode}
                 isCreator={isCreator}
+                hasGuest={hasGuest}
                 onTranscriptUpdate={handleTranscriptUpdate}
               />
             </div>

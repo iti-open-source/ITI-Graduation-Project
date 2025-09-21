@@ -238,6 +238,69 @@ Please provide detailed feedback covering:
 Please be constructive, specific, and professional in your feedback. Focus on actionable insights that could help the interviewee improve.";
     }
 
+    public function generateFeedbackFromScore(int $rating, string $comments = ''): string
+    {
+        $apiKey = $this->config['api_key'];
+        
+        if (!$apiKey) {
+            throw new \Exception('Google Gemini API key not configured');
+        }
+
+        $model = $this->config['model'] ?? 'gemini-1.5-flash';
+        
+        $prompt = $this->buildScoreBasedFeedbackPrompt($rating, $comments);
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->withOptions([
+            'verify' => false, // Disable SSL verification for development
+        ])->timeout(60)->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
+            'contents' => [
+                [
+                    'parts' => [
+                        ['text' => $prompt]
+                    ]
+                ]
+            ],
+            'generationConfig' => [
+                'temperature' => 0.3, // Lower temperature for more consistent feedback
+                'maxOutputTokens' => 1000, // Allow longer feedback
+                'topP' => 0.8,
+                'topK' => 10,
+            ]
+        ]);
+
+        if (!$response->successful()) {
+            throw new \Exception('Google Gemini API request failed: ' . $response->body());
+        }
+
+        $data = $response->json();
+        
+        if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+            return $data['candidates'][0]['content']['parts'][0]['text'];
+        }
+
+        return 'Unable to generate AI feedback at this time.';
+    }
+
+    private function buildScoreBasedFeedbackPrompt(int $rating, string $comments = ''): string
+    {
+        return "You are an expert interview analyst. Based on the interviewer's evaluation, provide comprehensive feedback on the interviewee's performance.
+
+INTERVIEWER EVALUATION:
+- Rating: {$rating}/10
+- Comments: " . ($comments ?: 'No specific comments provided') . "
+
+Please analyze this evaluation and provide:
+1. **Performance Summary**: Overall assessment based on the rating
+2. **Strengths**: What the interviewee did well (if rating is 6+)
+3. **Areas for Improvement**: Specific areas to focus on (if rating is below 8)
+4. **Recommendations**: Actionable advice for future interviews
+5. **Next Steps**: Suggested areas to practice or develop
+
+Format your response in a professional, constructive manner that would be helpful for the interviewee's development.";
+    }
+
     public function getProviderInfo(): array
     {
         return [

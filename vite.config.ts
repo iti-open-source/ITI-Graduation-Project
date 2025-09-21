@@ -22,6 +22,13 @@ export default defineConfig({
       formVariants: true,
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "resources/js"),

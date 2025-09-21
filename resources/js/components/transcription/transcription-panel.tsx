@@ -19,6 +19,86 @@ interface TranscriptEntry {
   timestampMicroseconds?: number;
 }
 
+// Comprehensive error handling functions
+function getErrorMessage(error: string | null): string {
+  if (!error) return "";
+
+  const errorLower = error.toLowerCase();
+
+  // Audio/Microphone related errors
+  if (errorLower.includes("audio-capture") || errorLower.includes("not-allowed")) {
+    return "Microphone access required - please allow microphone permission";
+  }
+
+  // Network related errors
+  if (errorLower.includes("network") || errorLower.includes("no-speech")) {
+    return "Network connection issue - check your internet connection";
+  }
+
+  // Service related errors
+  if (errorLower.includes("service-not-allowed") || errorLower.includes("service")) {
+    return "Speech service unavailable - try refreshing the page";
+  }
+
+  // Browser compatibility errors
+  if (errorLower.includes("aborted") || errorLower.includes("speech recognition error")) {
+    return "AI evaluation unavailable - use Chrome/Edge for full features";
+  }
+
+  // Generic fallback for any other errors
+  return "AI evaluation temporarily unavailable - please try again";
+}
+
+function getErrorDescription(error: string | null): string {
+  if (!error) return "";
+
+  const errorLower = error.toLowerCase();
+
+  // Audio/Microphone related errors
+  if (errorLower.includes("audio-capture") || errorLower.includes("not-allowed")) {
+    return "Please allow microphone access in your browser settings to enable AI evaluation";
+  }
+
+  // Network related errors
+  if (errorLower.includes("network") || errorLower.includes("no-speech")) {
+    return "Please check your internet connection and try again. AI evaluation requires a stable connection";
+  }
+
+  // Service related errors
+  if (errorLower.includes("service-not-allowed") || errorLower.includes("service")) {
+    return "Speech recognition service is currently unavailable. Please refresh the page and try again";
+  }
+
+  // Browser compatibility errors
+  if (errorLower.includes("aborted") || errorLower.includes("speech recognition error")) {
+    return "Manual feedback only - use Chrome/Edge for full AI analysis";
+  }
+
+  // Generic fallback for any other errors
+  return "AI evaluation is temporarily unavailable. Please try refreshing the page or check your browser settings";
+}
+
+function getErrorAction(error: string | null): string | null {
+  if (!error) return null;
+
+  const errorLower = error.toLowerCase();
+
+  // Errors that can be resolved by user action
+  if (
+    errorLower.includes("audio-capture") ||
+    errorLower.includes("not-allowed") ||
+    errorLower.includes("network") ||
+    errorLower.includes("no-speech") ||
+    errorLower.includes("service-not-allowed") ||
+    errorLower.includes("service")
+  ) {
+    return "Try Again";
+  }
+
+  // Errors that can't be resolved by user action
+  return null;
+}
+
 export default function TranscriptionPanel({
   roomCode,
   isCreator,
@@ -270,9 +350,7 @@ export default function TranscriptionPanel({
                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            {error.includes("aborted") || error.includes("Speech recognition error")
-              ? "AI evaluation unavailable - use Chrome/Edge for full features"
-              : error}
+            {getErrorMessage(error)}
           </div>
         </div>
       )}
@@ -283,8 +361,8 @@ export default function TranscriptionPanel({
           <div className="text-center">
             <div>
               <p className="text-xs text-[var(--color-text-muted)]">
-                {error && (error.includes("aborted") || error.includes("Speech recognition error"))
-                  ? "Manual feedback only - use Chrome/Edge for full AI analysis"
+                {error
+                  ? getErrorDescription(error)
                   : isListening
                     ? "AI is actively monitoring and analyzing your conversation"
                     : "AI evaluation will begin automatically when you start speaking"}
@@ -294,17 +372,25 @@ export default function TranscriptionPanel({
             {isListening && !error && (
               <div className="space-y-2 text-xs text-[var(--color-text-muted)]">
                 <div className="flex items-center justify-center gap-2">
-                  <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
-                  <span>Conversation captured</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="h-2 w-2 animate-pulse rounded-full bg-blue-500"></div>
-                  <span>AI analysis in progress</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-gray-400"></div>
                   <span>Detailed feedback available after interview</span>
                 </div>
+              </div>
+            )}
+
+            {error && getErrorAction(error) && (
+              <div className="mt-3">
+                <button
+                  onClick={() => {
+                    // Try to start listening again to trigger permission request
+                    if (isSupported) {
+                      startListening();
+                    }
+                  }}
+                  className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                >
+                  {getErrorAction(error)}
+                </button>
               </div>
             )}
           </div>

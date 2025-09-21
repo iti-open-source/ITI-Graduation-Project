@@ -597,6 +597,7 @@ class RoomController extends Controller
 
         try {
             $interviewDateTime = \Carbon\Carbon::parse("{$pivot->interview_date} {$pivot->interview_time}", config('app.timezone'));
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

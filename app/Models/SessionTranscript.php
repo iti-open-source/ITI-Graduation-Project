@@ -44,10 +44,17 @@ class SessionTranscript extends Model
     {
         $transcripts = static::forSession($sessionCode)->get();
         
+        // Get session to determine who is interviewer vs interviewee
+        $session = \App\Models\LobbySession::where('session_code', $sessionCode)->first();
+        if (!$session) {
+            return '';
+        }
+        
         $merged = [];
         foreach ($transcripts as $transcript) {
-            $speaker = $transcript->user->name ?? 'Unknown';
-            $merged[] = "[{$speaker}]: {$transcript->text}";
+            // Determine if this user is the interviewer (creator) or interviewee (guest)
+            $speakerRole = $transcript->user_id == $session->creator_id ? 'Interviewer' : 'Interviewee';
+            $merged[] = "[{$speakerRole}]: {$transcript->text}";
         }
         
         return implode("\n", $merged);

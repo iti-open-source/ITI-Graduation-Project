@@ -89,12 +89,12 @@ export default function TranscriptionPanel({
     };
   }, []);
 
-  // Auto-start transcription when component mounts (only if no error)
+  // Auto-start transcription when component mounts
   useEffect(() => {
-    if (isSupported && !isListening && !error) {
+    if (isSupported && !isListening) {
       startListening();
     }
-  }, [isSupported, isListening, startListening, error]);
+  }, [isSupported, isListening, startListening]);
 
   // Auto-pause when component unmounts
   useEffect(() => {

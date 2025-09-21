@@ -44,7 +44,6 @@ export function useSpeechRecognition({
   const [transcript, setTranscript] = useState("");
   const [interimTranscript, setInterimTranscript] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [hasPersistentError, setHasPersistentError] = useState(false);
 
   const recognitionRef = useRef<any>(null);
   const finalTranscriptRef = useRef("");
@@ -112,16 +111,6 @@ export function useSpeechRecognition({
       const errorMessage = `Speech recognition error: ${event.error}`;
       setError(errorMessage);
       setIsListening(false);
-
-      // Check if this is a persistent error that we should stop retrying
-      if (
-        event.error === "aborted" ||
-        event.error === "not-allowed" ||
-        event.error === "service-not-allowed"
-      ) {
-        setHasPersistentError(true);
-      }
-
       onError?.(errorMessage);
     };
 
@@ -135,17 +124,16 @@ export function useSpeechRecognition({
   }, [isSupported, language, continuous, interimResults, onTranscript, onError]);
 
   const startListening = useCallback(() => {
-    if (recognitionRef.current && !isListening && !hasPersistentError) {
+    if (recognitionRef.current && !isListening) {
       try {
         recognitionRef.current.start();
       } catch (err) {
         const errorMessage = "Failed to start speech recognition";
         setError(errorMessage);
-        setHasPersistentError(true);
         onError?.(errorMessage);
       }
     }
-  }, [isListening, hasPersistentError, onError]);
+  }, [isListening, onError]);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current && isListening) {

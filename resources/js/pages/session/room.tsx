@@ -2,6 +2,7 @@ import AIChatbot from "@/components/ai-chatbot/ai-chatbot";
 import CollaborativeEditor from "@/components/editor/collaborative-editor";
 import { VideoCall } from "@/components/livekit/videoCall";
 import Problem from "@/components/problem/problem";
+import TranscriptionPanel from "@/components/transcription/transcription-panel";
 import Whiteboard from "@/components/whiteboard/collaborative-whiteboard";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
@@ -26,6 +27,7 @@ export default function SessionRoom(props: PageProps) {
   const [rating, setRating] = useState<number>(10);
   const [comments, setComments] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [fullTranscript, setFullTranscript] = useState("");
 
   const { csrf_token } = usePage().props as any;
 
@@ -62,6 +64,11 @@ export default function SessionRoom(props: PageProps) {
 
   const handleVideoDisconnected = () => {
     setIsVideoConnected(false);
+  };
+
+  // Handle transcript updates
+  const handleTranscriptUpdate = (transcript: string) => {
+    setFullTranscript(transcript);
   };
 
   return (
@@ -115,6 +122,13 @@ export default function SessionRoom(props: PageProps) {
                   onDisconnected={handleVideoDisconnected}
                 />
               </div>
+
+              {/* Transcription Panel */}
+              <TranscriptionPanel
+                roomCode={roomCode}
+                isCreator={isCreator}
+                onTranscriptUpdate={handleTranscriptUpdate}
+              />
             </div>
           </div>
 
@@ -220,7 +234,11 @@ export default function SessionRoom(props: PageProps) {
                           ?.content ||
                         "",
                     },
-                    body: JSON.stringify({ rating, comments }),
+                    body: JSON.stringify({
+                      rating,
+                      comments,
+                      transcript: fullTranscript,
+                    }),
                   });
                   if (res.ok) {
                     const data = await res.json().catch(() => ({}) as any);

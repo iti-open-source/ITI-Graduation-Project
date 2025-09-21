@@ -1,0 +1,371 @@
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { usePage } from "@inertiajs/react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+interface TranscriptionPanelProps {
+  roomCode: string;
+  isCreator: boolean;
+  onTranscriptUpdate?: (transcript: string) => void;
+}
+
+interface TranscriptEntry {
+  id: string;
+  text: string;
+  timestamp: Date;
+  isFinal: boolean;
+  confidence: number;
+  speaker?: string;
+  isMe?: boolean;
+  timestampMicroseconds?: number;
+}
+
+export default function TranscriptionPanel({
+  roomCode,
+  isCreator,
+  onTranscriptUpdate,
+}: TranscriptionPanelProps) {
+  const [transcriptEntries, setTranscriptEntries] = useState<TranscriptEntry[]>([]);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [autoScroll, setAutoScroll] = useState(true);
+  const [isLoadingTranscripts, setIsLoadingTranscripts] = useState(false);
+
+  const { csrf_token } = usePage().props as any;
+  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingTranscriptsRef = useRef<TranscriptEntry[]>([]);
+
+  const {
+    isSupported,
+    isListening,
+    transcript,
+    interimTranscript,
+    startListening,
+    stopListening,
+    clearTranscript,
+    error,
+  } = useSpeechRecognition({
+    language: "en-US",
+    continuous: true,
+    interimResults: true,
+    onTranscript: (result) => {
+      const timestampMicroseconds = Date.now() * 1000 + ((performance.now() * 1000) % 1000);
+
+      if (result.isFinal) {
+        const newEntry: TranscriptEntry = {
+          id: Date.now().toString(),
+          text: result.transcript,
+          timestamp: new Date(),
+          isFinal: true,
+          confidence: result.confidence,
+          timestampMicroseconds,
+        };
+
+        setTranscriptEntries((prev) => [...prev, newEntry]);
+        pendingTranscriptsRef.current.push(newEntry);
+        scheduleBatchSync();
+        onTranscriptUpdate?.(transcript + result.transcript);
+      }
+    },
+    onError: (error) => {
+      console.error("Speech recognition error:", error);
+    },
+  });
+
+  // Auto-scroll to bottom when new entries are added
+  useEffect(() => {
+    if (autoScroll && transcriptEntries.length > 0) {
+      const transcriptContainer = document.getElementById("transcript-container");
+      if (transcriptContainer) {
+        transcriptContainer.scrollTop = transcriptContainer.scrollHeight;
+      }
+    }
+  }, [transcriptEntries, autoScroll]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (syncTimeoutRef.current) {
+        clearTimeout(syncTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Auto-start transcription when component mounts
+  useEffect(() => {
+    if (isSupported && !isListening) {
+      startListening();
+    }
+  }, [isSupported, isListening, startListening]);
+
+  // Auto-pause when component unmounts
+  useEffect(() => {
+    return () => {
+      if (isListening) {
+        stopListening();
+      }
+    };
+  }, [isListening, stopListening]);
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
+  // Sync transcript to server
+  const syncTranscriptToServer = useCallback(
+    async (transcript: TranscriptEntry) => {
+      try {
+        const response = await fetch(`/api/session/${roomCode}/transcript/sync`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": csrf_token || "",
+          },
+          body: JSON.stringify({
+            text: transcript.text,
+            timestamp_microseconds: transcript.timestampMicroseconds || Date.now() * 1000,
+            is_final: transcript.isFinal,
+            confidence: transcript.confidence,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          return data.transcript_id;
+        }
+      } catch (error) {
+        console.error("Failed to sync transcript:", error);
+      }
+      return null;
+    },
+    [roomCode, csrf_token],
+  );
+
+  // Load all transcripts from server
+  const loadTranscriptsFromServer = useCallback(async () => {
+    setIsLoadingTranscripts(true);
+    try {
+      const response = await fetch(`/api/session/${roomCode}/transcripts`, {
+        headers: {
+          Accept: "application/json",
+          "X-CSRF-TOKEN": csrf_token || "",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const serverTranscripts: TranscriptEntry[] = data.transcripts.map((t: any) => ({
+          id: t.id,
+          text: t.text,
+          timestamp: new Date(t.timestamp_microseconds / 1000),
+          isFinal: t.is_final,
+          confidence: t.confidence,
+          speaker: t.speaker,
+          isMe: t.is_me,
+          timestampMicroseconds: t.timestamp_microseconds,
+        }));
+
+        setTranscriptEntries(serverTranscripts);
+      }
+    } catch (error) {
+      console.error("Failed to load transcripts:", error);
+    } finally {
+      setIsLoadingTranscripts(false);
+    }
+  }, [roomCode, csrf_token]);
+
+  // Batch sync pending transcripts
+  const batchSyncTranscripts = useCallback(async () => {
+    if (pendingTranscriptsRef.current.length === 0) return;
+
+    const transcriptsToSync = [...pendingTranscriptsRef.current];
+    pendingTranscriptsRef.current = [];
+
+    for (const transcript of transcriptsToSync) {
+      await syncTranscriptToServer(transcript);
+    }
+  }, [syncTranscriptToServer]);
+
+  // Schedule batch sync
+  const scheduleBatchSync = useCallback(() => {
+    if (syncTimeoutRef.current) {
+      clearTimeout(syncTimeoutRef.current);
+    }
+
+    syncTimeoutRef.current = setTimeout(() => {
+      batchSyncTranscripts();
+    }, 2000); // Sync every 2 seconds
+  }, [batchSyncTranscripts]);
+
+  // Load transcripts when component mounts and periodically refresh
+  useEffect(() => {
+    loadTranscriptsFromServer();
+
+    // Auto-refresh transcripts every 5 seconds
+    const refreshInterval = setInterval(() => {
+      loadTranscriptsFromServer();
+    }, 5000);
+
+    return () => clearInterval(refreshInterval);
+  }, [loadTranscriptsFromServer]);
+
+  if (!isSupported) {
+    return (
+      <div className="border-t border-[var(--color-border)] bg-[var(--color-muted)]/30 p-3">
+        <div className="flex items-center justify-center text-sm text-[var(--color-text-muted)]">
+          <span>Speech recognition not supported in this browser</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="border-t border-[var(--color-border)] bg-[var(--color-muted)]/30">
+      {/* Transcription Header */}
+      <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-2">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex items-center gap-2 text-sm font-medium text-[var(--color-text)] hover:text-[var(--color-text-hover)]"
+          >
+            <svg
+              className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+            Live Transcription
+          </button>
+          {isListening && (
+            <div className="flex items-center gap-1">
+              <div className="h-2 w-2 animate-pulse rounded-full bg-red-500"></div>
+              <span className="text-xs text-red-600 dark:text-red-400">Recording</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {isExpanded && (
+            <div className="text-xs text-[var(--color-text-muted)]">
+              {isListening ? "Recording automatically" : "Transcription paused"}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="border-b border-[var(--color-border)] bg-red-50 px-3 py-2 dark:bg-red-900/20">
+          <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            {error}
+          </div>
+        </div>
+      )}
+
+      {/* Transcription Content */}
+      {isExpanded && (
+        <div className="max-h-48 overflow-hidden">
+          <div
+            id="transcript-container"
+            className="max-h-48 overflow-y-auto p-3"
+            onScroll={() => setAutoScroll(false)}
+          >
+            {transcriptEntries.length === 0 && !interimTranscript ? (
+              <div className="text-center text-sm text-[var(--color-text-muted)]">
+                {isListening
+                  ? "Listening for speech..."
+                  : "Transcription will start automatically when you speak"}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {transcriptEntries.map((entry) => (
+                  <div key={entry.id} className="group">
+                    <div className="flex items-start gap-2">
+                      <span className="mt-1 text-xs text-[var(--color-text-muted)]">
+                        {formatTime(entry.timestamp)}
+                      </span>
+                      <div className="flex-1">
+                        {entry.speaker && (
+                          <div className="mb-1 flex items-center gap-2">
+                            <span
+                              className={`text-xs font-medium ${
+                                entry.isMe
+                                  ? "text-blue-600 dark:text-blue-400"
+                                  : "text-green-600 dark:text-green-400"
+                              }`}
+                            >
+                              {entry.speaker}
+                            </span>
+                            {entry.isMe && <span className="text-xs text-blue-500">(You)</span>}
+                          </div>
+                        )}
+                        <p className="text-sm leading-relaxed text-[var(--color-text)]">
+                          {entry.text}
+                        </p>
+                        {entry.confidence && entry.confidence < 0.8 && (
+                          <span className="text-xs text-yellow-600 dark:text-yellow-400">
+                            Low confidence ({Math.round(entry.confidence * 100)}%)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Interim transcript */}
+                {interimTranscript && (
+                  <div className="group">
+                    <div className="flex items-start gap-2">
+                      <span className="mt-1 text-xs text-[var(--color-text-muted)]">
+                        {formatTime(new Date())}
+                      </span>
+                      <div className="flex-1">
+                        <p className="text-sm leading-relaxed text-[var(--color-text-muted)] italic">
+                          {interimTranscript}
+                        </p>
+                        <span className="text-xs text-blue-600 dark:text-blue-400">
+                          Speaking...
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Auto-scroll indicator */}
+          {!autoScroll && transcriptEntries.length > 0 && (
+            <div className="border-t border-[var(--color-border)] p-2">
+              <button
+                onClick={() => {
+                  setAutoScroll(true);
+                  const transcriptContainer = document.getElementById("transcript-container");
+                  if (transcriptContainer) {
+                    transcriptContainer.scrollTop = transcriptContainer.scrollHeight;
+                  }
+                }}
+                className="w-full rounded-md bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700"
+              >
+                Scroll to latest
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

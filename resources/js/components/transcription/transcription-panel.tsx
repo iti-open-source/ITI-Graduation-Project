@@ -70,6 +70,51 @@ export default function TranscriptionPanel({
     },
   });
 
+  // Generate specific error messages based on error type
+  const getErrorMessage = (error: string) => {
+    if (error.includes("aborted")) {
+      return "AI evaluation unavailable - microphone access was interrupted";
+    }
+    if (error.includes("not-allowed")) {
+      return "AI evaluation unavailable - microphone permission denied";
+    }
+    if (error.includes("service-not-allowed")) {
+      return "AI evaluation unavailable - speech recognition service blocked";
+    }
+    if (error.includes("network")) {
+      return "AI evaluation unavailable - network connection required";
+    }
+    if (error.includes("language-not-supported")) {
+      return "AI evaluation unavailable - language not supported";
+    }
+    if (error.includes("audio-capture")) {
+      return "AI evaluation unavailable - microphone not available";
+    }
+    return "AI evaluation unavailable - speech recognition error";
+  };
+
+  const getDetailedErrorMessage = (error: string) => {
+    if (error.includes("aborted")) {
+      return "Microphone access was interrupted. Please refresh the page and allow microphone access.";
+    }
+    if (error.includes("not-allowed")) {
+      return "Microphone permission was denied. Please enable microphone access in your browser settings.";
+    }
+    if (error.includes("service-not-allowed")) {
+      return "Speech recognition service is blocked. Please check your browser settings or try a different browser.";
+    }
+    if (error.includes("network")) {
+      return "Network connection is required for speech recognition. Please check your internet connection.";
+    }
+    if (error.includes("language-not-supported")) {
+      return "The current language is not supported by speech recognition.";
+    }
+    if (error.includes("audio-capture")) {
+      return "No microphone found. Please connect a microphone and try again.";
+    }
+    return "Speech recognition encountered an error. Please try refreshing the page.";
+  };
+
   // Auto-scroll to bottom when new entries are added
   useEffect(() => {
     if (autoScroll && transcriptEntries.length > 0) {
@@ -270,9 +315,7 @@ export default function TranscriptionPanel({
                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            {error.includes("aborted") || error.includes("Speech recognition error")
-              ? "AI evaluation unavailable - use Chrome/Edge for full features"
-              : error}
+            {getErrorMessage(error)}
           </div>
         </div>
       )}
@@ -283,8 +326,8 @@ export default function TranscriptionPanel({
           <div className="text-center">
             <div>
               <p className="text-xs text-[var(--color-text-muted)]">
-                {error && (error.includes("aborted") || error.includes("Speech recognition error"))
-                  ? "Manual feedback only - use Chrome/Edge for full AI analysis"
+                {error
+                  ? getDetailedErrorMessage(error)
                   : isListening
                     ? "AI is actively monitoring and analyzing your conversation"
                     : "AI evaluation will begin automatically when you start speaking"}

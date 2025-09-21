@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 // use App\Events\RoomSessionSignaling; // Removed: no longer broadcasting to Pusher
 use App\Models\LobbySession;
 use App\Models\InterviewEvaluation;
+use App\Models\SessionTranscript;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -30,14 +31,19 @@ class SessionController extends Controller
         $validated = $request->validate([
             'rating' => 'required|integer|min:1|max:10',
             'comments' => 'nullable|string|max:5000',
+            'transcript' => 'nullable|string',
         ]);
 
+        // Get merged transcript from all participants
+        $mergedTranscript = SessionTranscript::getMergedTranscript($sessionCode);
+        
         $evaluation = InterviewEvaluation::create([
             'lobby_session_id' => $session->id,
             'guest_id' => $session->guest_id,
             'created_by' => $userId,
             'rating' => $validated['rating'],
             'comments' => $validated['comments'] ?? null,
+            'transcript' => $mergedTranscript ?: ($validated['transcript'] ?? null),
         ]);
 
         // End the session as part of evaluation submission
@@ -161,6 +167,66 @@ class SessionController extends Controller
             'ended_at' => $session->ended_at,
             'room_id' => $session->room_id,
             'room_code' => $room?->room_code,
+        ]);
+    }
+
+    public function syncTranscript(Request $request, string $sessionCode)
+    {
+        $session = LobbySession::where('session_code', $sessionCode)->firstOrFail();
+        $userId = Auth::id();
+
+        // Verify user is part of this session
+        if ($userId !== $session->creator_id && $userId !== $session->guest_id) {
+            abort(403, 'Not authorized for this session');
+        }
+
+        $validated = $request->validate([
+            'text' => 'required|string',
+            'timestamp_microseconds' => 'required|integer',
+            'is_final' => 'required|boolean',
+            'confidence' => 'nullable|numeric|min:0|max:1',
+        ]);
+
+        $transcript = SessionTranscript::create([
+            'session_code' => $sessionCode,
+            'user_id' => $userId,
+            'text' => $validated['text'],
+            'timestamp_microseconds' => $validated['timestamp_microseconds'],
+            'is_final' => $validated['is_final'],
+            'confidence' => $validated['confidence'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'transcript_id' => $transcript->id,
+        ]);
+    }
+
+    public function getTranscripts(Request $request, string $sessionCode)
+    {
+        $session = LobbySession::where('session_code', $sessionCode)->firstOrFail();
+        $userId = Auth::id();
+
+        // Verify user is part of this session
+        if ($userId !== $session->creator_id && $userId !== $session->guest_id) {
+            abort(403, 'Not authorized for this session');
+        }
+
+        $transcripts = SessionTranscript::forSession($sessionCode)->get();
+
+        return response()->json([
+            'success' => true,
+            'transcripts' => $transcripts->map(function ($transcript) {
+                return [
+                    'id' => $transcript->id,
+                    'text' => $transcript->text,
+                    'timestamp_microseconds' => $transcript->timestamp_microseconds,
+                    'is_final' => $transcript->is_final,
+                    'confidence' => $transcript->confidence,
+                    'speaker' => $transcript->user->name ?? 'Unknown',
+                    'is_me' => $transcript->user_id === Auth::id(),
+                ];
+            }),
         ]);
     }
 }

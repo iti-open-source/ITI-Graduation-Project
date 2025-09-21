@@ -16,6 +16,7 @@ class InterviewEvaluation extends Model
         'rating',
         'comments',
         'transcript',
+        'ai_feedback',
     ];
 }
 

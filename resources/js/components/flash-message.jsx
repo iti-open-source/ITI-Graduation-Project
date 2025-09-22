@@ -35,7 +35,7 @@ export default function FlashMessage() {
     if (visible && isAnimating) {
       const timer = setTimeout(() => {
         handleClose();
-      }, 5000); // 5 seconds
+      }, 3000); // 3 seconds
 
       // Clear the timer if the component is unmounted or message changes
       return () => clearTimeout(timer);

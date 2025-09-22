@@ -16,6 +16,7 @@ use App\Mail\InterviewScheduled;
 use App\Mail\InterviewCancelled;
 use App\Mail\InterviewRescheduled;
 use App\Mail\InterviewCompleted;
+use App\Mail\InterviewAbsent;
 
 class RoomController extends Controller
 {
@@ -674,6 +675,15 @@ class RoomController extends Controller
             'is_absent' => $newValue,
             'interview_done' => $newValue,
         ]);
+
+        $newSessionDetails = $room->assignedStudents()
+            ->where('users.id', $student->id)
+            ->withPivot('interview_date', 'interview_time', 'interview_done', 'is_absent')
+            ->first();
+
+        if ($newSessionDetails->pivot->interview_done && $newSessionDetails->pivot->is_absent) {
+            Mail::to($student->email)->send(new InterviewAbsent($room, $student, $newSessionDetails));
+        }
 
         return response()->json([
             'success' => true,

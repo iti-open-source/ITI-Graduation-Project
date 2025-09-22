@@ -267,6 +267,15 @@ export default function Creator({
 
   const [markingDoneIds, setMarkingDoneIds] = useState<number[]>([]);
   const [studentToMarkDone, setStudentToMarkDone] = useState<any | null>(null);
+const [studentToEvaluate, setStudentToEvaluate] = useState<any | null>(null);
+
+const [showEvaluateModal, setShowEvaluateModal] = useState(false);
+const [rating, setRating] = useState<number>(0);
+const [comments, setComments] = useState("");
+const [submitting, setSubmitting] = useState(false);
+
+
+
 
   const handleToggleInterviewDone = async (roomId: number, student: any) => {
     const studentId = student.id;
@@ -288,6 +297,11 @@ export default function Creator({
           prev.map((s) => (s.id === studentId ? { ...s, interview_done: !s.interview_done } : s)),
         );
         toast.success(json.message || "Interview status updated");
+        // 👇 If interview done → open evaluation modal
+      if (json.interview_done) {
+        setStudentToEvaluate(json.student);
+        setShowEvaluateModal(true);
+      }
       } else {
         toast.error(json.message || "Could not update interview status");
       }
@@ -969,6 +983,118 @@ export default function Creator({
             />
           </motion.div>
         </div>
+        {/* Evaluate Modal
+      {showEvaluateModal &&  (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--card)] shadow-xl">
+            <div className="border-b border-[var(--color-border)] px-5 py-4">
+              <h3 className="text-base font-semibold text-[var(--color-text)]">
+                Evaluate Interview
+              </h3>
+            </div>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  setSubmitting(true);
+                  const res = await fetch(`/session/${roomCode}/evaluate`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "X-CSRF-TOKEN":
+                        (csrf_token as string) ||
+                        (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)
+                          ?.content ||
+                        "",
+                    },
+                    body: JSON.stringify({
+                      rating,
+                      comments,
+                      transcript: fullTranscript,
+                    }),
+                  });
+                  if (res.ok) {
+                    try {
+                      const data = await res.json();
+                      console.log("Evaluation response:", data);
+                      if (data?.roomCode) {
+                        console.log("Redirecting to room:", data.roomCode);
+                        window.location.href = `/room/${data.roomCode}`;
+                      } else {
+                        console.log("No roomCode in response, redirecting to lobby");
+                        window.location.href = "/lobby";
+                      }
+                    } catch (error) {
+                      console.error("Failed to parse evaluation response:", error);
+                      window.location.href = "/lobby";
+                    }
+                  } else {
+                    console.error("Evaluation request failed with status:", res.status);
+                    window.location.href = "/lobby";
+                  }
+                } finally {
+                  setSubmitting(false);
+                }
+              }}
+              className="px-5 py-4"
+            >
+              <div className="space-y-4">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-[var(--color-text)]">
+                    Rating
+                  </label>
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRating(r)}
+                        className={`flex h-9 w-9 items-center justify-center rounded-full border transition-colors ${
+                          rating >= r
+                            ? "border-yellow-400 bg-yellow-400 text-white"
+                            : "border-[var(--color-border)] bg-[var(--color-muted)] text-[var(--color-text)]"
+                        }`}
+                        aria-label={`Rate ${r}`}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-[var(--color-text)]">
+                    Comments
+                  </label>
+                  <textarea
+                    value={comments}
+                    onChange={(e) => setComments(e.target.value)}
+                    rows={5}
+                    className="w-full resize-none rounded-md border border-[var(--color-border)] bg-transparent p-2 text-sm text-[var(--color-text)] shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    placeholder="Share feedback about the interviewee..."
+                  />
+                </div>
+              </div>
+              <div className="mt-5 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEvaluateModal(false)}
+                  className="rounded-md border border-[var(--color-border)] bg-[var(--color-muted)] px-4 py-2 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-muted)]/80"
+                  disabled={submitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={submitting}
+                >
+                  {submitting ? "Submitting..." : "Submit & End Session"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )} */}
 
         <motion.div
           variants={fadeIn}

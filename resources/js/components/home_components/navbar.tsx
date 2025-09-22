@@ -149,7 +149,7 @@ export default function Navbar() {
               <div className="flex items-center gap-2">
                 <AppearanceToggleDropdown />
                 {/* Client Area button */}
-                {user.role != "admin" && (
+                {user.role && user.role != "admin" && (
                   <Button variant="outline" asChild>
                     <Link href={user?.role === "student" ? "/lobby" : "/dashboard"}>
                       Client Area

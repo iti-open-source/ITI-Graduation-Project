@@ -340,7 +340,7 @@ function CollaborativeEditorInner() {
 export default function CollaborativeEditor({ id }: { id: string }) {
   return (
     <LiveblocksProvider
-      publicApiKey={"pk_dev_TJvAsyYvtl6GARb5tMeCiBOyOQBoJ0FgPTsoOkxRmjvcPkunTEdNtkIxgd6K3QqA"}
+      publicApiKey={"pk_dev_Wu_TADch3ut98A5IfnD6wgChSZeYDGHXhqAnS3p2lWcB4Hys0yUBV-nfabLUahWr"}
     >
       <RoomProvider id={id}>
         <ClientSideSuspense fallback={<div>Loading…</div>}>

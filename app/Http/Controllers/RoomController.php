@@ -627,6 +627,8 @@ class RoomController extends Controller
 
         if ($newSessionDetails->pivot->interview_done) {
             Mail::to($student->email)->send(new InterviewCompleted($room, $student, $newSessionDetails));
+        } else {
+            Mail::to($student->email)->send(new InterviewScheduled($room, $student, $newSessionDetails));
         }
 
         return response()->json([
@@ -683,6 +685,8 @@ class RoomController extends Controller
 
         if ($newSessionDetails->pivot->interview_done && $newSessionDetails->pivot->is_absent) {
             Mail::to($student->email)->send(new InterviewAbsent($room, $student, $newSessionDetails));
+        } else {
+            Mail::to($student->email)->send(new InterviewScheduled($room, $student, $newSessionDetails));
         }
 
         return response()->json([

@@ -10,7 +10,6 @@ import {
   Calendar,
   // Edit,
   Eye,
-  Settings,
   Shield,
   TrendingUp,
   UserCheck,
@@ -273,82 +272,81 @@ export default function AdminDashboard({ users, stats, flash }: AdminDashboardPr
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Recent Users */}
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                Recent Users
-              </CardTitle>
-              <CardDescription>Latest user registrations and activity</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentUsers.map((user) => (
-                  <div
-                    key={user.id}
-                    className="flex items-center justify-between rounded-lg border p-4"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium">{user.name}</h4>
-                        {getStatusBadge(user)}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Joined {formatDate(user.created_at)}
-                      </p>
-                    </div>
+        {/* Recent Users */}
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Recent Users
+            </CardTitle>
+            <CardDescription>Latest user registrations and activity</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between rounded-lg border p-4"
+                >
+                  <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href={`/admin/users/${user.id}`}>
-                          <Eye className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                      {/* <Button variant="outline" size="sm" asChild>
+                      <h4 className="font-medium">{user.name}</h4>
+                      {getStatusBadge(user)}
+                    </div>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Joined {formatDate(user.created_at)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/admin/users/${user.id}`}>
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    {/* <Button variant="outline" size="sm" asChild>
                         <Link href={`/admin/users/${user.id}/edit`}>
                           <Edit className="h-4 w-4" />
                         </Link>
                       </Button> */}
 
-                      {/* Role dropdown */}
-                      <select
-                        defaultValue={user.role ?? "null"}
-                        onChange={(e) =>
-                          router.patch(`/admin/users/${user.id}`, {
-                            role: e.target.value === "null" ? null : e.target.value,
-                          })
-                        }
-                        className="w-full rounded-md border p-2 capitalize"
-                      >
-                        <option value="null" className="text-gray-800">
-                          Unassigned
-                        </option>
-                        <option value="admin" className="text-gray-800">
-                          Admin
-                        </option>
-                        <option value="student" className="text-gray-800">
-                          Student
-                        </option>
-                        <option value="instructor" className="text-gray-800">
-                          Instructor
-                        </option>
-                      </select>
-                    </div>
+                    {/* Role dropdown */}
+                    <select
+                      defaultValue={user.role ?? "null"}
+                      onChange={(e) =>
+                        router.patch(`/admin/users/${user.id}`, {
+                          role: e.target.value,
+                        })
+                      }
+                      className="w-full rounded-md border p-2 capitalize"
+                    >
+                      <option value="null" className="text-gray-800">
+                        Unassigned
+                      </option>
+                      <option value="admin" className="text-gray-800">
+                        Admin
+                      </option>
+                      <option value="student" className="text-gray-800">
+                        Student
+                      </option>
+                      <option value="instructor" className="text-gray-800">
+                        Instructor
+                      </option>
+                    </select>
                   </div>
-                ))}
-              </div>
-              <div className="mt-4">
-                <Button variant="outline" className="w-full" asChild>
-                  <Link href="/admin/users">View All Users</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4">
+              <Button variant="outline" className="w-full" asChild>
+                <Link href="/admin/users">View All Users</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Quick Actions */}
-          <Card>
+        {/* Quick Actions */}
+        {/* <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="h-5 w-5" />
@@ -374,8 +372,7 @@ export default function AdminDashboard({ users, stats, flash }: AdminDashboardPr
                 </Button>
               </div>
             </CardContent>
-          </Card>
-        </div>
+          </Card> */}
 
         {/* System Overview */}
         <Card>

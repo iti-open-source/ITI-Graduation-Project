@@ -75,7 +75,7 @@ export default function CollaborativeWhiteboard({ roomCode }: { roomCode?: strin
 
     const now = Date.now();
     // Simple throttling - allow updates every 10ms
-    if (now - lastChangeRef.current < 10) {
+    if (now - lastChangeRef.current < 100) {
       return;
     }
 

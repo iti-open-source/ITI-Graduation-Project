@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\InterviewScheduled;
 use App\Mail\InterviewCancelled;
 use App\Mail\InterviewRescheduled;
+use App\Mail\InterviewCompleted;
+use App\Mail\InterviewAbsent;
 
 class RoomController extends Controller
 {
@@ -117,7 +119,7 @@ class RoomController extends Controller
 
 
 
-                Mail::to($studentUser->email)->send(new InterviewScheduled($room, $studentUser, $sessionDetails));
+                Mail::to($studentUser->email)->send(new InterviewCompleted($room, $studentUser, $sessionDetails));
             }
         }
 
@@ -597,7 +599,6 @@ class RoomController extends Controller
 
         try {
             $interviewDateTime = \Carbon\Carbon::parse("{$pivot->interview_date} {$pivot->interview_time}", config('app.timezone'));
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -616,6 +617,19 @@ class RoomController extends Controller
         $room->assignedStudents()->updateExistingPivot($student->id, [
             'interview_done' => $newValue,
         ]);
+
+        $newSessionDetails = $room->assignedStudents()
+            ->where('users.id', $student->id)
+            ->withPivot('interview_date', 'interview_time', 'interview_done')
+            ->first();
+
+
+
+        if ($newSessionDetails->pivot->interview_done) {
+            Mail::to($student->email)->send(new InterviewCompleted($room, $student, $newSessionDetails));
+        } else {
+            Mail::to($student->email)->send(new InterviewScheduled($room, $student, $newSessionDetails));
+        }
 
         return response()->json([
             'success' => true,
@@ -663,6 +677,17 @@ class RoomController extends Controller
             'is_absent' => $newValue,
             'interview_done' => $newValue,
         ]);
+
+        $newSessionDetails = $room->assignedStudents()
+            ->where('users.id', $student->id)
+            ->withPivot('interview_date', 'interview_time', 'interview_done', 'is_absent')
+            ->first();
+
+        if ($newSessionDetails->pivot->interview_done && $newSessionDetails->pivot->is_absent) {
+            Mail::to($student->email)->send(new InterviewAbsent($room, $student, $newSessionDetails));
+        } else {
+            Mail::to($student->email)->send(new InterviewScheduled($room, $student, $newSessionDetails));
+        }
 
         return response()->json([
             'success' => true,

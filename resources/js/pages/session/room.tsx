@@ -55,7 +55,7 @@ export default function SessionRoom(props: PageProps) {
       } catch {}
     };
     checkState();
-    pollRef.current = window.setInterval(checkState, 2000);
+    pollRef.current = window.setInterval(checkState, 4000);
     return () => {
       aborted = true;
       if (pollRef.current) window.clearInterval(pollRef.current);
@@ -247,12 +247,23 @@ export default function SessionRoom(props: PageProps) {
                     }),
                   });
                   if (res.ok) {
-                    const data = await res.json().catch(() => ({}) as any);
-                    if (data?.roomCode) {
-                      window.location.href = `/room/${data.roomCode}`;
-                    } else {
+                    try {
+                      const data = await res.json();
+                      console.log("Evaluation response:", data);
+                      if (data?.roomCode) {
+                        console.log("Redirecting to room:", data.roomCode);
+                        window.location.href = `/room/${data.roomCode}`;
+                      } else {
+                        console.log("No roomCode in response, redirecting to lobby");
+                        window.location.href = "/lobby";
+                      }
+                    } catch (error) {
+                      console.error("Failed to parse evaluation response:", error);
                       window.location.href = "/lobby";
                     }
+                  } else {
+                    console.error("Evaluation request failed with status:", res.status);
+                    window.location.href = "/lobby";
                   }
                 } finally {
                   setSubmitting(false);

@@ -1,7 +1,10 @@
 import cors from "cors";
 import debug from "debug";
 import express from "express";
-import http from "http";
+// import http from "http";
+
+import fs from "fs";
+import https from "https";
 import { Server as SocketIO } from "socket.io";
 
 const ioDebug = debug("io");
@@ -25,10 +28,24 @@ app.get("/", (req, res) => {
   res.send("Excalidraw collaboration server is up :)");
 });
 
-const server = http.createServer(app);
+// <<<<<<< HEAD
+// const server = http.createServer(app);
+
+// server.listen(port, () => {
+//   console.log("Listening on port: " + port);
+// =======
+// Load SSL certificate and key
+const options = {
+  key: fs.readFileSync("key.pem"),
+  cert: fs.readFileSync("cert.pem"),
+};
+
+const server = https.createServer(options, app);
 
 server.listen(port, () => {
-  console.log("Listening on port: " + port);
+  console.log(`HTTPS server listening on port: ${port}`);
+  console.log(`Access the server at: https://localhost:${port}`);
+
 });
 
 try {

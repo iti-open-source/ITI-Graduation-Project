@@ -490,6 +490,10 @@ export default function Creator({
   const deleteRoom = () => {
     setIsDeleting(true);
     router.delete(`/room/${room.room_code}`, {
+      headers: {
+        "X-CSRF-TOKEN":
+          document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
+      },
       onSuccess: () => {
         setIsDeleting(false);
         setShowDeleteDialog(false);

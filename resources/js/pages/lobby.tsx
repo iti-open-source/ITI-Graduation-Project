@@ -110,6 +110,10 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
       "/rooms",
       { name: roomName, students: studentsWithSchedule },
       {
+        headers: {
+          "X-CSRF-TOKEN":
+            document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
+        },
         onSuccess: () => {
           setShowCreateForm(false);
           setSelectedStudents([]);
@@ -183,6 +187,10 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
 
     setIsDeleting(true);
     router.delete(`/room/${roomToDelete.code}`, {
+      headers: {
+        "X-CSRF-TOKEN":
+          document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
+      },
       preserveScroll: true,
       onSuccess: () => {
         setShowDeleteDialog(false);

@@ -1,3 +1,4 @@
+import { NavAppearance } from "@/components/nav-appearance";
 import { NavFooter } from "@/components/nav-footer";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -31,11 +32,6 @@ export function AppSidebar() {
             href: "/lobby",
             icon: PanelsRightBottom,
           },
-          {
-            title: "Settings",
-            href: "/settings",
-            icon: Settings,
-          },
         ]
       : []),
     ...(auth.user?.role === "admin"
@@ -49,11 +45,6 @@ export function AppSidebar() {
             title: "Lobby",
             href: "/lobby",
             icon: PanelsRightBottom,
-          },
-          {
-            title: "Settings",
-            href: "/settings",
-            icon: Settings,
           },
         ]
       : []),
@@ -70,13 +61,13 @@ export function AppSidebar() {
             href: "/lobby",
             icon: PanelsRightBottom,
           },
-          {
-            title: "Settings",
-            href: "/settings",
-            icon: Settings,
-          },
         ]
       : []),
+    {
+      title: "Settings",
+      href: "/settings",
+      icon: Settings,
+    },
   ];
 
   return (
@@ -98,6 +89,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
+        <NavAppearance />
         <NavFooter items={[]} className="mt-auto" />
         <NavUser />
       </SidebarFooter>

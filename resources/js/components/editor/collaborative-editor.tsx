@@ -165,7 +165,7 @@ function CollaborativeEditorInner() {
         }
 
         // Wait before next poll (1 second)
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       } catch (error) {
         console.error(`Polling attempt ${attempt} failed:`, error);
         return { stderr: (error as { message: string }).message, status: { id: 6 } };
@@ -340,7 +340,7 @@ function CollaborativeEditorInner() {
 export default function CollaborativeEditor({ id }: { id: string }) {
   return (
     <LiveblocksProvider
-      publicApiKey={"pk_dev_TJvAsyYvtl6GARb5tMeCiBOyOQBoJ0FgPTsoOkxRmjvcPkunTEdNtkIxgd6K3QqA"}
+      publicApiKey={"pk_dev_Wu_TADch3ut98A5IfnD6wgChSZeYDGHXhqAnS3p2lWcB4Hys0yUBV-nfabLUahWr"}
     >
       <RoomProvider id={id}>
         <ClientSideSuspense fallback={<div>Loading…</div>}>

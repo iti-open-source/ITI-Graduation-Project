@@ -10,14 +10,7 @@ import { logout } from "@/routes";
 import { edit } from "@/routes/profile";
 import { type User } from "@/types";
 import { Link, router } from "@inertiajs/react";
-import {
-  LogOut,
-  PanelsRightBottom,
-  Settings,
-  User as UserIcon,
-  Users,
-  UsersIcon,
-} from "lucide-react";
+import { LogOut, PanelsRightBottom, Settings, User as UserIcon, Users } from "lucide-react";
 
 interface UserMenuContentProps {
   user: User;
@@ -43,23 +36,17 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
           icon: Users,
         };
   const secondMenuItem =
-    user.role === "student"
+    user.role === "student" || user.role == "instructor"
       ? {
-          title: "Profile",
+          title: "Dashboard",
           href: "/dashboard",
           icon: UserIcon,
         }
-      : user.role === "admin"
-        ? {
-            title: "Dashboard",
-            href: "/admin",
-            icon: UserIcon,
-          }
-        : {
-            title: "Dashboard",
-            href: "/dashboard",
-            icon: UsersIcon,
-          };
+      : {
+          title: "Dashboard",
+          href: "/admin",
+          icon: UserIcon,
+        };
   return (
     <>
       <DropdownMenuLabel className="p-0 font-normal">
@@ -99,18 +86,20 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
           </DropdownMenuItem>
         )} */}
 
-        <DropdownMenuItem asChild>
-          <Link
-            className="block w-full"
-            href={secondMenuItem.href}
-            as="button"
-            prefetch
-            onClick={cleanup}
-          >
-            <secondMenuItem.icon className="mr-2" />
-            {secondMenuItem.title}
-          </Link>
-        </DropdownMenuItem>
+        {user.role != null && (
+          <DropdownMenuItem asChild>
+            <Link
+              className="block w-full"
+              href={secondMenuItem.href}
+              as="button"
+              prefetch
+              onClick={cleanup}
+            >
+              <secondMenuItem.icon className="mr-2" />
+              {secondMenuItem.title}
+            </Link>
+          </DropdownMenuItem>
+        )}
 
         <DropdownMenuItem asChild>
           <Link className="block w-full" href={edit()} as="button" prefetch onClick={cleanup}>

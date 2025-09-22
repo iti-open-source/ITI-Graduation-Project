@@ -70,12 +70,12 @@ return Application::configure(basePath: dirname(__DIR__))
             // 1. If the previous URL is an asset file...
             // 2. Or if the previous URL is the same as the current one (causes a redirect loop)...
             // ...then redirect to the fallback route.
-            if (Str::endsWith($previousUrl, $assetExtensions) || $previousUrl === url()->current()) {
-                return redirect($fallbackRoute);
-            }
+            // if (Str::endsWith($previousUrl, $assetExtensions) || $previousUrl === url()->current()) {
+            //     return redirect($fallbackRoute);
+            // }
 
             // Otherwise, it's safe to redirect back.
-            return redirect()->back();
+            return redirect($fallbackRoute);
         };
 
 

@@ -315,7 +315,7 @@ export default function AdminDashboard({ users, stats, flash }: AdminDashboardPr
                       defaultValue={user.role ?? "null"}
                       onChange={(e) =>
                         router.patch(`/admin/users/${user.id}`, {
-                          role: e.target.value === "null" ? null : e.target.value,
+                          role: e.target.value,
                         })
                       }
                       className="w-full rounded-md border p-2 capitalize"

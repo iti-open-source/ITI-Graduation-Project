@@ -8,6 +8,10 @@ use App\Models\InterviewEvaluation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Models\Room;
+use App\Mail\InterviewEvaluation as InterviewEvaluationMail;
+use App\Models\User;
 
 class SessionController extends Controller
 {
@@ -45,6 +49,26 @@ class SessionController extends Controller
             'status' => 'ended',
             'ended_at' => now(),
         ]);
+
+        // Send evaluation email to the interviewee
+        $interviewee = User::find($session->guest_id);
+        $evaluationRoom = Room::find($session->room_id);
+        $sessionDetails = $evaluationRoom->assignedStudents()
+            ->where('users.id', $interviewee->id)
+            ->withPivot('interview_date', 'interview_time')
+            ->first();
+
+        if ($interviewee && $evaluationRoom && $sessionDetails) {
+            Mail::to($interviewee->email)->send(new InterviewEvaluationMail(
+                $evaluationRoom,
+                $interviewee,
+                $sessionDetails,
+                $validated['rating'],
+                $validated['comments'] ?? ''
+            ));
+        }
+
+
 
         // No broadcast; clients poll session state
 
@@ -164,5 +188,3 @@ class SessionController extends Controller
         ]);
     }
 }
-
-

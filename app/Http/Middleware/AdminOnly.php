@@ -20,8 +20,8 @@ class AdminOnly
             return $next($request);
         }
 
-        abort(403, 'Unauthorized action. You do not have admin access.');
+        // abort(403, 'Unauthorized action. You do not have admin access.');
 
-        // return redirect('/')->with('error', 'You do not have admin access.');
+        return redirect('/')->with('error', 'You do not have admin access.');
     }
 }

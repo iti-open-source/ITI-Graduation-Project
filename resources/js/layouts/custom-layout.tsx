@@ -16,6 +16,7 @@ export default function CustomLayout({ children }: LayoutProps) {
       {/* {role !== "student" && <AppSidebarLayout />} */}
       <FlashMessage />
       <main>{children}</main>
+      {/* <Toaster position="bottom-right" /> */}
     </div>
   );
 }

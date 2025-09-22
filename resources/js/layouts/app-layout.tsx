@@ -1,4 +1,3 @@
-import FlashMessage from "@/components/flash-message";
 import AppLayoutTemplate from "@/layouts/app/app-sidebar-layout";
 import { type BreadcrumbItem } from "@/types";
 import { type ReactNode } from "react";
@@ -11,7 +10,7 @@ interface AppLayoutProps {
 
 export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => (
   <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
-    <FlashMessage />
+    {/* <FlashMessage /> */}
     {children}
     <Toaster position="bottom-right" />
   </AppLayoutTemplate>

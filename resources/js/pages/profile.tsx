@@ -128,7 +128,7 @@ export default function Profile() {
             </CardHeader>
             <CardContent className="text-center">
               <Button asChild>
-                <Link href="/lobby">Go to Lobby</Link>
+                <Link href="/admin">Go to Admin Dashboard</Link>
               </Button>
             </CardContent>
           </Card>

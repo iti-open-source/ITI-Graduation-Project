@@ -165,7 +165,7 @@ function CollaborativeEditorInner() {
         }
 
         // Wait before next poll (1 second)
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       } catch (error) {
         console.error(`Polling attempt ${attempt} failed:`, error);
         return { stderr: (error as { message: string }).message, status: { id: 6 } };

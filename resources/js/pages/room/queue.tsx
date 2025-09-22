@@ -70,7 +70,9 @@ export default function Queue({
     if (!isThisUserActive) return;
 
     const activeSession = Array.isArray(room.sessions)
-      ? room.sessions.find((s) => s.status === "active")
+      ? room.sessions.find(
+          (s: { id: number; session_code: string; status: string }) => s.status === "active",
+        )
       : undefined;
     if (activeSession?.session_code) {
       window.location.href = `/session/${activeSession.session_code}`;
@@ -85,7 +87,7 @@ export default function Queue({
       const now = new Date();
       const diffInSeconds = Math.floor((now.getTime() - joinedAt.getTime()) / 1000);
       setTimeInQueue(diffInSeconds);
-    }, 1000);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [initialQueueEntry?.joined_at]);
@@ -98,7 +100,16 @@ export default function Queue({
 
   const leaveQueue = () => {
     setIsLeaving(true);
-    router.post(`/room/${room.room_code}/leave`);
+    router.post(
+      `/room/${room.room_code}/leave`,
+      {},
+      {
+        headers: {
+          "X-CSRF-TOKEN":
+            document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
+        },
+      },
+    );
   };
 
   const fadeIn = {

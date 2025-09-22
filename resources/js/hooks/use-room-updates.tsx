@@ -22,6 +22,7 @@ interface Room {
   current_participant: User | null;
   queue: QueueUser[];
   queue_count: number;
+  sessions?: { id: number; session_code: string; status: string }[];
 }
 
 interface QueueUpdateData {
@@ -62,8 +63,8 @@ export function useRoomUpdates(roomCode: string, initialRoom: Room) {
 
     // initial fetch immediately
     fetchState();
-    // poll every 2s
-    intervalRef.current = window.setInterval(fetchState, 2000);
+    // poll every 4s
+    intervalRef.current = window.setInterval(fetchState, 4000);
 
     return () => {
       aborted = true;

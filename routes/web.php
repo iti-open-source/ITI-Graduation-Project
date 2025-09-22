@@ -21,7 +21,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::get('dashboard', ProfileController::class)->name('dashboard');
+    Route::get('dashboard', ProfileController::class)->name('dashboard')->middleware('check.role');
     Route::get('api/dashboard/state', [ProfileController::class, 'state'])->name('dashboard.state');
 
     // Admin routes

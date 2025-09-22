@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
 	{
 		// Upsert admin
 		User::updateOrCreate(
-			['email' => 'admin@mockmate.com'],
+			['email' => 'admin@mock.com'],
 			[
 				'name' => 'Admin User',
 				'password' => Hash::make('password'),
@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
 
 		// Upsert instructor
 		User::updateOrCreate(
-			['email' => 'instructor@mockmate.com'],
+			['email' => 'instructor@mock.com'],
 			[
 				'name' => 'Instructor User',
 				'password' => Hash::make('password'),
@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
 
 		// Upsert student
 		User::updateOrCreate(
-			['email' => 'student@mockmatem.com'],
+			['email' => 'student@mock.com'],
 			[
 				'name' => 'Student User',
 				'password' => Hash::make('password'),

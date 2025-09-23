@@ -69,13 +69,13 @@ class AIServiceProvider
     private function geminiChat(string $message, array $history = []): string
     {
         $apiKey = $this->config['api_key'];
-        
+
         if (!$apiKey) {
             throw new \Exception('Google Gemini API key not configured');
         }
 
         $model = $this->config['model'] ?? 'gemini-1.5-flash';
-        
+
         // Build the conversation context for Gemini
         $prompt = $this->buildGeminiPrompt($message, $history);
 
@@ -104,7 +104,7 @@ class AIServiceProvider
         }
 
         $data = $response->json();
-        
+
         if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
             return $data['candidates'][0]['content']['parts'][0]['text'];
         }
@@ -115,13 +115,13 @@ class AIServiceProvider
     private function geminiChatStream(string $message, array $history = []): \Generator
     {
         $apiKey = $this->config['api_key'];
-        
+
         if (!$apiKey) {
             throw new \Exception('Google Gemini API key not configured');
         }
 
         $model = $this->config['model'] ?? 'gemini-1.5-flash';
-        
+
         // Build the conversation context for Gemini
         $prompt = $this->buildGeminiPrompt($message, $history);
 
@@ -150,10 +150,10 @@ class AIServiceProvider
         }
 
         $body = $response->body();
-        
+
         // Parse the JSON array response
         $data = json_decode($body, true);
-        
+
         if (is_array($data)) {
             foreach ($data as $chunk) {
                 if (isset($chunk['candidates'][0]['content']['parts'][0]['text'])) {
@@ -177,29 +177,29 @@ class AIServiceProvider
 When generating interview questions:
 - Provide 5-7 well-structured questions for the given topic and difficulty
 - Include both conceptual and practical questions
-- Vary question types (multiple choice, open-ended, scenario-based)
+- Vary question types (open-ended, scenario-based)
 - Include follow-up questions for deeper discussion
 - Provide sample answers or evaluation criteria
 
 When recommending LeetCode problems:
-- Return ONLY the problem slugs (e.g., two-sum, valid-parentheses, merge-two-sorted-lists)
+- Return the problem slugs (e.g., two-sum, valid-parentheses, merge-two-sorted-lists) with a very brief description (one line)
 - Suggest 3-5 specific problems based on the topic and difficulty
 - Format as a simple list of slugs, one per line
 - Do not include problem numbers, descriptions, or explanations
 - Focus on well-known problems that match the requested topic and difficulty level
 
 Keep responses concise, professional, and focused on interview-related topics. If asked about non-interview topics, politely redirect to interview-related assistance.";
-        
+
         $prompt = "System: {$systemPrompt}\n\n";
-        
+
         // Add recent history
         foreach (array_slice($history, -5) as $msg) {
             $role = $msg['role'] === 'user' ? 'Human' : 'Assistant';
             $prompt .= "{$role}: {$msg['content']}\n";
         }
-        
+
         $prompt .= "Human: {$message}\nAssistant:";
-        
+
         return $prompt;
     }
 

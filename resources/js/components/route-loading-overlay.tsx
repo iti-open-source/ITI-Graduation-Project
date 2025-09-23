@@ -5,7 +5,11 @@ import { createPortal } from "react-dom";
 
 export default function RouteLoadingOverlay() {
   const [isNavigating, setIsNavigating] = useState(false);
+  // Mount state for overlay and visual opacity state for transitions
+  const [isShown, setIsShown] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const showTimerRef = useRef<number | null>(null);
+  const hideTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const clearShowTimer = () => {
@@ -15,8 +19,16 @@ export default function RouteLoadingOverlay() {
       }
     };
 
+    const clearHideTimer = () => {
+      if (hideTimerRef.current !== null) {
+        window.clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = null;
+      }
+    };
+
     const onStart = (event: any) => {
       clearShowTimer();
+      clearHideTimer();
       // Only show when the next visit changes the pathname (i.e., real page switch)
       try {
         const nextUrl = new URL(event?.detail?.visit?.url || "", window.location.origin);
@@ -33,6 +45,9 @@ export default function RouteLoadingOverlay() {
         const nprogressEl = document.getElementById("nprogress");
         if (nprogressEl) {
           setIsNavigating(true);
+          // Mount overlay and then fade in
+          setIsShown(true);
+          requestAnimationFrame(() => setIsVisible(true));
         }
       }, 250); // match/default NProgress delay feel
     };
@@ -40,6 +55,12 @@ export default function RouteLoadingOverlay() {
     const onStop = () => {
       clearShowTimer();
       setIsNavigating(false);
+      // Fade out, then unmount after transition
+      setIsVisible(false);
+      clearHideTimer();
+      hideTimerRef.current = window.setTimeout(() => {
+        setIsShown(false);
+      }, 200); // keep in sync with CSS duration
     };
 
     const offStart = router.on("start", onStart);
@@ -49,6 +70,7 @@ export default function RouteLoadingOverlay() {
 
     return () => {
       clearShowTimer();
+      clearHideTimer();
       offStart?.();
       offFinish?.();
       offError?.();
@@ -56,10 +78,14 @@ export default function RouteLoadingOverlay() {
     };
   }, []);
 
-  if (!isNavigating) return null;
+  if (!isShown) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80">
+    <div
+      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 transition-opacity duration-200 ease-out ${
+        isVisible ? "opacity-100" : "opacity-0"
+      }`}
+    >
       <div className="flex flex-col items-center gap-3 rounded-md p-6">
         <Loader2 className="h-8 w-8 animate-spin text-white" />
         <span className="text-sm text-white/90">Loading...</span>

@@ -21,7 +21,7 @@ import {
   Wind,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // It's good practice to define types in a separate file, but here's a quick reference
 interface User {
@@ -77,6 +77,47 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
   const [interviewTimes, setInterviewTimes] = useState<{ [key: number]: string }>({});
 
   const [searchQuery, setSearchQuery] = useState("");
+  // Auto-refresh lobby data without full page reload
+  const pollRef = useRef<number | null>(null);
+  const isReloadingRef = useRef(false as boolean);
+
+  useEffect(() => {
+    // Clear any existing poll
+    if (pollRef.current) {
+      window.clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+
+    const refresh = () => {
+      if (document.hidden) return; // avoid background tab polling
+      if (isReloadingRef.current) return;
+      isReloadingRef.current = true;
+      router.reload({
+        only: role === "student" ? ["userRooms"] : ["userRooms", "students"],
+        onFinish: () => {
+          isReloadingRef.current = false;
+        },
+      });
+    };
+
+    // Initial gentle delay to avoid racing first render
+    pollRef.current = window.setInterval(refresh, 5000);
+
+    // Pause/resume on visibility change
+    const onVisibility = () => {
+      if (!document.hidden) {
+        // Trigger an immediate refresh when tab becomes visible
+        refresh();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      if (pollRef.current) window.clearInterval(pollRef.current);
+      pollRef.current = null;
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [role]);
   // Search in students (name/email only)
   const filteredStudents = students.filter(
     (s) =>

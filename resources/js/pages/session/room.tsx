@@ -124,7 +124,7 @@ export default function SessionRoom(props: PageProps) {
           </div>
 
           {/* Right Side - Collaborative Tools (60% on desktop, full width on mobile) */}
-          <div className="flex w-[100vh] flex-col lg:min-w-0 lg:flex-1">
+          <div className="flex w-full min-w-0 flex-col lg:flex-1">
             <div className="flex min-h-96 flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-sm lg:h-screen lg:max-h-[calc(100vh-8rem)]">
               {/* Tabs Header */}
               <div className="flex-shrink-0 border-b border-[var(--color-border)] px-4 py-3">
@@ -132,10 +132,10 @@ export default function SessionRoom(props: PageProps) {
                   <h3 className="text-base font-medium text-[var(--color-text)]">
                     Collaborative Tools
                   </h3>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 overflow-x-auto whitespace-nowrap">
                     <button
                       onClick={() => setActiveTab("editor")}
-                      className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                      className={`flex-1 flex-shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                         activeTab === "editor"
                           ? "bg-blue-500 text-white shadow-sm"
                           : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
@@ -145,7 +145,7 @@ export default function SessionRoom(props: PageProps) {
                     </button>
                     <button
                       onClick={() => setActiveTab("whiteboard")}
-                      className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                      className={`flex-1 flex-shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                         activeTab === "whiteboard"
                           ? "bg-blue-500 text-white shadow-sm"
                           : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
@@ -156,7 +156,7 @@ export default function SessionRoom(props: PageProps) {
                     {isCreator && (
                       <button
                         onClick={() => setActiveTab("ai-chat")}
-                        className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                        className={`flex-1 flex-shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                           activeTab === "ai-chat"
                             ? "bg-blue-500 text-white shadow-sm"
                             : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
@@ -167,7 +167,7 @@ export default function SessionRoom(props: PageProps) {
                     )}
                     <button
                       onClick={() => setActiveTab("problem")}
-                      className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                      className={`flex-1 flex-shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                         activeTab === "problem"
                           ? "bg-blue-500 text-white shadow-sm"
                           : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"

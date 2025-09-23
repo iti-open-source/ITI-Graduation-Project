@@ -119,7 +119,7 @@ class RoomController extends Controller
 
 
 
-                Mail::to($studentUser->email)->send(new InterviewCompleted($room, $studentUser, $sessionDetails));
+                Mail::to($studentUser->email)->send(new InterviewScheduled($room, $studentUser, $sessionDetails));
             }
         }
 
@@ -183,9 +183,9 @@ class RoomController extends Controller
             $unassignedStudents = $allStudents->whereNotIn('id', $room->assignedStudents->pluck('id'));
             // $activeSession = LobbySession::where('room_id', $room->id)->latest()->first();
             $activeSession = \App\Models\LobbySession::where('room_id', $room->id)
-            // ->where('guest_id', $student->id)
-            ->where('status', 'active')
-            ->first();
+                // ->where('guest_id', $student->id)
+                ->where('status', 'active')
+                ->first();
 
             return Inertia::render('room/creator', [
                 'room' => $room,
@@ -627,22 +627,22 @@ class RoomController extends Controller
 
 
         // If marking as done → close active session
-    if ($newValue === true) {
-        $activeSession = \App\Models\LobbySession::where('room_id', $room->id)
-            ->where('guest_id', $student->id)
-            ->where('status', 'active')
-            ->first();
+        if ($newValue === true) {
+            $activeSession = \App\Models\LobbySession::where('room_id', $room->id)
+                ->where('guest_id', $student->id)
+                ->where('status', 'active')
+                ->first();
 
-        if ($activeSession) {
-            $activeSession->update([
-                'status' => 'ended',
-                'ended_at' => now(),
-            ]);
+            if ($activeSession) {
+                $activeSession->update([
+                    'status' => 'ended',
+                    'ended_at' => now(),
+                ]);
 
-            $room->disconnectCurrentParticipant();
-            event(new \App\Events\RoomStatusUpdated($room->fresh(), 'call_ended'));
+                $room->disconnectCurrentParticipant();
+                event(new \App\Events\RoomStatusUpdated($room->fresh(), 'call_ended'));
+            }
         }
-    }
 
         $newSessionDetails = $room->assignedStudents()
             ->where('users.id', $student->id)

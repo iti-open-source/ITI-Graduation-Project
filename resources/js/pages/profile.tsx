@@ -195,7 +195,7 @@ export default function Profile() {
           size="sm"
           disabled
           variant="outline"
-          className="cursor-not-allowed border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300"
+          className="w-full cursor-not-allowed border-green-200 bg-green-50 text-green-700 sm:w-auto dark:border-green-800 dark:bg-green-950 dark:text-green-300"
         >
           <Clock className="mr-2 h-4 w-4" />
           Completed
@@ -207,7 +207,7 @@ export default function Profile() {
           size="sm"
           disabled
           variant="outline"
-          className="cursor-not-allowed border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300"
+          className="w-full cursor-not-allowed border-red-200 bg-red-50 text-red-700 sm:w-auto dark:border-red-800 dark:bg-red-950 dark:text-red-300"
         >
           <Clock className="mr-2 h-4 w-4" />
           Absent
@@ -215,7 +215,11 @@ export default function Profile() {
       );
     } else if (!isUpcoming(interview.interview_date, interview.interview_time)) {
       buttonToRender = (
-        <Button asChild size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
+        <Button
+          asChild
+          size="sm"
+          className="w-full bg-blue-600 text-white hover:bg-blue-700 sm:w-auto"
+        >
           <Link href={`/room/${interview.room_code}`}>
             <ExternalLink className="mr-2 h-4 w-4" />
             Join Interview
@@ -228,7 +232,7 @@ export default function Profile() {
           size="sm"
           disabled
           variant="outline"
-          className="cursor-not-allowed border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
+          className="w-full cursor-not-allowed border-gray-200 bg-gray-50 text-gray-500 sm:w-auto dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
         >
           <Clock className="mr-2 h-4 w-4" />
           Not yet Available
@@ -480,7 +484,7 @@ export default function Profile() {
                     {upcoming.map((interview) => (
                       <div
                         key={interview.id}
-                        className="flex items-center justify-between rounded-lg border p-4"
+                        className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
@@ -505,7 +509,9 @@ export default function Profile() {
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">{StatusButton(interview)}</div>
+                        <div className="flex items-center gap-2 sm:justify-end">
+                          {StatusButton(interview)}
+                        </div>
                       </div>
                     ))}
                     {/* Pagination removed in polling mode */}
@@ -582,7 +588,7 @@ export default function Profile() {
                                   </div>
                                 )}
                               </div>
-                              <div className="flex shrink-0 items-center gap-2">
+                              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                                 <span
                                   className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${ratingBadgeClass}`}
                                 >
@@ -591,6 +597,7 @@ export default function Profile() {
                                 <Button
                                   variant="outline"
                                   size="sm"
+                                  className="w-full sm:w-auto"
                                   onClick={() => {
                                     setFeedbackItem(it);
                                     setFeedbackOpen(true);

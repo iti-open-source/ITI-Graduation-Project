@@ -28,7 +28,7 @@ This is a comprehensive **Mock-Mate** built as an ITI Graduation Project. The pl
 - **Multi-role System**: Admin, Instructor, and Student roles
 - **Role-based Access Control**: Different permissions and interfaces per role
 - **User Authentication**: Secure login with email verification
-- **Social Login**: Google and LinkedIn OAuth integration
+- **Social Login**: Google OAuth integration
 
 ### Interview Management
 - **Room Creation**: Instructors can create interview rooms
@@ -114,7 +114,6 @@ ITI-Graduation-Project/
 - **role**: User role (admin, instructor, student, null)
 - **avatar**: Profile picture path
 - **google_id**: Google OAuth identifier
-- **linkedin_id**: LinkedIn OAuth identifier
 - **email_verified_at**: Email verification timestamp
 
 #### Rooms

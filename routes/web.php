@@ -3,7 +3,6 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AIChatController;
 use App\Http\Controllers\GoogleController;
-use App\Http\Controllers\LinkedInController;
 use App\Http\Controllers\WebRtcController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\SessionController;
@@ -87,8 +86,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
-Route::get('/auth/linkedin', [LinkedInController::class, 'redirectToLinkedIn'])->name('linkedin.login');
-Route::get('/auth/linkedin/callback', [LinkedInController::class, 'handleLinkedInCallback']);
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

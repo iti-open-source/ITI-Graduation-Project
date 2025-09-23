@@ -80,7 +80,7 @@ export default function Queue({
         )
       : undefined;
     if (activeSession?.session_code) {
-      window.location.href = `/session/${activeSession.session_code}`;
+      router.visit(`/session/${activeSession.session_code}`);
     }
   }, [room.current_participant?.id, room.sessions, initialQueueEntry?.user?.id]);
 
@@ -117,7 +117,7 @@ export default function Queue({
     );
   };
 
-
+  // Auto-redirect when removed/unassigned from the queue or unassigned from room
   // Auto-redirect when removed/unassigned from the queue or unassigned from room
   const { queue, assignedStudents } = room as any;
 
@@ -183,12 +183,15 @@ export default function Queue({
 
 
 
-   // If initialRoom has queue/assignedStudents, mark hydrated immediately
+  // If initialRoom has queue/assignedStudents, mark hydrated immediately
   useEffect(() => {
     if (Array.isArray(initialRoom.queue) && initialRoom.queue.length > 0) {
       setQueueHydrated(true);
     }
-    if (Array.isArray((initialRoom as any).assignedStudents) && (initialRoom as any).assignedStudents.length > 0) {
+    if (
+      Array.isArray((initialRoom as any).assignedStudents) &&
+      (initialRoom as any).assignedStudents.length > 0
+    ) {
       setAssignedHydrated(true);
     }
   }, [initialRoom]);
@@ -201,10 +204,13 @@ export default function Queue({
   }, [room.queue]);
 
   useEffect(() => {
-    if (Array.isArray((room as any).assignedStudents) && (room as any).assignedStudents.length > 0) {
+    if (
+      Array.isArray((room as any).assignedStudents) &&
+      (room as any).assignedStudents.length > 0
+    ) {
       setAssignedHydrated(true);
     }
-  }, [room.assignedStudents]);
+  }, [(room as any).assignedStudents]);
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },

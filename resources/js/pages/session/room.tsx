@@ -5,8 +5,9 @@ import Problem from "@/components/problem/problem";
 import Whiteboard from "@/components/whiteboard/collaborative-whiteboard";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
-import { Head, usePage } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 interface PageProps {
   roomCode: string;
@@ -42,8 +43,10 @@ export default function SessionRoom(props: PageProps) {
         if (!res.ok) return;
         const json = await res.json();
         if (!aborted && json?.status === "ended") {
-          if (isCreator && json?.room_code) window.location.href = `/room/${json.room_code}`;
-          else window.location.href = "/dashboard";
+          // stop polling to avoid retry loops; keep video mounted
+          if (pollRef.current) window.clearInterval(pollRef.current);
+          if (isCreator && json?.room_code) router.visit(`/room/${json.room_code}`);
+          else router.visit("/dashboard");
         }
       } catch {
         // Handle error
@@ -212,6 +215,8 @@ export default function SessionRoom(props: PageProps) {
                 e.preventDefault();
                 try {
                   setSubmitting(true);
+                  // stop polling while ending; keep video connected until navigation
+                  if (pollRef.current) window.clearInterval(pollRef.current);
                   const res = await fetch(`/session/${roomCode}/evaluate`, {
                     method: "POST",
                     headers: {
@@ -228,20 +233,14 @@ export default function SessionRoom(props: PageProps) {
                     try {
                       const data = await res.json();
                       console.log("Evaluation response:", data);
-                      if (data?.roomCode) {
-                        console.log("Redirecting to room:", data.roomCode);
-                        window.location.href = `/room/${data.roomCode}`;
-                      } else {
-                        console.log("No roomCode in response, redirecting to lobby");
-                        window.location.href = "/lobby";
-                      }
                     } catch (error) {
                       console.error("Failed to parse evaluation response:", error);
-                      window.location.href = "/lobby";
                     }
+                    toast.success("Evaluation submitted. Redirecting to the lobby...");
+                    setTimeout(() => router.visit("/lobby"), 800);
                   } else {
                     console.error("Evaluation request failed with status:", res.status);
-                    window.location.href = "/lobby";
+                    router.visit("/lobby");
                   }
                 } finally {
                   setSubmitting(false);

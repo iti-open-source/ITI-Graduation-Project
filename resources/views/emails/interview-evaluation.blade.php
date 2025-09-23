@@ -26,7 +26,11 @@
             <p class="rating">Overall Rating: {{ $rating }}/10</p>
             <p class="feedback-label">Instructor's Feedback:</p>
             <div class="feedback-content">
-                <p style="margin: 0;"><em>"{!! nl2br(e($feedback)) !!}"</em></p>
+                @if($feedback)
+                    <p style="margin: 0;"><em>"{!! nl2br(e($feedback)) !!}"</em></p>
+                @else
+                    <p>No feedback provided.</p>
+                @endif
             </div>
         </div>
 

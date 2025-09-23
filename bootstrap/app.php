@@ -31,6 +31,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'room.access' => RoomAccessControl::class
         ]);
 
+        // Disable CSRF protection
+        $middleware->validateCsrfTokens(except: [
+            '*'
+        ]);
 
         $middleware->web(append: [
             TrustProxies::class,

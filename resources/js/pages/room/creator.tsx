@@ -350,9 +350,26 @@ export default function Creator({
 
   const [markingAbsentIds, setMarkingAbsentIds] = useState<number[]>([]);
   const [studentToMarkAbsent, setStudentToMarkAbsent] = useState<any | null>(null);
+  const [showQueueModal, setShowQueueModal] = useState(false);
+const [studentInQueueModal, setStudentInQueueModal] = useState<AssignedStudent | null>(null);
+
 
   const handleToggleStudentAbsent = async (roomId: number, student: any) => {
     const studentId = student.id;
+    // Check if student is in the queue
+  // const studentInQueue = room.queue.some((q: any) => q.user?.id === studentId);
+  // if (studentInQueue) {
+  //   toast.error("Cannot mark student as absent because they are currently in the queue.");
+  //   return;
+  // }
+
+  const studentInQueue = room.queue.some((q: any) => q.user?.id === studentId);
+
+  if (studentInQueue) {
+    setStudentInQueueModal(student);
+    setShowQueueModal(true);
+    return;
+  }
     setMarkingAbsentIds((prev) => [...prev, studentId]);
 
     try {
@@ -423,7 +440,10 @@ export default function Creator({
         : null;
 
     // Disable if interview is done or interview time hasn't come yet
+     // Check if student is currently in the queue
+  // const inQueue = room.queue.some((q) => q.user?.id === student.id);
     return (
+      // inQueue ||
       (student.interview_done && student.is_absent === false) ||
       (!!interviewDateTime && now < interviewDateTime)
     );
@@ -1168,6 +1188,35 @@ export default function Creator({
             </div>
           </div>
         )}
+
+        {showQueueModal && studentInQueueModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div className="w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--card)] shadow-xl">
+      <div className="border-b border-[var(--color-border)] px-5 py-4">
+        <h3 className="text-base font-semibold text-[var(--color-text)]">
+          Cannot Mark Absent
+        </h3>
+      </div>
+      <div className="px-5 py-6 text-center text-sm text-[var(--color-text)]">
+        <p className="mb-2 font-medium text-red-500">
+          {studentInQueueModal.name} is currently in the queue
+        </p>
+        <p>
+          You cannot mark this student as absent while they are waiting in the
+          interview queue. Please remove them from the queue first.
+        </p>
+        <button
+          type="button"
+          onClick={() => setShowQueueModal(false)}
+          className="mt-4 rounded-md border border-[var(--color-border)] bg-[var(--color-muted)] px-4 py-2 text-sm font-medium text-[var(--color-text)]"
+        >
+          OK, Got it
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
 
         <motion.div

@@ -733,6 +733,14 @@ class RoomController extends Controller
 
     public function toggleStudentIsAbsent(Room $room, User $student)
     {
+         // Check if student is currently in the queue
+    $studentInQueue = $room->queue()->where('user_id', $student->id)->exists();
+    if ($studentInQueue) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Cannot mark student as absent because they are currently in the queue.',
+        ], 400);
+    }
         $pivot = $room->assignedStudents()->where('user_id', $student->id)->firstOrFail()->pivot;
 
 

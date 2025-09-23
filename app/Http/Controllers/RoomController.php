@@ -8,15 +8,10 @@ use App\Models\Room;
 use App\Models\RoomQueue;
 use App\Models\LobbySession;
 use App\Models\User;
+use App\Jobs\SendInterviewEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\InterviewScheduled;
-use App\Mail\InterviewCancelled;
-use App\Mail\InterviewRescheduled;
-use App\Mail\InterviewCompleted;
-use App\Mail\InterviewAbsent;
 
 class RoomController extends Controller
 {
@@ -117,9 +112,7 @@ class RoomController extends Controller
                     ->withPivot('interview_date', 'interview_time', 'interview_done', 'is_absent')
                     ->first();
 
-
-
-                Mail::to($studentUser->email)->send(new InterviewScheduled($room, $studentUser, $sessionDetails));
+                SendInterviewEmail::dispatch('scheduled', $room, $studentUser, $sessionDetails);
             }
         }
 
@@ -418,7 +411,7 @@ class RoomController extends Controller
                 ->where('users.id', $student->id)
                 ->withPivot('interview_date', 'interview_time', 'interview_done', 'is_absent')
                 ->first();
-            Mail::to($student->email)->send(new InterviewCancelled($room, $student, $sessionDetails));
+            SendInterviewEmail::dispatch('cancelled', $room, $student, $sessionDetails);
         }
 
         return redirect()->route('lobby');
@@ -467,7 +460,7 @@ class RoomController extends Controller
 
         $student = User::find($request->student_id);
 
-        Mail::to($student->email)->send(new InterviewScheduled($room, $student, $sessionDetails));
+        SendInterviewEmail::dispatch('scheduled', $room, $student, $sessionDetails);
 
         $assigned = $room->assignedStudents()->get()->map(function ($student) {
             return [
@@ -507,7 +500,7 @@ class RoomController extends Controller
 
         event(new QueueUpdated($room->fresh(), 'left', $student));
 
-        Mail::to($student->email)->send(new InterviewCancelled($room, $student, $sessionDetails));
+        SendInterviewEmail::dispatch('cancelled', $room, $student, $sessionDetails);
 
         $assigned = $room->assignedStudents()->get()->map(function ($s) {
             return [
@@ -564,7 +557,7 @@ class RoomController extends Controller
             ->first();
 
         // Send reschedule email
-        Mail::to($student->email)->send(new InterviewRescheduled($room, $student, $oldSessionDetails, $newSessionDetails));
+        SendInterviewEmail::dispatch('rescheduled', $room, $student, $newSessionDetails, $oldSessionDetails);
 
         // Return updated assigned and unassigned lists
         $assigned = $room->assignedStudents()->get()->map(function ($s) {
@@ -652,9 +645,9 @@ class RoomController extends Controller
 
 
         if ($newSessionDetails->pivot->interview_done) {
-            Mail::to($student->email)->send(new InterviewCompleted($room, $student, $newSessionDetails));
+            SendInterviewEmail::dispatch('completed', $room, $student, $newSessionDetails);
         } else {
-            Mail::to($student->email)->send(new InterviewScheduled($room, $student, $newSessionDetails));
+            SendInterviewEmail::dispatch('scheduled', $room, $student, $newSessionDetails);
         }
 
         return response()->json([
@@ -711,9 +704,9 @@ class RoomController extends Controller
             ->first();
 
         if ($newSessionDetails->pivot->interview_done && $newSessionDetails->pivot->is_absent) {
-            Mail::to($student->email)->send(new InterviewAbsent($room, $student, $newSessionDetails));
+            SendInterviewEmail::dispatch('absent', $room, $student, $newSessionDetails);
         } else {
-            Mail::to($student->email)->send(new InterviewScheduled($room, $student, $newSessionDetails));
+            SendInterviewEmail::dispatch('scheduled', $room, $student, $newSessionDetails);
         }
 
         return response()->json([

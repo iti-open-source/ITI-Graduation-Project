@@ -80,7 +80,7 @@ export default function Queue({
         )
       : undefined;
     if (activeSession?.session_code) {
-      window.location.href = `/session/${activeSession.session_code}`;
+      router.visit(`/session/${activeSession.session_code}`);
     }
   }, [room.current_participant?.id, room.sessions, initialQueueEntry?.user?.id]);
 
@@ -173,7 +173,7 @@ export default function Queue({
     ) {
       setAssignedHydrated(true);
     }
-  }, [room.assignedStudents]);
+  }, [(room as any).assignedStudents]);
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },

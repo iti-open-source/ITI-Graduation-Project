@@ -26,6 +26,45 @@ class AIServiceProvider
         return $this->geminiChatStream($message, $history);
     }
 
+    /**
+     * Generate interview feedback markdown from score, notes, and optional context
+     *
+     * @param int $score 1-10 score
+     * @param string|null $notes Evaluator free-text notes
+     * @param array $context Optional associative data like candidate/evaluator/room
+     * @return string Markdown feedback
+     */
+    public function generateInterviewFeedback(int $score, ?string $notes = null, array $context = []): string
+    {
+        $lines = [];
+        if (!empty($context['candidate_name'])) {
+            $lines[] = "Candidate: {$context['candidate_name']}";
+        }
+        if (!empty($context['evaluator_name'])) {
+            $lines[] = "Evaluator: {$context['evaluator_name']}";
+        }
+        if (!empty($context['room_title'])) {
+            $lines[] = "Room: {$context['room_title']}";
+        }
+
+        $notes = trim((string) ($notes ?? ''));
+
+        $prompt = "You are an interview evaluation assistant.\n" .
+            "Provide a concise, professional markdown report evaluating the candidate's performance based on the score and notes.\n" .
+            "Use clear markdown headings (##) for each section and bullet points where appropriate. Avoid fluff.\n\n" .
+            (count($lines) ? implode("\n", $lines) . "\n" : '') .
+            "Score (1-10): {$score}\n" .
+            "Evaluator Notes: " . ($notes !== '' ? $notes : 'No additional comments provided.') . "\n\n" .
+            "Return markdown with these sections (use '## ' headings exactly):\n" .
+            "- ## Overall Assessment (2-3 sentences)\n" .
+            "- ## Strengths (bulleted)\n" .
+            "- ## Areas to Improve (bulleted)\n" .
+            "- ## Actionable Advice (bulleted, concrete next steps)\n" .
+            "- ## Score Justification (1-2 sentences)";
+
+        return $this->chat($prompt, []);
+    }
+
 
     private function geminiChat(string $message, array $history = []): string
     {

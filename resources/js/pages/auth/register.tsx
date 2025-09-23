@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AuthLayout from "@/layouts/auth-layout";
 import { login } from "@/routes";
-import { Form, Head, router } from "@inertiajs/react";
+import { Form, Head } from "@inertiajs/react";
 import { LoaderCircle, Plus, User } from "lucide-react";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
@@ -48,7 +48,7 @@ export default function Register() {
               type="button"
               className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
               onClick={() => {
-                router.visit("/auth/google");
+                window.location.assign("/auth/google");
               }}
             >
               <FcGoogle className="h-5 w-5" /> Continue with Google

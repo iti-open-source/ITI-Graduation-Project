@@ -18,7 +18,7 @@ class InterviewEvaluation extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(public Room $room, public User $student, public mixed $sessionDetails, public int $rating, public string $feedback)
+    public function __construct(public Room $room, public User $student, public mixed $sessionDetails, public int $rating, public string $feedback, public ?string $aiFeedback = null)
     {
         //
     }

@@ -48,7 +48,7 @@ export default function RouteLoadingOverlay() {
   if (!isNavigating) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90">
       <div className="flex flex-col items-center gap-3 rounded-md p-6">
         <Loader2 className="h-8 w-8 animate-spin text-white" />
         <span className="text-sm text-white/90">Loading...</span>

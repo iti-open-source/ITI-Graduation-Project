@@ -118,34 +118,69 @@ export default function Queue({
   };
 
 
-   // Auto-redirect when removed/unassigned from the queue or unassigned from room
+  // Auto-redirect when removed/unassigned from the queue or unassigned from room
   const { queue, assignedStudents } = room as any;
 
+  // useEffect(() => {
+  //   if (!initialQueueEntry?.user?.id) return;
+  //   const needAssigned = true;
+  //   if (!queueHydrated) return;
+  //   if (needAssigned && !assignedHydrated) return;
+
+  //   const userId = initialQueueEntry.user.id;
+  //   const stillInQueue = queue.some((q:any) => q.user?.id === userId);
+
+  //   const assignedList = Array.isArray(assignedStudents) ? assignedStudents : [];
+  //   const stillAssigned = assignedList.some((s: any) => s.id === userId);
+
+  //   if (!stillInQueue || !stillAssigned) {
+  //     if (!stillAssigned) {
+  //       toast.error("You were unassigned from this room by the instructor.");
+  //     } else {
+  //       toast.error("You have been removed from the queue.");
+  //     }
+
+  //     router.visit("/dashboard", {
+  //       preserveScroll: false,
+  //       preserveState: false,
+  //     });
+  //   }
+  // }, [queue, assignedStudents, initialQueueEntry?.user?.id, queueHydrated, assignedHydrated,]);
+
   useEffect(() => {
-    if (!initialQueueEntry?.user?.id) return;
-    const needAssigned = true;
-    if (!queueHydrated) return;
-    if (needAssigned && !assignedHydrated) return;
+  if (!initialQueueEntry?.user?.id) return;
+  if (!queueHydrated) return;
+  if (!assignedHydrated) return;
 
-    const userId = initialQueueEntry.user.id;
-    const stillInQueue = queue.some((q:any) => q.user?.id === userId);
+  const userId = initialQueueEntry.user.id;
+  const isActiveParticipant = room.current_participant?.id === userId;
+  if (isActiveParticipant) return;
 
-    const assignedList = Array.isArray(assignedStudents) ? assignedStudents : [];
-    const stillAssigned = assignedList.some((s: any) => s.id === userId);
+  const stillInQueue = queue.some((q: any) => q.user?.id === userId);
+  const assignedList = Array.isArray(assignedStudents) ? assignedStudents : [];
+  const stillAssigned = assignedList.some((s: any) => s.id === userId);
 
-    if (!stillInQueue || !stillAssigned) {
-      if (!stillAssigned) {
-        toast.error("You were unassigned from this room by the instructor.");
-      } else {
-        toast.error("You have been removed from the queue.");
-      }
-
-      router.visit("/dashboard", {
-        preserveScroll: false,
-        preserveState: false,
-      });
+  if (!stillInQueue || !stillAssigned) {
+    if (!stillAssigned) {
+      toast.error("You were unassigned from this room by the instructor.");
+    } else {
+      toast.error("You have been removed from the queue.");
     }
-  }, [queue, assignedStudents, initialQueueEntry?.user?.id, queueHydrated, assignedHydrated,]);
+
+    router.visit("/dashboard", {
+      preserveScroll: false,
+      preserveState: false,
+    });
+  }
+}, [
+  queue,
+  assignedStudents,
+  initialQueueEntry?.user?.id,
+  queueHydrated,
+  assignedHydrated,
+  room.current_participant?.id, 
+]);
+
 
 
    // If initialRoom has queue/assignedStudents, mark hydrated immediately

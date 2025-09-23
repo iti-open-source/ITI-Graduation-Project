@@ -45,7 +45,9 @@ export default function SessionRoom(props: PageProps) {
           if (isCreator && json?.room_code) window.location.href = `/room/${json.room_code}`;
           else window.location.href = "/dashboard";
         }
-      } catch {}
+      } catch {
+        // Handle error
+      }
     };
     checkState();
     pollRef.current = window.setInterval(checkState, 4000);

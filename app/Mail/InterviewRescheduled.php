@@ -40,6 +40,12 @@ class InterviewRescheduled extends Mailable
     {
         return new Content(
             view: 'emails.interview-rescheduled',
+            with: [
+                'room' => $this->room,
+                'student' => $this->student,
+                'oldSessionDetails' => $this->oldSessionDetails,
+                'newSessionDetails' => $this->newSessionDetails,
+            ],
         );
     }
 

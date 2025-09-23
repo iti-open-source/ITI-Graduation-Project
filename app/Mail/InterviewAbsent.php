@@ -40,6 +40,11 @@ class InterviewAbsent extends Mailable
     {
         return new Content(
             view: 'emails.interview-absent',
+            with: [
+                'room' => $this->room,
+                'student' => $this->student,
+                'sessionDetails' => $this->sessionDetails,
+            ],
         );
     }
 

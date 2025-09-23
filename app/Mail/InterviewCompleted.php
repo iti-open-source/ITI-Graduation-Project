@@ -40,6 +40,11 @@ class InterviewCompleted extends Mailable
     {
         return new Content(
             view: 'emails.interview-completed',
+            with: [
+                'room' => $this->room,
+                'student' => $this->student,
+                'sessionDetails' => $this->sessionDetails,
+            ],
         );
     }
 

@@ -45,7 +45,7 @@
             We hope you find this feedback valuable for your continued growth and professional development.
         </p>
         <p>Best regards,<br>The {{ config('app.name') }} Team</p>
-        <p class="footer">This evaluation reflects the perspective of the instructor for the session held on {{$sessionDetails->pivot->interview_date}} at {{$sessionDetails->pivot->interview_time}}.</p>
+        <p class="footer">This evaluation reflects the perspective of the instructor{{ $sessionDetails && $sessionDetails->pivot ? ' for the session held on ' . $sessionDetails->pivot->interview_date . ' at ' . $sessionDetails->pivot->interview_time : '' }}.</p>
     </div>
 </body>
 </html>

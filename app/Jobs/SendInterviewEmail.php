@@ -39,8 +39,20 @@ class SendInterviewEmail implements ShouldQueue
     public function handle(): void
     {
         try {
+            // Validate that required data is present
+            if (!$this->student || !$this->student->email) {
+                Log::error("SendInterviewEmail job failed: Invalid student data");
+                return;
+            }
+
+            Log::info("Processing {$this->emailType} email for student {$this->student->email}");
+
             switch ($this->emailType) {
                 case 'scheduled':
+                    if (!$this->sessionDetails) {
+                        Log::error("SendInterviewEmail job failed: Missing sessionDetails for scheduled email");
+                        return;
+                    }
                     Mail::to($this->student->email)->send(new InterviewScheduled(
                         $this->room,
                         $this->student,
@@ -49,6 +61,7 @@ class SendInterviewEmail implements ShouldQueue
                     break;
 
                 case 'cancelled':
+                    // For cancelled emails, sessionDetails can be null (room deleted scenarios)
                     Mail::to($this->student->email)->send(new InterviewCancelled(
                         $this->room,
                         $this->student,
@@ -57,6 +70,10 @@ class SendInterviewEmail implements ShouldQueue
                     break;
 
                 case 'rescheduled':
+                    if (!$this->sessionDetails || !$this->oldSessionDetails) {
+                        Log::error("SendInterviewEmail job failed: Missing session details for rescheduled email");
+                        return;
+                    }
                     Mail::to($this->student->email)->send(new InterviewRescheduled(
                         $this->room,
                         $this->student,
@@ -66,6 +83,7 @@ class SendInterviewEmail implements ShouldQueue
                     break;
 
                 case 'completed':
+                    // For completed emails, sessionDetails can be null in some cases
                     Mail::to($this->student->email)->send(new InterviewCompleted(
                         $this->room,
                         $this->student,
@@ -74,6 +92,7 @@ class SendInterviewEmail implements ShouldQueue
                     break;
 
                 case 'absent':
+                    // For absent emails, sessionDetails can be null in some cases
                     Mail::to($this->student->email)->send(new InterviewAbsent(
                         $this->room,
                         $this->student,
@@ -83,10 +102,13 @@ class SendInterviewEmail implements ShouldQueue
 
                 default:
                     Log::warning("Unknown email type: {$this->emailType}");
-                    break;
+                    return;
             }
+
+            Log::info("Successfully sent {$this->emailType} email to {$this->student->email}");
         } catch (\Throwable $e) {
             Log::error("Failed to send {$this->emailType} email to {$this->student->email}: " . $e->getMessage());
+            Log::error("Stack trace: " . $e->getTraceAsString());
             throw $e; // Re-throw to trigger job retry
         }
     }

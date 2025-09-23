@@ -8,10 +8,16 @@ use App\Models\Room;
 use App\Models\RoomQueue;
 use App\Models\LobbySession;
 use App\Models\User;
-use App\Jobs\SendInterviewEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InterviewScheduled;
+use App\Mail\InterviewCancelled;
+use App\Mail\InterviewRescheduled;
+use App\Mail\InterviewCompleted;
+use App\Mail\InterviewAbsent;
+use App\Jobs\SendInterviewEmail;
 
 class RoomController extends Controller
 {
@@ -111,6 +117,8 @@ class RoomController extends Controller
                     ->where('users.id', $studentUser->id)
                     ->withPivot('interview_date', 'interview_time', 'interview_done', 'is_absent')
                     ->first();
+
+
 
                 SendInterviewEmail::dispatch('scheduled', $room, $studentUser, $sessionDetails);
             }
@@ -411,7 +419,21 @@ class RoomController extends Controller
                 ->where('users.id', $student->id)
                 ->withPivot('interview_date', 'interview_time', 'interview_done', 'is_absent')
                 ->first();
-            SendInterviewEmail::dispatch('cancelled', $room, $student, $sessionDetails);
+
+            // Create a simple object for the email job instead of passing the full model
+            $sessionDetailsForEmail = null;
+            if ($sessionDetails && $sessionDetails->pivot) {
+                $sessionDetailsForEmail = (object) [
+                    'pivot' => (object) [
+                        'interview_date' => $sessionDetails->pivot->interview_date,
+                        'interview_time' => $sessionDetails->pivot->interview_time,
+                        'interview_done' => $sessionDetails->pivot->interview_done,
+                        'is_absent' => $sessionDetails->pivot->is_absent,
+                    ]
+                ];
+            }
+
+            SendInterviewEmail::dispatch('cancelled', $room, $student, $sessionDetailsForEmail);
         }
 
         return redirect()->route('lobby');
@@ -500,7 +522,20 @@ class RoomController extends Controller
 
         event(new QueueUpdated($room->fresh(), 'left', $student));
 
-        SendInterviewEmail::dispatch('cancelled', $room, $student, $sessionDetails);
+        // Create a simple object for the email job instead of passing the full model
+        $sessionDetailsForEmail = null;
+        if ($sessionDetails && $sessionDetails->pivot) {
+            $sessionDetailsForEmail = (object) [
+                'pivot' => (object) [
+                    'interview_date' => $sessionDetails->pivot->interview_date,
+                    'interview_time' => $sessionDetails->pivot->interview_time,
+                    'interview_done' => $sessionDetails->pivot->interview_done,
+                    'is_absent' => $sessionDetails->pivot->is_absent,
+                ]
+            ];
+        }
+
+        SendInterviewEmail::dispatch('cancelled', $room, $student, $sessionDetailsForEmail);
 
         $assigned = $room->assignedStudents()->get()->map(function ($s) {
             return [
@@ -556,8 +591,31 @@ class RoomController extends Controller
             ->withPivot('interview_date', 'interview_time', 'interview_done', 'is_absent')
             ->first();
 
+        // Create simple objects for the email job instead of passing the full models
+        $oldSessionDetailsForEmail = null;
+        if ($oldSessionDetails && $oldSessionDetails->pivot) {
+            $oldSessionDetailsForEmail = (object) [
+                'pivot' => (object) [
+                    'interview_date' => $oldSessionDetails->pivot->interview_date,
+                    'interview_time' => $oldSessionDetails->pivot->interview_time,
+                ]
+            ];
+        }
+
+        $newSessionDetailsForEmail = null;
+        if ($newSessionDetails && $newSessionDetails->pivot) {
+            $newSessionDetailsForEmail = (object) [
+                'pivot' => (object) [
+                    'interview_date' => $newSessionDetails->pivot->interview_date,
+                    'interview_time' => $newSessionDetails->pivot->interview_time,
+                    'interview_done' => $newSessionDetails->pivot->interview_done,
+                    'is_absent' => $newSessionDetails->pivot->is_absent,
+                ]
+            ];
+        }
+
         // Send reschedule email
-        SendInterviewEmail::dispatch('rescheduled', $room, $student, $newSessionDetails, $oldSessionDetails);
+        SendInterviewEmail::dispatch('rescheduled', $room, $student, $newSessionDetailsForEmail, $oldSessionDetailsForEmail);
 
         // Return updated assigned and unassigned lists
         $assigned = $room->assignedStudents()->get()->map(function ($s) {
@@ -642,12 +700,23 @@ class RoomController extends Controller
             ->withPivot('interview_date', 'interview_time', 'interview_done')
             ->first();
 
-
+        // Create a simple object for the email job instead of passing the full model
+        $sessionDetailsForEmail = null;
+        if ($newSessionDetails && $newSessionDetails->pivot) {
+            $sessionDetailsForEmail = (object) [
+                'pivot' => (object) [
+                    'interview_date' => $newSessionDetails->pivot->interview_date,
+                    'interview_time' => $newSessionDetails->pivot->interview_time,
+                    'interview_done' => $newSessionDetails->pivot->interview_done,
+                    'is_absent' => $newSessionDetails->pivot->is_absent ?? false,
+                ]
+            ];
+        }
 
         if ($newSessionDetails->pivot->interview_done) {
-            SendInterviewEmail::dispatch('completed', $room, $student, $newSessionDetails);
+            SendInterviewEmail::dispatch('completed', $room, $student, $sessionDetailsForEmail);
         } else {
-            SendInterviewEmail::dispatch('scheduled', $room, $student, $newSessionDetails);
+            SendInterviewEmail::dispatch('scheduled', $room, $student, $sessionDetailsForEmail);
         }
 
         return response()->json([
@@ -703,10 +772,23 @@ class RoomController extends Controller
             ->withPivot('interview_date', 'interview_time', 'interview_done', 'is_absent')
             ->first();
 
+        // Create a simple object for the email job instead of passing the full model
+        $sessionDetailsForEmail = null;
+        if ($newSessionDetails && $newSessionDetails->pivot) {
+            $sessionDetailsForEmail = (object) [
+                'pivot' => (object) [
+                    'interview_date' => $newSessionDetails->pivot->interview_date,
+                    'interview_time' => $newSessionDetails->pivot->interview_time,
+                    'interview_done' => $newSessionDetails->pivot->interview_done,
+                    'is_absent' => $newSessionDetails->pivot->is_absent,
+                ]
+            ];
+        }
+
         if ($newSessionDetails->pivot->interview_done && $newSessionDetails->pivot->is_absent) {
-            SendInterviewEmail::dispatch('absent', $room, $student, $newSessionDetails);
+            SendInterviewEmail::dispatch('absent', $room, $student, $sessionDetailsForEmail);
         } else {
-            SendInterviewEmail::dispatch('scheduled', $room, $student, $newSessionDetails);
+            SendInterviewEmail::dispatch('scheduled', $room, $student, $sessionDetailsForEmail);
         }
 
         return response()->json([

@@ -40,6 +40,11 @@ class InterviewCancelled extends Mailable
     {
         return new Content(
             view: 'emails.interview-cancelled',
+            with: [
+                'room' => $this->room,
+                'student' => $this->student,
+                'sessionDetails' => $this->sessionDetails,
+            ],
         );
     }
 

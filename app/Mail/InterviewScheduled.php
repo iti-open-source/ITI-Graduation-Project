@@ -40,6 +40,11 @@ class InterviewScheduled extends Mailable
     {
         return new Content(
             view: 'emails.interview-scheduled',
+            with: [
+                'room' => $this->room,
+                'student' => $this->student,
+                'sessionDetails' => $this->sessionDetails,
+            ],
         );
     }
 

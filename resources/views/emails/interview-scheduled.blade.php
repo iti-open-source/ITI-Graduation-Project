@@ -20,7 +20,7 @@
         <p>Here are the details:</p>
         <ul>
             <li><strong>Room:</strong> {{ $room->name }}</li>
-            <li><strong>Date & Time:</strong> {{$sessionDetails->pivot->interview_date}} at {{$sessionDetails->pivot->interview_time}}</li>
+            <li><strong>Date & Time:</strong> {{ $sessionDetails && $sessionDetails->pivot ? $sessionDetails->pivot->interview_date . ' at ' . $sessionDetails->pivot->interview_time : 'Not specified' }}</li>
         </ul>
         <p>
             Please be prepared and on time. You can access the interview room using the button below.

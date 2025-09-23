@@ -1130,6 +1130,15 @@ export default function Creator({
             >
               {submitting ? "Submitting..." : "Submit & End Session"}
             </button>
+            <button
+            type="button"
+            onClick={() => setShowEvaluateModal(false)}
+            className=" rounded-md border border-[var(--color-border)] bg-[var(--color-muted)] px-4 py-2 text-sm font-medium text-[var(--color-text)]"
+            disabled={submitting}
+          >
+            Cancel
+          </button>
+            
           </div>
         </form>
       ) : (

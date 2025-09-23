@@ -32,6 +32,13 @@
                     <p>No feedback provided.</p>
                 @endif
             </div>
+            @if(isset($aiFeedback) && $aiFeedback)
+                <p class="feedback-label" style="margin-top: 16px;">AI Feedback:</p>
+                <div class="feedback-content">
+                    {{-- Render markdown minimally: support line breaks; email-safe --}}
+                    {!! nl2br(e($aiFeedback)) !!}
+                </div>
+            @endif
         </div>
 
         <p>

@@ -6,7 +6,7 @@ import {
   ParticipantTile,
   RoomAudioRenderer,
   useLocalParticipant,
-  useMediaDevices,
+  useMediaDeviceSelect,
   useTracks,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
@@ -31,9 +31,12 @@ function GalleryView() {
   );
 
   const { localParticipant } = useLocalParticipant();
-  const audioInputDevices = useMediaDevices({ kind: "audioinput" });
-  const videoInputDevices = useMediaDevices({ kind: "videoinput" });
-  const audioOutputDevices = useMediaDevices({ kind: "audiooutput" });
+
+  // Use LiveKit's device selection hooks
+  const audioDeviceSelect = useMediaDeviceSelect({ kind: "audioinput" });
+  const videoDeviceSelect = useMediaDeviceSelect({ kind: "videoinput" });
+  const audioOutputDeviceSelect = useMediaDeviceSelect({ kind: "audiooutput" });
+
   const [showDeviceSettings, setShowDeviceSettings] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [focusedIdentity, setFocusedIdentity] = useState<string | null>(null);
@@ -83,6 +86,8 @@ function GalleryView() {
       }
     }
   }, [tracks, manualFocus]);
+
+  // Device switching will be handled by the useMediaDeviceSelect hooks automatically
 
   // Separate tracks for guest and local participant
   const guestTracks = tracks.filter((t) => t.participant.identity !== localParticipant?.identity);
@@ -508,13 +513,13 @@ function GalleryView() {
                     </label>
                     <select
                       className="w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                      value={audioDeviceSelect.activeDeviceId || ""}
                       onChange={(e) => {
-                        if (localParticipant) {
-                          localParticipant.setMicrophoneEnabled(true, { deviceId: e.target.value });
-                        }
+                        audioDeviceSelect.setActiveMediaDevice(e.target.value);
                       }}
                     >
-                      {audioInputDevices.map((device: MediaDeviceInfo) => (
+                      <option value="">Select microphone...</option>
+                      {audioDeviceSelect.devices.map((device) => (
                         <option key={device.deviceId} value={device.deviceId}>
                           {device.label || `Microphone ${device.deviceId.slice(0, 8)}`}
                         </option>
@@ -529,13 +534,13 @@ function GalleryView() {
                     </label>
                     <select
                       className="w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                      value={videoDeviceSelect.activeDeviceId || ""}
                       onChange={(e) => {
-                        if (localParticipant) {
-                          localParticipant.setCameraEnabled(true, { deviceId: e.target.value });
-                        }
+                        videoDeviceSelect.setActiveMediaDevice(e.target.value);
                       }}
                     >
-                      {videoInputDevices.map((device: MediaDeviceInfo) => (
+                      <option value="">Select camera...</option>
+                      {videoDeviceSelect.devices.map((device) => (
                         <option key={device.deviceId} value={device.deviceId}>
                           {device.label || `Camera ${device.deviceId.slice(0, 8)}`}
                         </option>
@@ -550,12 +555,13 @@ function GalleryView() {
                     </label>
                     <select
                       className="w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-400"
+                      value={audioOutputDeviceSelect.activeDeviceId || ""}
                       onChange={(e) => {
-                        // Note: Speaker selection would need to be handled by the room's audio output
-                        console.log("Speaker selected:", e.target.value);
+                        audioOutputDeviceSelect.setActiveMediaDevice(e.target.value);
                       }}
                     >
-                      {audioOutputDevices.map((device: MediaDeviceInfo) => (
+                      <option value="">Select speaker...</option>
+                      {audioOutputDeviceSelect.devices.map((device) => (
                         <option key={device.deviceId} value={device.deviceId}>
                           {device.label || `Speaker ${device.deviceId.slice(0, 8)}`}
                         </option>

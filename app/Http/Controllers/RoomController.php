@@ -118,9 +118,20 @@ class RoomController extends Controller
                     ->withPivot('interview_date', 'interview_time', 'interview_done', 'is_absent')
                     ->first();
 
+                // Create a simple object for the email job instead of passing the full model
+                $sessionDetailsForEmail = null;
+                if ($sessionDetails && $sessionDetails->pivot) {
+                    $sessionDetailsForEmail = (object) [
+                        'pivot' => (object) [
+                            'interview_date' => $sessionDetails->pivot->interview_date,
+                            'interview_time' => $sessionDetails->pivot->interview_time,
+                            'interview_done' => $sessionDetails->pivot->interview_done,
+                            'is_absent' => $sessionDetails->pivot->is_absent,
+                        ]
+                    ];
+                }
 
-
-                SendInterviewEmail::dispatch('scheduled', $room, $studentUser, $sessionDetails);
+                SendInterviewEmail::dispatch('scheduled', $room, $studentUser, $sessionDetailsForEmail);
             }
         }
 
@@ -482,7 +493,20 @@ class RoomController extends Controller
 
         $student = User::find($request->student_id);
 
-        SendInterviewEmail::dispatch('scheduled', $room, $student, $sessionDetails);
+        // Create a simple object for the email job instead of passing the full model
+        $sessionDetailsForEmail = null;
+        if ($sessionDetails && $sessionDetails->pivot) {
+            $sessionDetailsForEmail = (object) [
+                'pivot' => (object) [
+                    'interview_date' => $sessionDetails->pivot->interview_date,
+                    'interview_time' => $sessionDetails->pivot->interview_time,
+                    'interview_done' => $sessionDetails->pivot->interview_done,
+                    'is_absent' => $sessionDetails->pivot->is_absent,
+                ]
+            ];
+        }
+
+        SendInterviewEmail::dispatch('scheduled', $room, $student, $sessionDetailsForEmail);
 
         $assigned = $room->assignedStudents()->get()->map(function ($student) {
             return [

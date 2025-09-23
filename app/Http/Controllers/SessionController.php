@@ -5,14 +5,11 @@ namespace App\Http\Controllers;
 // use App\Events\RoomSessionSignaling; // Removed: no longer broadcasting to Pusher
 use App\Models\LobbySession;
 use App\Models\InterviewEvaluation;
-use App\Services\AIServiceProvider;
+use App\Jobs\ProcessInterviewEvaluation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
 use App\Models\Room;
-use App\Mail\InterviewEvaluation as InterviewEvaluationMail;
 use App\Models\User;
 
 class SessionController extends Controller
@@ -46,58 +43,19 @@ class SessionController extends Controller
             'comments' => $validated['comments'] ?? null,
         ]);
 
-        // Generate AI feedback using centralized AI service
-        try {
-            $interviewee = User::find($session->guest_id);
-            $evaluator = User::find($userId);
-            $room = Room::find($session->room_id);
-
-            $ai = new AIServiceProvider();
-            $aiFeedback = $ai->generateInterviewFeedback(
-                (int) $validated['rating'],
-                $validated['comments'] ?? null,
-                [
-                    'candidate_name' => $interviewee?->name,
-                    'evaluator_name' => $evaluator?->name,
-                    'room_title' => $room?->title,
-                ]
-            );
-
-            if (is_string($aiFeedback) && $aiFeedback !== '') {
-                $evaluation->ai_feedback = $aiFeedback;
-                $evaluation->save();
-            }
-        } catch (\Throwable $e) {
-            // Log and continue without blocking evaluation submission
-            Log::warning('AI feedback generation failed: ' . $e->getMessage());
-        }
+        // Dispatch job to handle AI feedback generation and email sending
+        ProcessInterviewEvaluation::dispatch(
+            $evaluation,
+            $session,
+            $validated['rating'],
+            $validated['comments']
+        );
 
         // End the session as part of evaluation submission
         $session->update([
             'status' => 'ended',
             'ended_at' => now(),
         ]);
-
-        // Send evaluation email to the interviewee
-        $interviewee = User::find($session->guest_id);
-        $evaluationRoom = Room::find($session->room_id);
-        $sessionDetails = $evaluationRoom->assignedStudents()
-            ->where('users.id', $interviewee->id)
-            ->withPivot('interview_date', 'interview_time')
-            ->first();
-
-        if ($interviewee && $evaluationRoom && $sessionDetails) {
-            Mail::to($interviewee->email)->send(new InterviewEvaluationMail(
-                $evaluationRoom,
-                $interviewee,
-                $sessionDetails,
-                $validated['rating'],
-                $validated['comments'] ?? '',
-                $evaluation->ai_feedback ?? null,
-            ));
-        }
-
-
 
         // No broadcast; clients poll session state
 

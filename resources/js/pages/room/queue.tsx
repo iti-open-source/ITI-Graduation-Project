@@ -8,6 +8,7 @@ import { Head, Link, router } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Loader2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -43,6 +44,7 @@ interface Room {
   queue: QueueUser[];
   queue_count: number;
   sessions?: { id: number; session_code: string; status: string }[];
+  assignedStudents?: { id: number; name: string; email: string }[];
 }
 
 interface QueueProps {
@@ -59,6 +61,9 @@ export default function Queue({
   const [timeInQueue, setTimeInQueue] = useState(0);
   const [isLeaving, setIsLeaving] = useState(false);
   const { room, isConnected } = useRoomUpdates(initialRoom.room_code, initialRoom);
+  // Two hydration flags to avoid running checks before we receive data
+  const [queueHydrated, setQueueHydrated] = useState(false);
+  const [assignedHydrated, setAssignedHydrated] = useState(false);
 
   // Find current queue position from updated room data
   const currentQueueEntry = room.queue.find((q) => q.user?.id === initialQueueEntry?.user?.id);
@@ -111,6 +116,60 @@ export default function Queue({
       },
     );
   };
+
+
+   // Auto-redirect when removed/unassigned from the queue or unassigned from room
+  const { queue, assignedStudents } = room as any;
+
+  useEffect(() => {
+    if (!initialQueueEntry?.user?.id) return;
+    const needAssigned = true;
+    if (!queueHydrated) return;
+    if (needAssigned && !assignedHydrated) return;
+
+    const userId = initialQueueEntry.user.id;
+    const stillInQueue = queue.some((q:any) => q.user?.id === userId);
+
+    const assignedList = Array.isArray(assignedStudents) ? assignedStudents : [];
+    const stillAssigned = assignedList.some((s: any) => s.id === userId);
+
+    if (!stillInQueue || !stillAssigned) {
+      if (!stillAssigned) {
+        toast.error("You were unassigned from this room by the instructor.");
+      } else {
+        toast.error("You have been removed from the queue.");
+      }
+
+      router.visit("/dashboard", {
+        preserveScroll: false,
+        preserveState: false,
+      });
+    }
+  }, [queue, assignedStudents, initialQueueEntry?.user?.id, queueHydrated, assignedHydrated,]);
+
+
+   // If initialRoom has queue/assignedStudents, mark hydrated immediately
+  useEffect(() => {
+    if (Array.isArray(initialRoom.queue) && initialRoom.queue.length > 0) {
+      setQueueHydrated(true);
+    }
+    if (Array.isArray((initialRoom as any).assignedStudents) && (initialRoom as any).assignedStudents.length > 0) {
+      setAssignedHydrated(true);
+    }
+  }, [initialRoom]);
+
+  // Set hydration once the live room data has non-empty arrays at least once
+  useEffect(() => {
+    if (Array.isArray(room.queue) && room.queue.length > 0) {
+      setQueueHydrated(true);
+    }
+  }, [room.queue]);
+
+  useEffect(() => {
+    if (Array.isArray((room as any).assignedStudents) && (room as any).assignedStudents.length > 0) {
+      setAssignedHydrated(true);
+    }
+  }, [room.assignedStudents]);
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },

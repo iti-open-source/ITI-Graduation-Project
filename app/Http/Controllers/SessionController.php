@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 // use App\Events\RoomSessionSignaling; // Removed: no longer broadcasting to Pusher
 use App\Models\LobbySession;
 use App\Models\InterviewEvaluation;
+use App\Services\AIServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Models\Room;
 use App\Mail\InterviewEvaluation as InterviewEvaluationMail;
 use App\Models\User;
@@ -44,6 +46,32 @@ class SessionController extends Controller
             'comments' => $validated['comments'] ?? null,
         ]);
 
+        // Generate AI feedback using centralized AI service
+        try {
+            $interviewee = User::find($session->guest_id);
+            $evaluator = User::find($userId);
+            $room = Room::find($session->room_id);
+
+            $ai = new AIServiceProvider();
+            $aiFeedback = $ai->generateInterviewFeedback(
+                (int) $validated['rating'],
+                $validated['comments'] ?? null,
+                [
+                    'candidate_name' => $interviewee?->name,
+                    'evaluator_name' => $evaluator?->name,
+                    'room_title' => $room?->title,
+                ]
+            );
+
+            if (is_string($aiFeedback) && $aiFeedback !== '') {
+                $evaluation->ai_feedback = $aiFeedback;
+                $evaluation->save();
+            }
+        } catch (\Throwable $e) {
+            // Log and continue without blocking evaluation submission
+            Log::warning('AI feedback generation failed: ' . $e->getMessage());
+        }
+
         // End the session as part of evaluation submission
         $session->update([
             'status' => 'ended',
@@ -64,7 +92,8 @@ class SessionController extends Controller
                 $interviewee,
                 $sessionDetails,
                 $validated['rating'],
-                $validated['comments'] ?? ''
+                $validated['comments'] ?? '',
+                $evaluation->ai_feedback ?? null,
             ));
         }
 

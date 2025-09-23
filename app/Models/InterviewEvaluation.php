@@ -15,6 +15,7 @@ class InterviewEvaluation extends Model
         'created_by',
         'rating',
         'comments',
+        'ai_feedback',
     ];
 }
 

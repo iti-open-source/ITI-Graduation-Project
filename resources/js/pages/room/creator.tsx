@@ -107,10 +107,10 @@ export default function Creator({
 
   const [studentToEvaluate, setStudentToEvaluate] = useState<any | null>(null);
 
-const [showEvaluateModal, setShowEvaluateModal] = useState(false);
-const [rating, setRating] = useState<number>(0);
-const [comments, setComments] = useState("");
-const [submitting, setSubmitting] = useState(false);
+  const [showEvaluateModal, setShowEvaluateModal] = useState(false);
+  const [rating, setRating] = useState<number>(0);
+  const [comments, setComments] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   // Pagination state
   const [assignedCurrentPage, setAssignedCurrentPage] = useState(1);
@@ -480,7 +480,7 @@ const [submitting, setSubmitting] = useState(false);
         const result = await response.json();
         const sessionCode = result.sessionCode || room.room_code;
         console.log(`[Creator] User ${userId} accepted, redirecting to session ${sessionCode}`);
-        window.location.href = `/session/${sessionCode}`;
+        router.visit(`/session/${sessionCode}`);
       } else {
         const errorText = await response.text();
         console.error(`[Creator] Failed to accept user ${userId}:`, response.status, errorText);

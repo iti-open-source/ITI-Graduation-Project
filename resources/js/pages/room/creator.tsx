@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
+  Loader2,
   Trash2,
   // Undo2,
   User,
@@ -111,6 +112,9 @@ export default function Creator({
   const [rating, setRating] = useState<number>(0);
   const [comments, setComments] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Accept button loading state
+  const [acceptingUserIds, setAcceptingUserIds] = useState<number[]>([]);
 
   // Pagination state
   const [assignedCurrentPage, setAssignedCurrentPage] = useState(1);
@@ -455,6 +459,9 @@ export default function Creator({
   const joinUser = async (userId: number) => {
     console.log(`[Creator] Accepting user ${userId} and initiating WebRTC call`);
 
+    // Add user to loading state
+    setAcceptingUserIds((prev) => [...prev, userId]);
+
     try {
       // Get CSRF token from meta tag
       const csrfToken = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)
@@ -484,9 +491,14 @@ export default function Creator({
       } else {
         const errorText = await response.text();
         console.error(`[Creator] Failed to accept user ${userId}:`, response.status, errorText);
+        toast.error(`Failed to accept user: ${errorText}`);
       }
     } catch (error) {
       console.error(`[Creator] Error accepting user ${userId}:`, error);
+      toast.error("An error occurred while accepting the user.");
+    } finally {
+      // Remove user from loading state
+      setAcceptingUserIds((prev) => prev.filter((id) => id !== userId));
     }
   };
 
@@ -668,11 +680,17 @@ export default function Creator({
                           <Button
                             onClick={() => joinUser(queueItem.user.id)}
                             size="sm"
-                            className="w-full border-0 bg-blue-500 text-white hover:bg-blue-600 sm:w-auto"
-                            disabled={false}
+                            className="w-full border-0 bg-blue-500 text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                            disabled={acceptingUserIds.includes(queueItem.user.id)}
                           >
-                            <UserPlus className="mr-2 h-4 w-4" />
-                            Accept
+                            {acceptingUserIds.includes(queueItem.user.id) ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <UserPlus className="mr-2 h-4 w-4" />
+                            )}
+                            {acceptingUserIds.includes(queueItem.user.id)
+                              ? "Accepting..."
+                              : "Accept"}
                           </Button>
                         </motion.div>
                       ))}

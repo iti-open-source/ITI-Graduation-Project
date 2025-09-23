@@ -33,6 +33,8 @@ interface StudentModalProps {
   isSubmitting: boolean;
   submitButtonText: string;
   isDisabled?: boolean;
+   minDate?: string;
+   minTime?: string
 }
 
 export default function StudentModal({
@@ -53,8 +55,15 @@ export default function StudentModal({
   isSubmitting,
   submitButtonText,
   isDisabled = false,
+  minDate,
+  minTime,
+  
 }: StudentModalProps) {
   if (!isOpen) return null;
+  const now = new Date();
+const today = now.toISOString().split("T")[0]; 
+const currentTime = now.toTimeString().slice(0, 5);
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -107,6 +116,7 @@ export default function StudentModal({
                 type="date"
                 className="w-full rounded-md border p-2 text-sm"
                 value={interviewDate}
+                min={minDate || today} 
                 onChange={(e) => {
                   const value = e.target.value;
                   onDateChange(value);
@@ -128,6 +138,7 @@ export default function StudentModal({
                 type="time"
                 className="w-full rounded-md border p-2 text-sm"
                 value={interviewTime}
+                min={interviewDate === (minDate || today) ? minTime || currentTime : undefined}
                 onChange={(e) => {
                   const value = e.target.value;
                   onTimeChange(value);

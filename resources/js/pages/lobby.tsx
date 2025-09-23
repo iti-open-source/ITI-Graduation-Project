@@ -69,6 +69,7 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
   const [roomToDelete, setRoomToDelete] = useState<{ code: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+
   const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
   const { auth } = usePage().props as any;
   const role = auth?.user?.role;
@@ -80,6 +81,7 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
   // Auto-refresh lobby data without full page reload
   const pollRef = useRef<number | null>(null);
   const isReloadingRef = useRef(false as boolean);
+
 
   useEffect(() => {
     // Clear any existing poll
@@ -169,19 +171,21 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
   };
 
   const now = new Date();
+  const formattedToday = now.toISOString().split("T")[0];
+  const currentTime = now.toTimeString().slice(0, 5);
 
   const upcomingRooms =
     role === "student"
       ? userRooms.filter((r) => {
-          const interviewDate =
-            r.student_interview_date && r.student_interview_time
-              ? new Date(`${r.student_interview_date}T${r.student_interview_time}`)
-              : null;
+        const interviewDate =
+          r.student_interview_date && r.student_interview_time
+            ? new Date(`${r.student_interview_date}T${r.student_interview_time}`)
+            : null;
 
-          return (
-            interviewDate && interviewDate > now && !r.pivot?.interview_done && !r.pivot?.is_absent
-          );
-        })
+        return (
+          interviewDate && interviewDate > now && !r.pivot?.interview_done && !r.pivot?.is_absent
+        );
+      })
       : userRooms;
 
   // const pastRooms =
@@ -317,6 +321,7 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                           className="pl-10"
                           onChange={(e) => setSearchQuery(e.target.value)}
                           value={searchQuery}
+
                         />
                       </div>
 
@@ -328,11 +333,10 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                             .map((student) => (
                               <div
                                 key={student.id}
-                                className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 shadow-sm transition ${
-                                  selectedStudents.includes(student.id)
+                                className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 shadow-sm transition ${selectedStudents.includes(student.id)
                                     ? "border-primary bg-primary/10 ring-2 ring-primary/40"
                                     : "hover:bg-muted"
-                                }`}
+                                  }`}
                                 onClick={() => {
                                   setSelectedStudents((prev) =>
                                     prev.includes(student.id)
@@ -412,6 +416,7 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                                       <Calendar className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                       <Input
                                         type="date"
+                                        min={formattedToday}
                                         className="pl-10 text-sm"
                                         value={interviewDates[id] || ""}
                                         onChange={(e) =>
@@ -433,6 +438,11 @@ export default function Lobby({ userRooms, students }: LobbyProps) {
                                       <Clock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                       <Input
                                         type="time"
+                                        min={
+                                          interviewDates[id] === formattedToday
+                                            ? currentTime
+                                            : undefined
+                                        }
                                         className="pl-10 text-sm"
                                         value={interviewTimes[id] || ""}
                                         onChange={(e) =>

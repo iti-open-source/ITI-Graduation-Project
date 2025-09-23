@@ -70,7 +70,10 @@ export default function Queue({
     if (Array.isArray(initialRoom.queue) && initialRoom.queue.length > 0) {
       setQueueHydrated(true);
     }
-    if (Array.isArray((initialRoom as any).assignedStudents) && (initialRoom as any).assignedStudents.length > 0) {
+    if (
+      Array.isArray((initialRoom as any).assignedStudents) &&
+      (initialRoom as any).assignedStudents.length > 0
+    ) {
       setAssignedHydrated(true);
     }
   }, [initialRoom]);
@@ -83,7 +86,10 @@ export default function Queue({
   }, [room.queue]);
 
   useEffect(() => {
-    if (Array.isArray((room as any).assignedStudents) && (room as any).assignedStudents.length > 0) {
+    if (
+      Array.isArray((room as any).assignedStudents) &&
+      (room as any).assignedStudents.length > 0
+    ) {
       setAssignedHydrated(true);
     }
   }, [room.assignedStudents]);
@@ -99,8 +105,8 @@ export default function Queue({
 
     const activeSession = Array.isArray(room.sessions)
       ? room.sessions.find(
-        (s: { id: number; session_code: string; status: string }) => s.status === "active",
-      )
+          (s: { id: number; session_code: string; status: string }) => s.status === "active",
+        )
       : undefined;
     if (activeSession?.session_code) {
       window.location.href = `/session/${activeSession.session_code}`;
@@ -130,7 +136,7 @@ export default function Queue({
     if (needAssigned && !assignedHydrated) return;
 
     const userId = initialQueueEntry.user.id;
-    const stillInQueue = queue.some((q:any) => q.user?.id === userId);
+    const stillInQueue = queue.some((q: any) => q.user?.id === userId);
 
     const assignedList = Array.isArray(assignedStudents) ? assignedStudents : [];
     const stillAssigned = assignedList.some((s: any) => s.id === userId);
@@ -147,9 +153,7 @@ export default function Queue({
         preserveState: false,
       });
     }
-  }, [queue, assignedStudents, initialQueueEntry?.user?.id, queueHydrated, assignedHydrated,]);
-
-
+  }, [queue, assignedStudents, initialQueueEntry?.user?.id, queueHydrated, assignedHydrated]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);

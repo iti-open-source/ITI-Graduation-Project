@@ -8,6 +8,7 @@ import { login } from "@/routes";
 import { Form, Head } from "@inertiajs/react";
 import { LoaderCircle, Plus, User } from "lucide-react";
 import { useState } from "react";
+import { FcGoogle } from "react-icons/fc";
 
 export default function Register() {
   const [preview, setPreview] = useState<string | null>(null);
@@ -42,6 +43,23 @@ export default function Register() {
       >
         {({ processing, errors }) => (
           <>
+            {/* Continue with Google */}
+            <Button
+              type="button"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
+              onClick={() => {
+                window.location.href = "/auth/google";
+              }}
+            >
+              <FcGoogle className="h-5 w-5" /> Continue with Google
+            </Button>
+
+            {/* Divider */}
+            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <span className="flex-1 border-t border-gray-300 dark:border-gray-700"></span>
+              OR
+              <span className="flex-1 border-t border-gray-300 dark:border-gray-700"></span>
+            </div>
             {/* Profile Photo Upload */}
             <div className="flex flex-col items-center gap-2">
               <Label

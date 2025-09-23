@@ -267,15 +267,12 @@ export default function Creator({
 
   const [markingDoneIds, setMarkingDoneIds] = useState<number[]>([]);
   const [studentToMarkDone, setStudentToMarkDone] = useState<any | null>(null);
-const [studentToEvaluate, setStudentToEvaluate] = useState<any | null>(null);
+  const [studentToEvaluate, setStudentToEvaluate] = useState<any | null>(null);
 
-const [showEvaluateModal, setShowEvaluateModal] = useState(false);
-const [rating, setRating] = useState<number>(0);
-const [comments, setComments] = useState("");
-const [submitting, setSubmitting] = useState(false);
-
-
-
+  const [showEvaluateModal, setShowEvaluateModal] = useState(false);
+  const [rating, setRating] = useState<number>(0);
+  const [comments, setComments] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleToggleInterviewDone = async (roomId: number, student: any) => {
     const studentId = student.id;
@@ -298,10 +295,10 @@ const [submitting, setSubmitting] = useState(false);
         );
         toast.success(json.message || "Interview status updated");
         // 👇 If interview done → open evaluation modal
-      if (json.interview_done) {
-        setStudentToEvaluate(json.student);
-        setShowEvaluateModal(true);
-      }
+        if (json.interview_done) {
+          setStudentToEvaluate(json.student);
+          setShowEvaluateModal(true);
+        }
       } else {
         toast.error(json.message || "Could not update interview status");
       }

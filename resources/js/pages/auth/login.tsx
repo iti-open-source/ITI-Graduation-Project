@@ -40,7 +40,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
               <FcGoogle className="h-5 w-5" /> Continue with Google
             </Button>
 
-
             {/* Divider */}
             <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
               <span className="flex-1 border-t border-gray-300 dark:border-gray-700"></span>

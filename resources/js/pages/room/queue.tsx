@@ -117,8 +117,7 @@ export default function Queue({
     );
   };
 
-
-   // Auto-redirect when removed/unassigned from the queue or unassigned from room
+  // Auto-redirect when removed/unassigned from the queue or unassigned from room
   const { queue, assignedStudents } = room as any;
 
   useEffect(() => {
@@ -128,7 +127,7 @@ export default function Queue({
     if (needAssigned && !assignedHydrated) return;
 
     const userId = initialQueueEntry.user.id;
-    const stillInQueue = queue.some((q:any) => q.user?.id === userId);
+    const stillInQueue = queue.some((q: any) => q.user?.id === userId);
 
     const assignedList = Array.isArray(assignedStudents) ? assignedStudents : [];
     const stillAssigned = assignedList.some((s: any) => s.id === userId);
@@ -145,15 +144,17 @@ export default function Queue({
         preserveState: false,
       });
     }
-  }, [queue, assignedStudents, initialQueueEntry?.user?.id, queueHydrated, assignedHydrated,]);
+  }, [queue, assignedStudents, initialQueueEntry?.user?.id, queueHydrated, assignedHydrated]);
 
-
-   // If initialRoom has queue/assignedStudents, mark hydrated immediately
+  // If initialRoom has queue/assignedStudents, mark hydrated immediately
   useEffect(() => {
     if (Array.isArray(initialRoom.queue) && initialRoom.queue.length > 0) {
       setQueueHydrated(true);
     }
-    if (Array.isArray((initialRoom as any).assignedStudents) && (initialRoom as any).assignedStudents.length > 0) {
+    if (
+      Array.isArray((initialRoom as any).assignedStudents) &&
+      (initialRoom as any).assignedStudents.length > 0
+    ) {
       setAssignedHydrated(true);
     }
   }, [initialRoom]);
@@ -166,7 +167,10 @@ export default function Queue({
   }, [room.queue]);
 
   useEffect(() => {
-    if (Array.isArray((room as any).assignedStudents) && (room as any).assignedStudents.length > 0) {
+    if (
+      Array.isArray((room as any).assignedStudents) &&
+      (room as any).assignedStudents.length > 0
+    ) {
       setAssignedHydrated(true);
     }
   }, [room.assignedStudents]);

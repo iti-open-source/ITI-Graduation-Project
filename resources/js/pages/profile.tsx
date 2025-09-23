@@ -15,6 +15,10 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import remarkGfm from "remark-gfm";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -53,6 +57,7 @@ interface PreviousInterviewItem {
   ended_at?: string | null;
   rating?: number | null;
   comments?: string | null;
+  ai_feedback?: string | null;
 }
 
 interface ProfilePageProps extends SharedData {
@@ -641,7 +646,7 @@ export default function Profile() {
             </Card>
             {feedbackOpen && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                <div className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-[var(--card)] p-5 shadow-xl">
+                <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--card)] p-6 shadow-xl md:w-[90vw]">
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div>
                       <h3 className="text-lg font-semibold text-[var(--color-text)]">
@@ -670,6 +675,102 @@ export default function Profile() {
                           : "No feedback provided"}
                       </p>
                     </div>
+                    {feedbackItem?.ai_feedback && feedbackItem.ai_feedback.trim() !== "" && (
+                      <div className="rounded-lg border border-[var(--color-border)] bg-muted/30 p-3 text-sm">
+                        <div className="mb-1 font-medium">AI Feedback</div>
+                        {/* Fixed height, scrollable content */}
+                        <div className="h-64 overflow-y-auto rounded border border-dashed border-[var(--color-border)] bg-background/40 p-2">
+                          <div className="prose prose-sm dark:prose-invert max-w-none text-sm break-words">
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                code: ({ node, inline, className, children, ...props }: any) => {
+                                  const match = /language-(\w+)/.exec(className || "");
+                                  const language = match ? match[1] : "";
+                                  if (inline) {
+                                    return (
+                                      <code
+                                        className="rounded bg-[var(--color-muted)] px-1 py-0.5 text-sm"
+                                        {...props}
+                                      >
+                                        {children}
+                                      </code>
+                                    );
+                                  }
+                                  return (
+                                    <SyntaxHighlighter
+                                      style={oneDark}
+                                      language={language}
+                                      PreTag="div"
+                                      className="rounded-lg"
+                                      customStyle={{
+                                        margin: 0,
+                                        background: "var(--color-card-bg)",
+                                        whiteSpace: "pre-wrap",
+                                        wordWrap: "break-word",
+                                        overflowWrap: "break-word",
+                                      }}
+                                      wrapLines={true}
+                                      wrapLongLines={true}
+                                    >
+                                      {String(children).replace(/\n$/, "")}
+                                    </SyntaxHighlighter>
+                                  );
+                                },
+                                ul: ({ children }) => (
+                                  <ul className="list-inside list-disc space-y-1">{children}</ul>
+                                ),
+                                ol: ({ children }) => (
+                                  <ol className="list-inside list-decimal space-y-1">{children}</ol>
+                                ),
+                                h1: ({ children }) => (
+                                  <h1 className="mb-2 text-lg font-bold break-words">{children}</h1>
+                                ),
+                                h2: ({ children }) => (
+                                  <h2 className="mb-2 text-base font-semibold break-words">
+                                    {children}
+                                  </h2>
+                                ),
+                                h3: ({ children }) => (
+                                  <h3 className="mb-1 text-sm font-medium break-words">
+                                    {children}
+                                  </h3>
+                                ),
+                                p: ({ children }) => (
+                                  <p className="overflow-wrap-anywhere mb-2 break-words last:mb-0">
+                                    {children}
+                                  </p>
+                                ),
+                                blockquote: ({ children }) => (
+                                  <blockquote className="border-l-4 border-[var(--color-border)] pl-4 break-words italic">
+                                    {children}
+                                  </blockquote>
+                                ),
+                                table: ({ children }) => (
+                                  <div className="w-full">
+                                    <table className="w-full table-fixed border-collapse border border-[var(--color-border)]">
+                                      {children}
+                                    </table>
+                                  </div>
+                                ),
+                                th: ({ children }) => (
+                                  <th className="border border-[var(--color-border)] bg-[var(--color-muted)] px-2 py-1 text-left break-words">
+                                    {children}
+                                  </th>
+                                ),
+                                td: ({ children }) => (
+                                  <td className="border border-[var(--color-border)] px-2 py-1 break-words">
+                                    {children}
+                                  </td>
+                                ),
+                              }}
+                            >
+                              {feedbackItem.ai_feedback}
+                            </ReactMarkdown>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="mt-4 flex justify-end">
                     <Button onClick={() => setFeedbackOpen(false)}>Close</Button>

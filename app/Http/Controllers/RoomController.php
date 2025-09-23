@@ -420,9 +420,9 @@ class RoomController extends Controller
                 ->withPivot('interview_date', 'interview_time', 'interview_done', 'is_absent')
                 ->first();
 
-            // Create a simple object for the email job instead of passing the full model
-            $sessionDetailsForEmail = null;
-            if ($sessionDetails && $sessionDetails->pivot) {
+            // Only send cancellation email if the interview is not completed yet
+            if ($sessionDetails && $sessionDetails->pivot && !$sessionDetails->pivot->interview_done) {
+                // Create a simple object for the email job instead of passing the full model
                 $sessionDetailsForEmail = (object) [
                     'pivot' => (object) [
                         'interview_date' => $sessionDetails->pivot->interview_date,
@@ -431,9 +431,9 @@ class RoomController extends Controller
                         'is_absent' => $sessionDetails->pivot->is_absent,
                     ]
                 ];
-            }
 
-            SendInterviewEmail::dispatch('cancelled', $room, $student, $sessionDetailsForEmail);
+                SendInterviewEmail::dispatch('cancelled', $room, $student, $sessionDetailsForEmail);
+            }
         }
 
         return redirect()->route('lobby');

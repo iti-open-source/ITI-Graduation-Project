@@ -10,7 +10,6 @@ import { register } from "@/routes";
 import { request } from "@/routes/password";
 import { Form, Head } from "@inertiajs/react";
 import { LoaderCircle } from "lucide-react";
-import { FaLinkedin } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
 interface LoginProps {
@@ -30,7 +29,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
       >
         {({ processing, errors }) => (
           <>
-            {/* Continue with Google & LinkedIn */}
+            {/* Continue with Google */}
             <Button
               type="button"
               className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
@@ -41,15 +40,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
               <FcGoogle className="h-5 w-5" /> Continue with Google
             </Button>
 
-            <Button
-              type="button"
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#0077B5] bg-[#0077B5] text-sm font-medium text-white shadow-md transition hover:bg-[#005f91]"
-              onClick={() => {
-                window.location.href = "/auth/linkedin";
-              }}
-            >
-              <FaLinkedin className="h-5 w-5" /> Continue with LinkedIn
-            </Button>
 
             {/* Divider */}
             <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">

@@ -15,8 +15,19 @@ export default function RouteLoadingOverlay() {
       }
     };
 
-    const onStart = () => {
+    const onStart = (event: any) => {
       clearShowTimer();
+      // Only show when the next visit changes the pathname (i.e., real page switch)
+      try {
+        const nextUrl = new URL(event?.detail?.visit?.url || "", window.location.origin);
+        const isPageChange = nextUrl.pathname && nextUrl.pathname !== window.location.pathname;
+        if (!isPageChange) {
+          return;
+        }
+      } catch {
+        // If parsing fails, fallback to not showing to avoid random flashes
+        return;
+      }
       // Wait a bit; only show overlay if the NProgress bar actually appears
       showTimerRef.current = window.setTimeout(() => {
         const nprogressEl = document.getElementById("nprogress");

@@ -105,6 +105,13 @@ export default function Creator({
   const [updatingStudent, setUpdatingStudent] = useState(false);
   // const [studentToUpdate, setStudentToUpdate] = useState<AssignedStudent | null>(null);
 
+  const [studentToEvaluate, setStudentToEvaluate] = useState<any | null>(null);
+
+const [showEvaluateModal, setShowEvaluateModal] = useState(false);
+const [rating, setRating] = useState<number>(0);
+const [comments, setComments] = useState("");
+const [submitting, setSubmitting] = useState(false);
+
   // Pagination state
   const [assignedCurrentPage, setAssignedCurrentPage] = useState(1);
   const [queueCurrentPage, setQueueCurrentPage] = useState(1);

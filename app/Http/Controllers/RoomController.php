@@ -181,11 +181,17 @@ class RoomController extends Controller
 
             // Students NOT assigned to this room
             $unassignedStudents = $allStudents->whereNotIn('id', $room->assignedStudents->pluck('id'));
+            // $activeSession = LobbySession::where('room_id', $room->id)->latest()->first();
+            $activeSession = \App\Models\LobbySession::where('room_id', $room->id)
+            // ->where('guest_id', $student->id)
+            ->where('status', 'active')
+            ->first();
 
             return Inertia::render('room/creator', [
                 'room' => $room,
                 'assignedStudents' => $assignedStudents,
                 'unassignedStudents' => $unassignedStudents->values(),
+                'session' => $activeSession,
             ]);
         }
 
@@ -618,6 +624,26 @@ class RoomController extends Controller
             'interview_done' => $newValue,
         ]);
 
+
+
+        // If marking as done → close active session
+    if ($newValue === true) {
+        $activeSession = \App\Models\LobbySession::where('room_id', $room->id)
+            ->where('guest_id', $student->id)
+            ->where('status', 'active')
+            ->first();
+
+        if ($activeSession) {
+            $activeSession->update([
+                'status' => 'ended',
+                'ended_at' => now(),
+            ]);
+
+            $room->disconnectCurrentParticipant();
+            event(new \App\Events\RoomStatusUpdated($room->fresh(), 'call_ended'));
+        }
+    }
+
         $newSessionDetails = $room->assignedStudents()
             ->where('users.id', $student->id)
             ->withPivot('interview_date', 'interview_time', 'interview_done')
@@ -634,8 +660,9 @@ class RoomController extends Controller
         return response()->json([
             'success' => true,
             'interview_done' => $newValue,
+            'student' => $student,
             'message' => $newValue
-                ? 'Interview marked as done.'
+                ? 'Interview marked as done. Please evaluate the student.'
                 : 'Interview marked as not done.',
         ]);
     }
